@@ -51,7 +51,7 @@ public class JobArtifactHash implements Serializable {
         @Column(name = "job_id", nullable = false)
         private UUID jobId;
 
-        @Column(name = "content_hash", nullable = false, length = 64)
+        @Column(name = "content_hash", nullable = false, length = 128)
         private String contentHash;
 
         @Enumerated(EnumType.STRING)

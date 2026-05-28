@@ -125,9 +125,12 @@ CREATE INDEX IF NOT EXISTS idx_processing_job_step_job
 -- ---------------------------------------------------------------------------------------------
 -- 6. job_artifact_hash — per-step input/output content hashes used by the lineage detector.
 -- ---------------------------------------------------------------------------------------------
+-- content_hash is wide enough (VARCHAR(128)) to hold any signature type, not just a SHA-256 hex
+-- digest. Signatures are stored as "type:value" strings, so a future PDF-aware extractor (e.g.
+-- "pdf-id:{uuid}") coexists with byte hashes on the same column without a schema change.
 CREATE TABLE IF NOT EXISTS job_artifact_hash (
     job_id        UUID         NOT NULL REFERENCES processing_job(job_id) ON DELETE CASCADE,
-    content_hash  CHAR(64)     NOT NULL,
+    content_hash  VARCHAR(128) NOT NULL,
     kind          VARCHAR(8)   NOT NULL,
     created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (job_id, content_hash, kind)
