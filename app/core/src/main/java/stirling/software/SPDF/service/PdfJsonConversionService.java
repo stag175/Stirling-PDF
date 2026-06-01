@@ -119,6 +119,7 @@ import stirling.software.SPDF.service.pdfjson.type3.Type3ConversionRequest;
 import stirling.software.SPDF.service.pdfjson.type3.Type3FontConversionService;
 import stirling.software.SPDF.service.pdfjson.type3.Type3GlyphExtractor;
 import stirling.software.SPDF.service.pdfjson.type3.model.Type3GlyphOutline;
+import stirling.software.SPDF.service.pdfjson.util.PdfJsonFontUtils;
 import stirling.software.common.service.CustomPDFDocumentFactory;
 import stirling.software.common.service.TaskManager;
 import stirling.software.common.util.ExceptionUtils;
@@ -2103,8 +2104,8 @@ public class PdfJsonConversionService {
             java.util.regex.Matcher matcher = bfcharPattern.matcher(toUnicodeStr);
             while (matcher.find()) {
                 try {
-                    int charCode = parseToUnicodeCodepoint(matcher.group(1));
-                    int unicode = parseToUnicodeCodepoint(matcher.group(2));
+                    int charCode = PdfJsonFontUtils.parseToUnicodeCodepoint(matcher.group(1));
+                    int unicode = PdfJsonFontUtils.parseToUnicodeCodepoint(matcher.group(2));
                     charCodeToUnicode.put(charCode, unicode);
                 } catch (NumberFormatException entryEx) {
                     // Tolerate a single malformed entry: log and skip rather than aborting the
@@ -2167,42 +2168,6 @@ public class PdfJsonConversionService {
                     e.getMessage());
             return toUnicodeBase64; // Fall back to raw ToUnicode
         }
-    }
-
-    /**
-     * Parse a hex string from a PDF ToUnicode CMap into a single Unicode codepoint. Handles three
-     * cases: a single BMP code unit (4 hex chars), a UTF-16 surrogate pair encoding a supplementary
-     * codepoint above U+FFFF (8 hex chars, e.g. {@code D837DF0E} for U+1F40E), and multi-codepoint
-     * mappings (longer; returns the first codepoint as a best-effort representative).
-     *
-     * <p>Without this, {@code Integer.parseInt("D837DF0E", 16)} overflows because the value is ~3.6
-     * billion, throwing {@link NumberFormatException} and forcing the conversion to fall back to a
-     * raw ToUnicode payload that the JSON&rarr;PDF rebuild then fails to use efficiently.
-     */
-    static int parseToUnicodeCodepoint(String hex) {
-        if (hex == null || hex.isEmpty()) {
-            throw new NumberFormatException("Empty ToUnicode hex value");
-        }
-        if (hex.length() <= 4) {
-            return Integer.parseInt(hex, 16);
-        }
-        // Treat the hex string as UTF-16BE: pairs of hex digits form bytes, four hex digits form
-        // one UTF-16 code unit. The PDF ToUnicode CMap convention requires an even number of bytes
-        // (i.e. a multiple of four hex characters) for multi-unit values.
-        if (hex.length() % 4 != 0) {
-            throw new NumberFormatException(
-                    "ToUnicode hex value not a multiple of 4 chars: " + hex);
-        }
-        int unitCount = hex.length() / 4;
-        char[] units = new char[unitCount];
-        for (int i = 0; i < unitCount; i++) {
-            units[i] = (char) Integer.parseInt(hex.substring(i * 4, i * 4 + 4), 16);
-        }
-        // codePointAt assembles a surrogate pair into a supplementary codepoint when the
-        // high/low surrogates appear in sequence; for any other multi-unit sequence it returns
-        // the first BMP codepoint, which is the right best-effort fallback for ligature
-        // decompositions (one charCode -> several Unicode chars).
-        return new String(units).codePointAt(0);
     }
 
     private PdfJsonFontCidSystemInfo extractCidSystemInfo(COSDictionary fontDictionary) {
@@ -2282,7 +2247,7 @@ public class PdfJsonConversionService {
             String webFormat = null;
             String pdfBase64 = null;
             String pdfFormat = null;
-            if (format != null && isCffFormat(format)) {
+            if (format != null && PdfJsonFontUtils.isCffFormat(format)) {
                 log.debug(
                         "[FONT-DEBUG] Font is CFF format, attempting conversion. CFF conversion enabled: {}, method: {}",
                         fontService.isCffConversionEnabled(),
@@ -4578,7 +4543,7 @@ public class PdfJsonConversionService {
                     // PDFBox expects TrueType/OpenType data during reconstruction.
                     boolean preferWeb =
                             originalFormat == null
-                                    || isCffFormat(originalFormat)
+                                    || PdfJsonFontUtils.isCffFormat(originalFormat)
                                     || "cidfonttype0c".equals(originalFormat);
                     FontByteSource source = new FontByteSource(bytes, webFormat, "webProgram");
                     if (preferWeb) {
@@ -4840,7 +4805,7 @@ public class PdfJsonConversionService {
                         format,
                         fontBytes.length);
             }
-            if (isType1Format(format)) {
+            if (PdfJsonFontUtils.isType1Format(format)) {
                 try (InputStream stream = new ByteArrayInputStream(fontBytes)) {
                     PDFont font = new PDType1Font(document, stream);
                     if (!skipMetadata) {
@@ -4974,23 +4939,6 @@ public class PdfJsonConversionService {
                     ex);
             return null;
         }
-    }
-
-    private boolean isType1Format(String format) {
-        if (format == null) {
-            return false;
-        }
-        return "type1".equals(format) || format.endsWith("pfb");
-    }
-
-    private boolean isCffFormat(String format) {
-        if (format == null) {
-            return false;
-        }
-        String normalized = format.toLowerCase(Locale.ROOT);
-        return normalized.contains("type1c")
-                || normalized.contains("cidfonttype0c")
-                || "cff".equals(normalized);
     }
 
     private void applyAdditionalFontMetadata(
