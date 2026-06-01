@@ -1,6 +1,11 @@
 package stirling.software.SPDF.service.pdfjson.util;
 
 import java.util.Locale;
+import java.util.Set;
+
+import lombok.extern.slf4j.Slf4j;
+
+import stirling.software.SPDF.model.json.PdfJsonFontConversionStatus;
 
 /**
  * Stateless, pure helpers extracted from {@code PdfJsonConversionService} as the first step of
@@ -11,6 +16,7 @@ import java.util.Locale;
  * <p>Behaviour is identical to the original private methods; only the location changed, so the
  * helpers can be unit-tested in isolation.
  */
+@Slf4j
 public final class PdfJsonFontUtils {
 
     private PdfJsonFontUtils() {}
@@ -71,5 +77,55 @@ public final class PdfJsonFontUtils {
         // the first BMP codepoint, which is the right best-effort fallback for ligature
         // decompositions (one charCode -> several Unicode chars).
         return new String(units).codePointAt(0);
+    }
+
+    /**
+     * Priority for a font conversion status (lower = preferred): SUCCESS &lt; WARNING &lt; other.
+     */
+    public static int conversionStatusPriority(PdfJsonFontConversionStatus status) {
+        return switch (status) {
+            case SUCCESS -> 0;
+            case WARNING -> 1;
+            default -> 2;
+        };
+    }
+
+    /**
+     * Returns true if the Type3 glyph {@code coverage} set covers {@code codePoint}. An empty/null
+     * coverage means "covers everything"; low bytes are also matched against the 0xF000 private-use
+     * range PDFBox uses for Type3 glyphs.
+     */
+    public static boolean isGlyphCoveredByType3Font(Set<Integer> coverage, int codePoint) {
+        if (coverage == null || coverage.isEmpty()) {
+            return true;
+        }
+        if (coverage.contains(codePoint)) {
+            return true;
+        }
+        if (codePoint >= 0 && codePoint <= 0xFF) {
+            return coverage.contains(0xF000 | (codePoint & 0xFF));
+        }
+        return false;
+    }
+
+    /** Preference ranking (lower = preferred) for embedding a given font program format. */
+    public static int fontFormatPreference(String format, String origin) {
+        if (format == null) {
+            return 5;
+        }
+        switch (format) {
+            case "ttf":
+                return 0;
+            case "truetype":
+                return 1;
+            case "otf":
+            case "cff":
+            case "type1c":
+            case "cidfonttype0c":
+                return 2;
+            default:
+                log.debug("[FONT-DEBUG] Unknown font format '{}' from {}", format, origin);
+                return 4;
+        }
     }
 }

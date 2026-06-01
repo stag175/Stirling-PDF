@@ -11,6 +11,7 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
+import stirling.software.SPDF.service.pdfjson.util.PdfJsonByteUtils;
 import stirling.software.SPDF.service.pdfjson.util.PdfJsonFontUtils;
 
 /**
@@ -92,12 +93,12 @@ class PdfJsonConversionServiceUnicodeParsingTest {
         // the buffer's uninitialized region after EOF). Without the no-progress guard, the
         // counting loop in countGlyphs ran forever.
         ByteArrayInputStream stream = new ByteArrayInputStream(new byte[] {1, 2, 3, 4});
-        PdfJsonConversionService.CodeReader reader = in -> 0; // never reads, always "succeeds"
+        PdfJsonByteUtils.CodeReader reader = in -> 0; // never reads, always "succeeds"
 
         int count =
                 assertTimeoutPreemptively(
                         Duration.ofSeconds(2),
-                        () -> PdfJsonConversionService.countCodesProtected(stream, reader));
+                        () -> PdfJsonByteUtils.countCodesProtected(stream, reader));
 
         // First iteration sees no progress and breaks immediately.
         assertEquals(0, count);
@@ -106,7 +107,7 @@ class PdfJsonConversionServiceUnicodeParsingTest {
     @Test
     void countCodesProtectedTerminatesOnEmptyStream() {
         ByteArrayInputStream stream = new ByteArrayInputStream(new byte[0]);
-        PdfJsonConversionService.CodeReader reader =
+        PdfJsonByteUtils.CodeReader reader =
                 in -> {
                     throw new AssertionError("reader must not be called when stream is empty");
                 };
@@ -114,7 +115,7 @@ class PdfJsonConversionServiceUnicodeParsingTest {
         int count =
                 assertTimeoutPreemptively(
                         Duration.ofSeconds(2),
-                        () -> PdfJsonConversionService.countCodesProtected(stream, reader));
+                        () -> PdfJsonByteUtils.countCodesProtected(stream, reader));
 
         assertEquals(0, count);
     }
@@ -122,13 +123,13 @@ class PdfJsonConversionServiceUnicodeParsingTest {
     @Test
     void countCodesProtectedHonorsExplicitMinusOneReturn() throws IOException {
         ByteArrayInputStream stream = new ByteArrayInputStream(new byte[] {1, 2, 3});
-        PdfJsonConversionService.CodeReader reader =
+        PdfJsonByteUtils.CodeReader reader =
                 in -> {
                     int b = in.read();
                     return b == -1 ? -1 : b;
                 };
 
-        int count = PdfJsonConversionService.countCodesProtected(stream, reader);
+        int count = PdfJsonByteUtils.countCodesProtected(stream, reader);
 
         assertEquals(3, count);
     }
@@ -138,8 +139,8 @@ class PdfJsonConversionServiceUnicodeParsingTest {
         // A reader that consumes one byte then hits a corrupt-CMap pattern returning 0 without
         // consuming further must still terminate after counting the consumed bytes.
         ByteArrayInputStream stream = new ByteArrayInputStream(new byte[] {1, 2, 3, 4});
-        PdfJsonConversionService.CodeReader reader =
-                new PdfJsonConversionService.CodeReader() {
+        PdfJsonByteUtils.CodeReader reader =
+                new PdfJsonByteUtils.CodeReader() {
                     boolean firstCall = true;
 
                     @Override
@@ -155,7 +156,7 @@ class PdfJsonConversionServiceUnicodeParsingTest {
         int count =
                 assertTimeoutPreemptively(
                         Duration.ofSeconds(2),
-                        () -> PdfJsonConversionService.countCodesProtected(stream, reader));
+                        () -> PdfJsonByteUtils.countCodesProtected(stream, reader));
 
         assertEquals(1, count);
     }

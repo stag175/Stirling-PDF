@@ -115,6 +115,7 @@ import stirling.software.SPDF.service.pdfjson.type3.Type3ConversionRequest;
 import stirling.software.SPDF.service.pdfjson.type3.Type3FontConversionService;
 import stirling.software.SPDF.service.pdfjson.type3.Type3GlyphExtractor;
 import stirling.software.SPDF.service.pdfjson.type3.model.Type3GlyphOutline;
+import stirling.software.SPDF.service.pdfjson.util.PdfJsonByteUtils;
 import stirling.software.SPDF.service.pdfjson.util.PdfJsonDateUtils;
 import stirling.software.SPDF.service.pdfjson.util.PdfJsonFontUtils;
 import stirling.software.SPDF.service.pdfjson.util.PdfJsonGraphicsUtils;
@@ -1651,7 +1652,7 @@ public class PdfJsonConversionService {
         prioritized.sort(
                 Comparator.comparingInt(
                         c ->
-                                conversionStatusPriority(
+                                PdfJsonFontUtils.conversionStatusPriority(
                                         c.getStatus() != null
                                                 ? c.getStatus()
                                                 : PdfJsonFontConversionStatus.FAILURE)));
@@ -1679,16 +1680,10 @@ public class PdfJsonConversionService {
         }
         sources.sort(
                 Comparator.comparingInt(
-                        source -> fontFormatPreference(source.format(), source.originLabel())));
+                        source ->
+                                PdfJsonFontUtils.fontFormatPreference(
+                                        source.format(), source.originLabel())));
         return sources;
-    }
-
-    private int conversionStatusPriority(PdfJsonFontConversionStatus status) {
-        return switch (status) {
-            case SUCCESS -> 0;
-            case WARNING -> 1;
-            default -> 2;
-        };
     }
 
     private void addCandidatePayload(
@@ -1762,39 +1757,6 @@ public class PdfJsonConversionService {
         }
         if (!coverage.isEmpty()) {
             type3GlyphCoverageCache.put(fontUid, Collections.unmodifiableSet(coverage));
-        }
-    }
-
-    private boolean isGlyphCoveredByType3Font(Set<Integer> coverage, int codePoint) {
-        if (coverage == null || coverage.isEmpty()) {
-            return true;
-        }
-        if (coverage.contains(codePoint)) {
-            return true;
-        }
-        if (codePoint >= 0 && codePoint <= 0xFF) {
-            return coverage.contains(0xF000 | (codePoint & 0xFF));
-        }
-        return false;
-    }
-
-    private int fontFormatPreference(String format, String origin) {
-        if (format == null) {
-            return 5;
-        }
-        switch (format) {
-            case "ttf":
-                return 0;
-            case "truetype":
-                return 1;
-            case "otf":
-            case "cff":
-            case "type1c":
-            case "cidfonttype0c":
-                return 2;
-            default:
-                log.debug("[FONT-DEBUG] Unknown font format '{}' from {}", format, origin);
-                return 4;
         }
     }
 
@@ -3410,7 +3372,7 @@ public class PdfJsonConversionService {
             } else if (baseIsType3) {
                 // For actual Type3 fonts without normalized replacement
                 boolean type3SupportsGlyph =
-                        isGlyphCoveredByType3Font(baseType3Coverage, codePoint);
+                        PdfJsonFontUtils.isGlyphCoveredByType3Font(baseType3Coverage, codePoint);
                 if (!type3SupportsGlyph) {
                     targetFont = null;
                     targetFontId = null;
@@ -4264,7 +4226,7 @@ public class PdfJsonConversionService {
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream(encoded.length);
         for (byte b : encoded) {
-            if (isStrippedControlByte(b)) {
+            if (PdfJsonByteUtils.isStrippedControlByte(b)) {
                 continue;
             }
             baos.write(b);
@@ -4276,24 +4238,13 @@ public class PdfJsonConversionService {
         return sanitized;
     }
 
-    private boolean isStrippedControlByte(byte value) {
-        if (value == 0) {
-            return true;
-        }
-        int unsigned = Byte.toUnsignedInt(value);
-        if (unsigned <= 0x1F) {
-            return !(unsigned == 0x09 || unsigned == 0x0A || unsigned == 0x0D);
-        }
-        return false;
-    }
-
     private int countGlyphs(COSString value, PDFont font) {
         if (value == null) {
             return 0;
         }
         if (font != null) {
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(value.getBytes())) {
-                int count = countCodesProtected(inputStream, font::readCode);
+                int count = PdfJsonByteUtils.countCodesProtected(inputStream, font::readCode);
                 if (count > 0) {
                     return count;
                 }
@@ -4303,49 +4254,6 @@ public class PdfJsonConversionService {
         }
         byte[] bytes = value.getBytes();
         return Math.max(1, bytes.length);
-    }
-
-    /**
-     * Functional accessor for {@link PDFont#readCode(InputStream)} so the bounded counting loop can
-     * be exercised in isolation without instantiating a {@link PDFont}.
-     */
-    @FunctionalInterface
-    interface CodeReader {
-        int readCode(InputStream stream) throws IOException;
-    }
-
-    /**
-     * Count how many codes the supplied {@code reader} can extract from {@code inputStream}, with
-     * two safety nets that PDFBox's raw {@link PDFont#readCode(InputStream)} loop lacks:
-     *
-     * <ol>
-     *   <li>Stop when the stream is empty (a corrupt CMap can otherwise loop forever returning
-     *       successfully-matched zero-bytes from an exhausted {@link ByteArrayInputStream}).
-     *   <li>Stop when a {@code readCode} call did not consume any bytes, even if it returned a
-     *       non-{@code -1} value.
-     * </ol>
-     *
-     * <p>Both conditions were observed in the wild on round-tripped fallback fonts where the
-     * embedded ToUnicode CMap matched 0x00 sequences, hanging the JSON&rarr;PDF rebuild.
-     */
-    static int countCodesProtected(ByteArrayInputStream inputStream, CodeReader reader)
-            throws IOException {
-        int count = 0;
-        int previousAvailable = inputStream.available();
-        while (previousAvailable > 0) {
-            int code = reader.readCode(inputStream);
-            if (code == -1) {
-                break;
-            }
-            int currentAvailable = inputStream.available();
-            if (currentAvailable >= previousAvailable) {
-                // No progress made; break to avoid infinite loop on corrupt CMaps.
-                break;
-            }
-            count++;
-            previousAvailable = currentAvailable;
-        }
-        return count;
     }
 
     private MergedText mergeText(List<PdfJsonTextElement> elements) {
