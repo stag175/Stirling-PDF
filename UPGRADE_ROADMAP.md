@@ -60,11 +60,28 @@ items remain **environment-blocked** here and are plan-only until built on a CI 
 compiler-only bugs in agent-written tests caught and fixed by central verification — the whole point of
 not trusting un-compiled output.
 
-**Not yet done (and why):** the large refactors B1 (MUI→Mantine), B2 (state library), C3 (streaming I/O),
-and the **remainder of C1** (the other ~9 pure helpers, then the genuinely stateful sections) are
-multi-week and were not rushed — C1 is *begun*, not finished. The env-blocked items remain plan-only here:
-Docker/Tauri/multi-OS/release-signing, SBOM/provenance (E2/E3), CI consolidation (H2/H3). Security-hardening
-(D1–D5) and the global JaCoCo ratchet (A1, gated by the un-buildable `saas` module) also remain open.
+### Wave 4 — finish C1 pure extraction + SBOM (verified; pushed)
+
+- **C1 pure-helper extraction COMPLETE:** across increments 1–4, **15 pure helpers** pulled out of
+  `PdfJsonConversionService` into **4 independently-tested util classes** — `PdfJsonFontUtils`
+  (format classifiers, ToUnicode parsing, font-selection scoring, glyph coverage), `PdfJsonDateUtils`
+  (Calendar/Instant), `PdfJsonGraphicsUtils` (safeFloat, matrix flatten, rendering mode),
+  `PdfJsonByteUtils` (control-byte stripping, bounded code counting + `CodeReader`). All rename-only,
+  compiler-verified, behaviour identical. What remains in the class is genuinely *stateful* conversion
+  logic — the next phase needs characterization tests on real PDFs first.
+- **E2 (SBOM) done:** added the CycloneDX Gradle plugin 3.1.0; `./gradlew cyclonedxBom` emits a full
+  CycloneDX SBOM for the multi-module graph (verified, ~1.1 MB `application.cdx.json`).
+
+**Not yet done — and an honest statement of why:**
+- **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
+  consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, license-report CI gate (E4), and the global
+  JaCoCo ratchet (A1 — governed by the `saas` module, which can't be built here without Stripe/Supabase).
+  These are config/pipeline changes that cannot be *verified* without running GitHub Actions / Docker, so
+  shipping them blind would violate the "verify your work" bar.
+- **Multi-week refactors (not safe to rush in a session):** B1 (MUI→Mantine, ~157 files + visual QA),
+  B2 (state-library migration), C3 (streaming I/O — correctness-critical, needs load testing), the
+  *stateful* remainder of C1, and the security-hardening items D1–D5 (need a running app + real auth
+  providers to verify). Each is begun-or-scoped in this doc, not faked.
 
 ---
 
