@@ -194,6 +194,18 @@ partial-migration compile bugs the agents missed.
   errors (a `Promise<boolean>` mock resolving `undefined`; a `Blob|null|undefined` passed where `Blob|null`
   expected), both fixed.
 
+### Wave 12 — frontend coverage round 5 (hooks/utils; verified; pushed)
+
+- **+259 tests across 12 statement-heavy hook/util/service modules** (core hooks `useConvertOperation`
+  [78 cases], compare/`operationUtils`, validateSignature `signatureStatus`/`signatureCsv`,
+  automate/`useAutomationForm`; core utils `toolSearch`/`urlRouting`/`scarfTracking`/`imageTransparency`;
+  proprietary `teamService`/`databaseManagementService`/stripeCheckout `checkoutUtils`).
+- **Coverage (deterministic 125-file run):** 9.38→**9.98** stmts/lines, 65.47→**68.41** branch,
+  33.33→**35.01** func. **Ratchet raised to 9.9 / 68 / 34.9 / 9.9.** Central tsc gate caught **7** type
+  errors (0-arg mock called with an arg; `Partial<ConvertParameters>` rejecting partial `imageOptions`;
+  a `ToolId`-vs-`"apple"` comparison), all fixed. Cumulative frontend coverage **6.96 → 9.98** since the
+  stale-floor discovery.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
