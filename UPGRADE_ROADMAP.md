@@ -232,6 +232,18 @@ partial-migration compile bugs the agents missed.
   `StirlingFile` vs `File`; a TS 5.7 `Uint8Array`/`BlobPart` mismatch; `vi.mocked()` not surfacing Mock
   helpers on axios's overloaded `post`), all fixed. Cumulative frontend coverage **6.96 → 11.03**.
 
+### Wave 15 — frontend coverage round 7 (services/hooks/utils; verified; pushed)
+
+- **+322 tests across 12 modules** (core services `updateService`/`pdfProcessingService`/`auditService`/
+  `httpErrorHandler`/`folderStorage`/`pixelCompareService`; core hooks `useToolState`/`useCropParameters`;
+  core utils `hotkeys`; desktop `connectionModeService`; proprietary `SignupFormValidation`; saas charts
+  `themeUtils`).
+- **Coverage (deterministic 149-file run):** 11.03→**12.02** stmts/lines, 71.31→**73.37** branch,
+  38.34→**40.69** func (broke 12% stmts / 40% funcs). **Ratchet raised to 11.9 / 73 / 40 / 11.9.** Central
+  tsc gate caught 2 files of type errors (overloaded-axios `vi.mocked` on core auditService;
+  `makeFolder` intersecting `id` to branded `FolderId`), both fixed. Cumulative frontend coverage
+  **6.96 → 12.02** (statements have nearly doubled; branches 53.6→73.4, functions 25.5→40.7).
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
