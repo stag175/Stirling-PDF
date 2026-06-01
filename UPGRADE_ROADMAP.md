@@ -39,14 +39,32 @@ items remain **environment-blocked** here and are plan-only until built on a CI 
   (Stripe/Supabase deps) — raising it blind risks breaking the enterprise CI build. Correct follow-up:
   convert to **per-module** thresholds on a CI box where all suites run green.
 
-**Cumulative wave 1+2:** ~33 new test files; frontend 673→**1378** tests; `app/common` 1168 tests; backend
-`core`/`proprietary` additions green. Two compiler-only bugs in agent-written tests caught and fixed by
-central verification (the whole point of not trusting un-compiled output).
+### Wave 3 — finish TS strictness, more coverage, begin C1 (verified; pushed)
 
-**Not yet done (and why):** the four Effort-L refactors (B1 MUI→Mantine, B2 state library, C1 god-class
-split, C3 streaming I/O) are multi-week and were not rushed; backend coverage beyond `app/common`,
-SBOM/provenance (E2/E3), CI consolidation (H2/H3), and the security-hardening items (D1–D5) remain open.
-No commits/pushes were made — changes are in the working tree for review.
+- **B5 complete:** enabled `noImplicitReturns` and fixed all **22 violation files** (24 `useEffect`
+  fall-through sites, behavior-preserving `return undefined;`, swarm: one agent per file). `typecheck:all`
+  = 0 across all 6 variants. Three strict flags now on.
+- **More coverage (`app/core`):** 8 new JUnit test files (DTOs, `model/json` value types, security results).
+- **C1 god-class split — first increment:** extracted 3 pure helpers (`isType1Format`, `isCffFormat`,
+  `parseToUnicodeCodepoint`) from the ~7k-line `PdfJsonConversionService` into a new, independently-tested
+  `service/pdfjson/util/PdfJsonFontUtils`. Rename-only/compiler-verified; the analysis identified ~9 more
+  pure helpers as the documented continuation.
+- Central verification caught **two more Jackson-3 default gotchas** in agent tests (both assumed Jackson 2):
+  `FAIL_ON_UNKNOWN_PROPERTIES` is now OFF by default (unknowns ignored, not rejected), and
+  `FAIL_ON_NULL_FOR_PRIMITIVES` is ON with the Lombok all-args ctor as creator (absent primitives throw).
+- **Committed + pushed** to `stag175/Stirling-PDF` branch `roadmap/test-coverage-waves-1-2`
+  (`0649e071f` → `de89a8c4a` → `330d972bd`).
+
+**Cumulative waves 1–3:** ~52 new test files; frontend 673→**1378** tests; `app/common` 1168 tests;
+`app/core`/`proprietary` additions green; TS strictness +3 flags; god-class extraction begun. **Four**
+compiler-only bugs in agent-written tests caught and fixed by central verification — the whole point of
+not trusting un-compiled output.
+
+**Not yet done (and why):** the large refactors B1 (MUI→Mantine), B2 (state library), C3 (streaming I/O),
+and the **remainder of C1** (the other ~9 pure helpers, then the genuinely stateful sections) are
+multi-week and were not rushed — C1 is *begun*, not finished. The env-blocked items remain plan-only here:
+Docker/Tauri/multi-OS/release-signing, SBOM/provenance (E2/E3), CI consolidation (H2/H3). Security-hardening
+(D1–D5) and the global JaCoCo ratchet (A1, gated by the un-buildable `saas` module) also remain open.
 
 ---
 
