@@ -9,8 +9,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
-
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { FolderRecord } from "@app/types/folder";
 
 interface DeleteFolderDialogProps {
@@ -87,7 +86,13 @@ export function DeleteFolderDialog({
         {error && (
           <Alert
             color="red"
-            icon={<ErrorOutlineIcon fontSize="small" />}
+            icon={
+              <LocalIcon
+                icon="error-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
+            }
             variant="light"
             role="alert"
           >

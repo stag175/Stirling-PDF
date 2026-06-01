@@ -11,8 +11,6 @@ import {
 import LocalIcon from "@app/components/shared/LocalIcon";
 import { useViewer } from "@app/contexts/ViewerContext";
 import { PdfAttachmentObject } from "@embedpdf/models";
-import AttachmentIcon from "@mui/icons-material/AttachmentRounded";
-import DownloadIcon from "@mui/icons-material/DownloadRounded";
 import { useTranslation } from "react-i18next";
 import "@app/components/viewer/SidebarBase.css";
 import "@app/components/viewer/AttachmentSidebar.css";
@@ -293,7 +291,7 @@ export const AttachmentSidebar = ({
             className="attachment-item__download-icon"
             onClick={(event) => handleDownload(attachment, event)}
           >
-            <DownloadIcon sx={{ fontSize: "1.2rem" }} />
+            <LocalIcon icon="download-rounded" width="1.2rem" height="1.2rem" />
           </ActionIcon>
         </div>
       </div>
@@ -346,7 +344,11 @@ export const AttachmentSidebar = ({
       <div className="sidebar-base__header attachment-sidebar__header">
         <div className="sidebar-base__header-title attachment-sidebar__header-title">
           <span className="sidebar-base__header-icon attachment-sidebar__header-icon">
-            <AttachmentIcon />
+            <LocalIcon
+              icon="attachment-rounded"
+              width="1.5rem"
+              height="1.5rem"
+            />
           </span>
           <Text fw={600} size="sm" tt="uppercase" lts={0.5}>
             {t("viewer.attachments.title", "Attachments")}
