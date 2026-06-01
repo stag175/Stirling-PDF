@@ -244,6 +244,17 @@ partial-migration compile bugs the agents missed.
   `makeFolder` intersecting `id` to branded `FolderId`), both fixed. Cumulative frontend coverage
   **6.96 → 12.02** (statements have nearly doubled; branches 53.6→73.4, functions 25.5→40.7).
 
+### Wave 16 — frontend coverage round 8 (services/hooks/contexts; verified; pushed)
+
+- **+289 tests across 12 modules** (core services `zipFileService`/`fileSyncService`/`signatureStorageService`/
+  `accountService`; core contexts `file/lifecycle`/`toolWorkflow/toolWorkflowState`; core hook
+  `usePageSelectionManager`; desktop hooks `useEndpointConfig`/`useConversionCloudStatus`; proprietary
+  `useParticipantSession`; saas hooks `usePlans`/`useAutoAnonymousAuth`).
+- **Coverage (deterministic 161-file run):** 12.02→**13.28** stmts/lines, 73.37→**75.62** branch,
+  40.69→**42.87** func (broke 13%). **Ratchet raised to 13.1 / 75 / 42 / 13.1.** Central tsc gate caught 2
+  files (TS 5.7 `Uint8Array`/`BlobPart`; old 2-arg `vi.fn` generics), fixed. Cumulative frontend coverage
+  **6.96 → 13.28** (statements ~doubled; branches 53.6→75.6, functions 25.5→42.9).
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
