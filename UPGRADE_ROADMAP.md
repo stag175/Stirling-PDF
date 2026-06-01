@@ -176,6 +176,18 @@ partial-migration compile bugs the agents missed.
   - The Convert smart-detection integration suite timed out only under v8 coverage instrumentation;
     raised `testTimeout`/`hookTimeout` 10s → 20s (headroom for instrumentation, not masking a hang).
 
+### Wave 11 — frontend coverage round 4 (service layer; verified; pushed)
+
+- **+304 tests across 12 statement-heavy service modules** (every layer): core
+  `fileProcessingService`/`automationStorage`/`documentManipulationService`; proprietary
+  `licenseService`/`shareLinkImport`; desktop `saasBillingService`/`endpointAvailabilityService`/
+  `fileOpenService`/`selfHostedServerMonitor`; saas `avatarSyncService`/`signatureStorageService`;
+  prototypes `pdfCommentAgentOperationConfig`.
+- **Coverage (deterministic 113-file run, no `--retry`):** 8.21→**9.38** stmts/lines, 61.2→**65.47** branch,
+  30.14→**33.33** func. **Vitest ratchet raised to 9.3 / 65 / 33 / 9.3.** Central tsc gate caught 2 type
+  errors (a `Promise<boolean>` mock resolving `undefined`; a `Blob|null|undefined` passed where `Blob|null`
+  expected), both fixed.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
