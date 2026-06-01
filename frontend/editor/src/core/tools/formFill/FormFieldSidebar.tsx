@@ -179,7 +179,11 @@ export function FormFieldSidebar({ visible, onToggle }: FormFieldSidebarProps) {
                               fontSize: "0.875rem",
                             }}
                           >
-                            {FIELD_TYPE_ICON[field.type]}
+                            <LocalIcon
+                              icon={FIELD_TYPE_ICON[field.type]}
+                              width="0.875rem"
+                              height="0.875rem"
+                            />
                           </span>
                         </Tooltip>
                         <span className={styles.fieldName}>

@@ -64,7 +64,7 @@ const FileThumbnail = ({
   const { t } = useTranslation();
   const terminology = useFileActionTerminology();
   const icons = useFileActionIcons();
-  const DownloadOutlinedIcon = icons.download;
+  const downloadIcon = icons.download;
   const { pinFile, unpinFile, isFilePinned, activeFiles } = useFileContext();
 
   // ---- Drag state ----
@@ -302,7 +302,7 @@ const FileThumbnail = ({
               setShowActions(false);
             }}
           >
-            <DownloadOutlinedIcon fontSize="small" />
+            <LocalIcon icon={downloadIcon} width="1.25rem" height="1.25rem" />
             <span>{terminology.download}</span>
           </button>
 

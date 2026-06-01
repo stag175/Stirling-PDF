@@ -36,7 +36,7 @@ function ReviewStepContent<TParams = unknown>({
   const { t } = useTranslation();
   const terminology = useFileActionTerminology();
   const icons = useFileActionIcons();
-  const DownloadIcon = icons.download;
+  const downloadIcon = icons.download;
   const stepRef = useRef<HTMLDivElement>(null);
   const { actions: fileActions } = useFileActions();
   const { selectors } = useFileState();
@@ -142,7 +142,9 @@ function ReviewStepContent<TParams = unknown>({
       {operation.downloadUrl && (
         <Button
           data-testid="download-result-button"
-          leftSection={<DownloadIcon />}
+          leftSection={
+            <LocalIcon icon={downloadIcon} width="1.5rem" height="1.5rem" />
+          }
           color="blue"
           fullWidth
           mb="md"

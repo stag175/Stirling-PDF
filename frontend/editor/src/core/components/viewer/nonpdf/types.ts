@@ -1,16 +1,9 @@
-import React from "react";
-import ImageIcon from "@mui/icons-material/Image";
-import TableChartIcon from "@mui/icons-material/TableChart";
-import ArticleIcon from "@mui/icons-material/Article";
-import CodeIcon from "@mui/icons-material/Code";
-import DataObjectIcon from "@mui/icons-material/DataObject";
-import HtmlIcon from "@mui/icons-material/Html";
-
 import type { NonPdfFileType } from "@app/utils/fileUtils";
 
 export interface FileTypeMeta {
   label: string;
-  icon: React.ReactNode;
+  /** Bare material-symbols icon name, rendered via LocalIcon at the call site. */
+  icon: string;
   color: string; // Mantine color name (e.g. 'teal', 'violet')
   accentColor: string;
   borderColor: string;
@@ -35,37 +28,37 @@ export function getFileTypeMeta(
     case "image":
       return {
         label: "Image",
-        icon: React.createElement(ImageIcon, { fontSize: "small" }),
+        icon: "image-rounded",
         ...BADGE_COLORS,
       };
     case "csv":
       return {
         label: "Spreadsheet",
-        icon: React.createElement(TableChartIcon, { fontSize: "small" }),
+        icon: "table-chart",
         ...BADGE_COLORS,
       };
     case "json":
       return {
         label: "JSON",
-        icon: React.createElement(DataObjectIcon, { fontSize: "small" }),
+        icon: "data-object-rounded",
         ...BADGE_COLORS,
       };
     case "markdown":
       return {
         label: "Markdown",
-        icon: React.createElement(CodeIcon, { fontSize: "small" }),
+        icon: "code-rounded",
         ...BADGE_COLORS,
       };
     case "html":
       return {
         label: "HTML",
-        icon: React.createElement(HtmlIcon, { fontSize: "small" }),
+        icon: "html-rounded",
         ...BADGE_COLORS,
       };
     case "text":
       return {
         label: "Text",
-        icon: React.createElement(ArticleIcon, { fontSize: "small" }),
+        icon: "article-rounded",
         ...BADGE_COLORS,
       };
     default: {
@@ -74,7 +67,7 @@ export function getFileTypeMeta(
       const label = ext || "File";
       return {
         label,
-        icon: React.createElement(ArticleIcon, { fontSize: "small" }),
+        icon: "article-rounded",
         ...BADGE_COLORS,
       };
     }

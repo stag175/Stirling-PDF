@@ -260,7 +260,11 @@ const FullscreenToolList = ({
                   }}
                   aria-hidden
                 >
-                  {getSubcategoryIcon(subcategoryId)}
+                  <LocalIcon
+                    icon={getSubcategoryIcon(subcategoryId)}
+                    width="1.5rem"
+                    height="1.5rem"
+                  />
                 </span>
                 <Text
                   size="sm"

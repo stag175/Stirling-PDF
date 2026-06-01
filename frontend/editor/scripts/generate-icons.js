@@ -4,6 +4,21 @@ const { icons } = require("@iconify-json/material-symbols");
 const fs = require("fs");
 const path = require("path");
 
+// Icons referenced dynamically (as variables / map values / function returns) rather than as a
+// literal `<LocalIcon icon="...">` or `icon: "..."` the scanner below can recognise. List them here
+// so they are always bundled for offline / air-gapped builds. Keep in sync with the icon-name
+// string maps in toolsTaxonomy.ts, fieldMeta.tsx, useFileActionIcons.ts, useSuggestedTools.ts and
+// viewer/nonpdf/types.ts.
+const EXTRA_ICONS = [
+  "draw-rounded", "security-rounded", "verified-user-rounded", "rate-review-rounded",
+  "view-agenda-outline", "download-rounded", "delete-sweep-rounded", "smart-toy-rounded",
+  "build-rounded", "tune-rounded", "code-rounded", "text-fields-rounded", "check-box-rounded",
+  "arrow-drop-down-circle-rounded", "list-rounded", "radio-button-checked", "upload-rounded",
+  "folder-open-rounded", "save-rounded", "save-as-rounded", "folder-rounded", "compress-rounded",
+  "swap-horiz-rounded", "cleaning-services-rounded", "crop-rounded", "image-rounded", "table-chart",
+  "data-object-rounded", "html-rounded", "article-rounded",
+];
+
 // Check for verbose flag
 const isVerbose =
   process.argv.includes("--verbose") || process.argv.includes("-v");
@@ -126,6 +141,7 @@ function scanForUsedIcons() {
   }
 
   scanDirectory(srcDir);
+  EXTRA_ICONS.forEach((icon) => usedIcons.add(icon));
 
   const iconArray = Array.from(usedIcons).sort();
   info(`📋 Found ${iconArray.length} unique icons across codebase`);

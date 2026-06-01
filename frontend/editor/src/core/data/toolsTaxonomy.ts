@@ -10,17 +10,6 @@ import {
   ToolId,
   ToolKind,
 } from "@app/types/toolId";
-import DrawRoundedIcon from "@mui/icons-material/DrawRounded";
-import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
-import VerifiedUserRoundedIcon from "@mui/icons-material/VerifiedUserRounded";
-import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";
-import ViewAgendaRoundedIcon from "@mui/icons-material/ViewAgendaRounded";
-import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
-import DeleteSweepRoundedIcon from "@mui/icons-material/DeleteSweepRounded";
-import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
-import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
-import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
-import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
 import { ProprietaryToolId } from "@app/types/proprietaryToolId";
 import { PrototypeToolId } from "@app/types/prototypeToolId";
 
@@ -110,34 +99,36 @@ export const SUBCATEGORY_COLOR_MAP: Record<SubcategoryId, string> = {
   [SubcategoryId.DEVELOPER_TOOLS]: "var(--category-color-developer)", // Gray
 };
 
-export const getSubcategoryIcon = (
-  subcategory: SubcategoryId,
-): React.ReactNode => {
+/**
+ * Returns the bare material-symbols icon name for a subcategory.
+ * Render via the shared LocalIcon component at the call site.
+ */
+export const getSubcategoryIcon = (subcategory: SubcategoryId): string => {
   switch (subcategory) {
     case SubcategoryId.SIGNING:
-      return React.createElement(DrawRoundedIcon);
+      return "draw-rounded";
     case SubcategoryId.DOCUMENT_SECURITY:
-      return React.createElement(SecurityRoundedIcon);
+      return "security-rounded";
     case SubcategoryId.VERIFICATION:
-      return React.createElement(VerifiedUserRoundedIcon);
+      return "verified-user-rounded";
     case SubcategoryId.DOCUMENT_REVIEW:
-      return React.createElement(RateReviewRoundedIcon);
+      return "rate-review-rounded";
     case SubcategoryId.PAGE_FORMATTING:
-      return React.createElement(ViewAgendaRoundedIcon);
+      return "view-agenda-outline";
     case SubcategoryId.EXTRACTION:
-      return React.createElement(FileDownloadRoundedIcon);
+      return "download-rounded";
     case SubcategoryId.REMOVAL:
-      return React.createElement(DeleteSweepRoundedIcon);
+      return "delete-sweep-rounded";
     case SubcategoryId.AUTOMATION:
-      return React.createElement(SmartToyRoundedIcon);
+      return "smart-toy-rounded";
     case SubcategoryId.GENERAL:
-      return React.createElement(BuildRoundedIcon);
+      return "build-rounded";
     case SubcategoryId.ADVANCED_FORMATTING:
-      return React.createElement(TuneRoundedIcon);
+      return "tune-rounded";
     case SubcategoryId.DEVELOPER_TOOLS:
-      return React.createElement(CodeRoundedIcon);
+      return "code-rounded";
     default:
-      return React.createElement(BuildRoundedIcon);
+      return "build-rounded";
   }
 };
 

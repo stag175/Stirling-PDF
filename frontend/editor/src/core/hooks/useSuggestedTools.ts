@@ -4,17 +4,11 @@ import { useToolNavigation } from "@app/hooks/useToolNavigation";
 import { useToolWorkflow } from "@app/contexts/ToolWorkflowContext";
 import { ToolId } from "@app/types/toolId";
 
-// Material UI Icons
-import CompressIcon from "@mui/icons-material/Compress";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
-import CropIcon from "@mui/icons-material/Crop";
-import TextFieldsIcon from "@mui/icons-material/TextFields";
-
 export interface SuggestedTool {
   id: ToolId;
   title: string;
-  icon: React.ComponentType<any>;
+  /** Bare material-symbols icon name, rendered via LocalIcon at the call site. */
+  icon: string;
   href: string;
   onClick: (e: React.MouseEvent) => void;
 }
@@ -23,27 +17,27 @@ const ALL_SUGGESTED_TOOLS: Omit<SuggestedTool, "href" | "onClick">[] = [
   {
     id: "compress",
     title: "Compress",
-    icon: CompressIcon,
+    icon: "compress-rounded",
   },
   {
     id: "convert",
     title: "Convert",
-    icon: SwapHorizIcon,
+    icon: "swap-horiz-rounded",
   },
   {
     id: "sanitize",
     title: "Sanitize",
-    icon: CleaningServicesIcon,
+    icon: "cleaning-services-rounded",
   },
   {
     id: "split",
     title: "Split",
-    icon: CropIcon,
+    icon: "crop-rounded",
   },
   {
     id: "ocr",
     title: "OCR",
-    icon: TextFieldsIcon,
+    icon: "text-fields-rounded",
   },
 ];
 

@@ -69,7 +69,7 @@ const FileEditorThumbnail = ({
   const { config } = useAppConfig();
   const terminology = useFileActionTerminology();
   const icons = useFileActionIcons();
-  const DownloadOutlinedIcon = icons.download;
+  const downloadIcon = icons.download;
   const {
     pinFile,
     unpinFile,
@@ -323,7 +323,7 @@ const FileEditorThumbnail = ({
       },
       {
         id: "download",
-        icon: <DownloadOutlinedIcon style={{ fontSize: 20 }} />,
+        icon: <LocalIcon icon={downloadIcon} width={20} height={20} />,
         label: terminology.download,
         onClick: (e) => {
           e.stopPropagation();
@@ -397,7 +397,7 @@ const FileEditorThumbnail = ({
       isPinned,
       actualFile,
       terminology,
-      DownloadOutlinedIcon,
+      downloadIcon,
       onViewFile,
       onDownloadFile,
       onUnzipFile,

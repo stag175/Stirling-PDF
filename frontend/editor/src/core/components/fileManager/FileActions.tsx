@@ -19,7 +19,7 @@ const FileActions: React.FC = () => {
   const { t } = useTranslation();
   const terminology = useFileActionTerminology();
   const icons = useFileActionIcons();
-  const DownloadIcon = icons.download;
+  const downloadIcon = icons.download;
   const { config } = useAppConfig();
   const [showBulkUploadModal, setShowBulkUploadModal] = React.useState(false);
   const [showBulkShareModal, setShowBulkShareModal] = React.useState(false);
@@ -221,7 +221,7 @@ const FileActions: React.FC = () => {
             disabled={!hasSelection || !hasDownloadAccess}
             radius="sm"
           >
-            <DownloadIcon style={{ fontSize: "1rem" }} />
+            <LocalIcon icon={downloadIcon} width="1rem" height="1rem" />
           </ActionIcon>
         </Tooltip>
       </Group>

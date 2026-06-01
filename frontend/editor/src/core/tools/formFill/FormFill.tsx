@@ -674,7 +674,11 @@ const FormFill = (_props: BaseToolProps) => {
                                 fontSize: "0.875rem",
                               }}
                             >
-                              {FIELD_TYPE_ICON[field.type]}
+                              <LocalIcon
+                                icon={FIELD_TYPE_ICON[field.type]}
+                                width="0.875rem"
+                                height="0.875rem"
+                              />
                             </span>
                             <span className={styles.fieldName}>
                               {field.label || field.name}

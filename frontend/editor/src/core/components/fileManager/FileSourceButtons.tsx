@@ -30,7 +30,7 @@ const FileSourceButtons: React.FC<FileSourceButtonsProps> = ({
     useGoogleDrivePicker();
   const terminology = useFileActionTerminology();
   const icons = useFileActionIcons();
-  const UploadIcon = icons.upload;
+  const uploadIcon = icons.upload;
   const [mobileUploadModalOpen, setMobileUploadModalOpen] = useState(false);
   const { config } = useAppConfig();
   const isMobile = useIsMobile();
@@ -107,7 +107,9 @@ const FileSourceButtons: React.FC<FileSourceButtonsProps> = ({
       <Button
         variant="subtle"
         color="var(--mantine-color-gray-6)"
-        leftSection={<UploadIcon />}
+        leftSection={
+          <LocalIcon icon={uploadIcon} width="1.5rem" height="1.5rem" />
+        }
         justify={horizontal ? "center" : "flex-start"}
         onClick={onLocalFileClick}
         fullWidth={!horizontal}
