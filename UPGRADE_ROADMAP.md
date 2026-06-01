@@ -113,12 +113,26 @@ partial-migration compile bugs the agents missed.
   structured gap analysis vs this fork, including an explicit **Claude-vs-Codex** comparison (Codex run
   read-only over the repo). Analysis only; no code changes.
 
+### Wave 7 — A1 per-module JaCoCo gate (partial; verified; pushed)
+
+- **A1 (decorative coverage gate) — first real ratchet landed.** The global JaCoCo floor
+  (INSTRUCTION 0.14 / LINE 0.13 / BRANCH 0.09) is held down by the un-buildable `saas` module, so it
+  can't be raised globally here. Implemented the roadmap's own recommended fix — **per-module floors**:
+  `build.gradle` now reads a `perModuleCoverageFloors` map (falling back to the conservative default for
+  any unlisted module, so `saas`/core/proprietary CI is untouched). **`:common` is pinned to
+  INSTRUCTION 0.42 / LINE 0.40 / BRANCH 0.35** — just below its measured **43.83 / 41.30 / 36.96**.
+  Verified: `:common:test` (1168 tests) green, `:common:jacocoTestCoverageVerification` **BUILD
+  SUCCESSFUL** with the summary now reporting the real targets (`>= 40/42/35`, all PASS). This turns a
+  decorative 13% gate into a meaningful ~40% one for the best-covered module. Next: measure + pin
+  `:stirling-pdf` (core) and `:proprietary` the same way once their full suites are confirmed green here.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
-  consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, license-report CI gate (E4), and the global
-  JaCoCo ratchet (A1 — governed by the `saas` module, which can't be built here without Stripe/Supabase).
+  consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and the license-report CI gate (E4).
   These are config/pipeline changes that cannot be *verified* without running GitHub Actions / Docker, so
-  shipping them blind would violate the "verify your work" bar.
+  shipping them blind would violate the "verify your work" bar. (A1 is now **partially done** — the
+  *global* floor is still capped by the un-buildable `saas` module, but per-module floors are in and
+  `:common` is pinned at ~40%; see Wave 7. Pinning core/proprietary is the verifiable continuation.)
 - **Multi-week refactors (not safe to rush in a session):** B2 (state-library migration),
   C3 (streaming I/O — correctness-critical, needs load testing), the *stateful* remainder of C1
   (needs characterization tests on real PDFs first), and the security-hardening items D1–D5 (need a

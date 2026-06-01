@@ -151,6 +151,18 @@ tasks.register('writeVersion', WriteProperties) {
     property 'version', project.provider { project.version.toString() }
 }
 
+// Per-module JaCoCo coverage floors (regression ratchet). Modules not listed use the
+// conservative default that even the un-buildable `saas` module can meet, so the global
+// CI build is never broken. `app/common` (`:common`) is a well-tested utility module
+// measured at 41.3% line / 43.8% instruction / 37.0% branch, so its floor is pinned just
+// below actual — turning a decorative 13% gate into a meaningful one for this module.
+// Raise as coverage improves; never lower. (Per-module is the correct path here because a
+// single global floor is held down by `saas`, which can't be built without Stripe/Supabase.)
+def defaultCoverageFloor = [INSTRUCTION: 0.14, LINE: 0.13, BRANCH: 0.09]
+def perModuleCoverageFloors = [
+    ':common': [INSTRUCTION: 0.42, LINE: 0.40, BRANCH: 0.35],
+]
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'java-library'
@@ -261,6 +273,8 @@ subprojects {
         // options.compilerArgs.add("-Xlint:unchecked")
     }
 
+    def coverageFloor = perModuleCoverageFloors[project.path] ?: defaultCoverageFloor
+
     def jacocoReport = tasks.named("jacocoTestReport")
 
     tasks.withType(Test).configureEach {
@@ -293,9 +307,9 @@ subprojects {
             }
 
             def thresholds = [
-                    LINE       : 0.13,
-                    INSTRUCTION: 0.14,
-                    BRANCH     : 0.09
+                    LINE       : coverageFloor.LINE,
+                    INSTRUCTION: coverageFloor.INSTRUCTION,
+                    BRANCH     : coverageFloor.BRANCH
             ]
 
             def types = ["LINE", "INSTRUCTION", "BRANCH"]
@@ -380,19 +394,19 @@ subprojects {
                 limit {
                     counter = 'INSTRUCTION'
                     value = 'COVEREDRATIO'
-                    minimum = 0.14
+                    minimum = coverageFloor.INSTRUCTION
                 }
                 // wie viele Quellcode-Zeilen abgedeckt
                 limit {
                     counter = 'LINE'
                     value = 'COVEREDRATIO'
-                    minimum = 0.13
+                    minimum = coverageFloor.LINE
                 }
                 // Verzweigungen (if/else, switch) abgedeckt; misst Logik-Abdeckung
                 limit {
                     counter = 'BRANCH'
                     value = 'COVEREDRATIO'
-                    minimum = 0.09
+                    minimum = coverageFloor.BRANCH
                 }
             }
         }
