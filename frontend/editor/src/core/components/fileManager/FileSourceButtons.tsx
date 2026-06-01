@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Stack, Text, Button, Group } from "@mantine/core";
-import HistoryIcon from "@mui/icons-material/History";
-import PhonelinkIcon from "@mui/icons-material/Phonelink";
 import { useTranslation } from "react-i18next";
 import { useFileManagerContext } from "@app/contexts/FileManagerContext";
 import { useGoogleDrivePicker } from "@app/hooks/useGoogleDrivePicker";
@@ -11,6 +9,7 @@ import { useAppConfig } from "@app/contexts/AppConfigContext";
 import { useIsMobile } from "@app/hooks/useIsMobile";
 import MobileUploadModal from "@app/components/shared/MobileUploadModal";
 import { GoogleDriveIcon } from "@app/components/shared/CloudStorageIcons";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface FileSourceButtonsProps {
   horizontal?: boolean;
@@ -90,7 +89,9 @@ const FileSourceButtons: React.FC<FileSourceButtonsProps> = ({
   const buttons = (
     <>
       <Button
-        leftSection={<HistoryIcon />}
+        leftSection={
+          <LocalIcon icon="history-rounded" width="1.5rem" height="1.5rem" />
+        }
         justify={horizontal ? "center" : "flex-start"}
         onClick={() => onSourceChange("recent")}
         fullWidth={!horizontal}
@@ -164,7 +165,9 @@ const FileSourceButtons: React.FC<FileSourceButtonsProps> = ({
         <Button
           variant="subtle"
           color="var(--mantine-color-gray-6)"
-          leftSection={<PhonelinkIcon />}
+          leftSection={
+            <LocalIcon icon="devices-rounded" width="1.5rem" height="1.5rem" />
+          }
           justify={horizontal ? "center" : "flex-start"}
           onClick={handleMobileUploadClick}
           fullWidth={!horizontal}

@@ -13,14 +13,7 @@ import { alert } from "@app/components/toast";
 import { useTranslation } from "react-i18next";
 import { useFileActionTerminology } from "@app/hooks/useFileActionTerminology";
 import { useFileActionIcons } from "@app/hooks/useFileActionIcons";
-import CloseIcon from "@mui/icons-material/Close";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import UnarchiveIcon from "@mui/icons-material/Unarchive";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import LinkIcon from "@mui/icons-material/Link";
-import PushPinIcon from "@mui/icons-material/PushPin";
-import LockOpenIcon from "@mui/icons-material/LockOpen";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import {
   draggable,
   dropTargetForElements,
@@ -291,7 +284,7 @@ const FileEditorThumbnail = ({
     () => [
       {
         id: "view",
-        icon: <VisibilityIcon style={{ fontSize: 20 }} />,
+        icon: <LocalIcon icon="visibility-rounded" width={20} height={20} />,
         label: t("openInViewer", "Open in Viewer"),
         onClick: (e) => {
           e.stopPropagation();
@@ -300,7 +293,7 @@ const FileEditorThumbnail = ({
       },
       {
         id: "pin",
-        icon: <PushPinIcon style={{ fontSize: 20 }} />,
+        icon: <LocalIcon icon="keep-rounded" width={20} height={20} />,
         label: isPinned
           ? t("unpin", "Unpin File (replace after tool run)")
           : t("pin", "Pin File (keep active after tool run)"),
@@ -341,7 +334,7 @@ const FileEditorThumbnail = ({
         ? [
             {
               id: "upload",
-              icon: <CloudUploadIcon style={{ fontSize: 20 }} />,
+              icon: <LocalIcon icon="upload-rounded" width={20} height={20} />,
               label: isUploaded
                 ? t("fileManager.updateOnServer", "Update on Server")
                 : t("fileManager.uploadToServer", "Upload to Server"),
@@ -356,7 +349,7 @@ const FileEditorThumbnail = ({
         ? [
             {
               id: "share",
-              icon: <LinkIcon style={{ fontSize: 20 }} />,
+              icon: <LocalIcon icon="link-rounded" width={20} height={20} />,
               label: t("fileManager.share", "Share"),
               onClick: (e: React.MouseEvent) => {
                 e.stopPropagation();
@@ -367,7 +360,7 @@ const FileEditorThumbnail = ({
         : []),
       {
         id: "unzip",
-        icon: <UnarchiveIcon style={{ fontSize: 20 }} />,
+        icon: <LocalIcon icon="unarchive-rounded" width={20} height={20} />,
         label: t("fileManager.unzip", "Unzip"),
         onClick: (e) => {
           e.stopPropagation();
@@ -385,7 +378,7 @@ const FileEditorThumbnail = ({
       },
       {
         id: "close",
-        icon: <CloseIcon style={{ fontSize: 20 }} />,
+        icon: <LocalIcon icon="close-rounded" width={20} height={20} />,
         label: t("close", "Close"),
         onClick: (e) => {
           e.stopPropagation();
@@ -513,7 +506,7 @@ const FileEditorThumbnail = ({
                 </span>
                 {isPinned && (
                   <span className={styles.pinnedBadge}>
-                    <PushPinIcon style={{ fontSize: 12 }} />
+                    <LocalIcon icon="keep-rounded" width={12} height={12} />
                   </span>
                 )}
                 {isSharedFile && !isOwnedOrLocal && (
@@ -538,7 +531,11 @@ const FileEditorThumbnail = ({
                       }}
                       style={{ pointerEvents: "auto" }}
                     >
-                      <LockOpenIcon style={{ fontSize: 12 }} />
+                      <LocalIcon
+                        icon="lock-open-rounded"
+                        width={12}
+                        height={12}
+                      />
                     </ActionIcon>
                   </Tooltip>
                 )}
@@ -551,7 +548,7 @@ const FileEditorThumbnail = ({
 
           {/* Drag handle */}
           <span ref={handleRef} className={styles.dragHandle} aria-hidden>
-            <DragIndicatorIcon fontSize="small" />
+            <LocalIcon icon="drag-indicator" width="1.25rem" height="1.25rem" />
           </span>
         </div>
 

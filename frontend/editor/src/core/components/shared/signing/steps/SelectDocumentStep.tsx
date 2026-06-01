@@ -1,6 +1,6 @@
 import { Button, Stack, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import type { FileState } from "@app/types/file";
 
 interface SelectDocumentStepProps {
@@ -46,8 +46,11 @@ export const SelectDocumentStep: React.FC<SelectDocumentStepProps> = ({
                 backgroundColor: "var(--mantine-color-default-hover)",
               }}
             >
-              <PictureAsPdfIcon
-                sx={{ fontSize: 32, color: "var(--mantine-color-red-6)" }}
+              <LocalIcon
+                icon="picture-as-pdf-rounded"
+                width={32}
+                height={32}
+                style={{ color: "var(--mantine-color-red-6)" }}
               />
               <div style={{ flex: 1 }}>
                 <Text size="sm" fw={600}>

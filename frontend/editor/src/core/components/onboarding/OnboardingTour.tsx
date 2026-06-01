@@ -9,11 +9,9 @@
 import React from "react";
 import { TourProvider, useTour, type StepType } from "@reactour/tour";
 import { CloseButton, ActionIcon } from "@mantine/core";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CheckIcon from "@mui/icons-material/Check";
 import type { TFunction } from "i18next";
 import i18n from "@app/i18n";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 /**
  * TourContent - Controls the tour visibility
@@ -126,7 +124,9 @@ export default function OnboardingTour({
         setIsOpen,
       }) => {
         const isLast = tourCurrentStep === stepsLength - 1;
-        const ArrowIcon = isRTL ? ArrowBackIcon : ArrowForwardIcon;
+        const arrowIconName = isRTL
+          ? "arrow-back-rounded"
+          : "arrow-forward-rounded";
         return (
           <ActionIcon
             onClick={() =>
@@ -145,7 +145,11 @@ export default function OnboardingTour({
                 : t("onboarding.next", "Next")
             }
           >
-            {isLast ? <CheckIcon /> : <ArrowIcon />}
+            {isLast ? (
+              <LocalIcon icon="check-rounded" width="1.5rem" height="1.5rem" />
+            ) : (
+              <LocalIcon icon={arrowIconName} width="1.5rem" height="1.5rem" />
+            )}
           </ActionIcon>
         );
       }}

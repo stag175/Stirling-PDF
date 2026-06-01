@@ -7,16 +7,12 @@ import React, {
 } from "react";
 import { ActionIcon, CheckboxIndicator } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import PushPinIcon from "@mui/icons-material/PushPin";
-import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import {
   draggable,
   dropTargetForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 
+import LocalIcon from "@app/components/shared/LocalIcon";
 import styles from "@app/components/pageEditor/PageEditor.module.css";
 import { useFileContext } from "@app/contexts/FileContext";
 import { FileId } from "@app/types/file";
@@ -265,7 +261,7 @@ const FileThumbnail = ({
             setShowActions((v) => !v);
           }}
         >
-          <MoreVertIcon fontSize="small" />
+          <LocalIcon icon="more-vert" width="1.25rem" height="1.25rem" />
         </ActionIcon>
       </div>
 
@@ -292,9 +288,9 @@ const FileThumbnail = ({
             }}
           >
             {isPinned ? (
-              <PushPinIcon fontSize="small" />
+              <LocalIcon icon="keep-rounded" width="1.25rem" height="1.25rem" />
             ) : (
-              <PushPinOutlinedIcon fontSize="small" />
+              <LocalIcon icon="keep-rounded" width="1.25rem" height="1.25rem" />
             )}
             <span>{isPinned ? t("unpin", "Unpin") : t("pin", "Pin")}</span>
           </button>
@@ -320,7 +316,7 @@ const FileThumbnail = ({
               setShowActions(false);
             }}
           >
-            <DeleteOutlineIcon fontSize="small" />
+            <LocalIcon icon="delete-rounded" width="1.25rem" height="1.25rem" />
             <span>{t("delete", "Delete")}</span>
           </button>
         </div>
@@ -375,13 +371,13 @@ const FileThumbnail = ({
         {/* Pin indicator (bottom-left) */}
         {isPinned && (
           <span className={styles.pinIndicator} aria-hidden>
-            <PushPinIcon fontSize="small" />
+            <LocalIcon icon="keep-rounded" width="1.25rem" height="1.25rem" />
           </span>
         )}
 
         {/* Drag handle (span wrapper so we can attach a ref reliably) */}
         <span ref={handleRef} className={styles.dragHandle} aria-hidden>
-          <DragIndicatorIcon fontSize="small" />
+          <LocalIcon icon="drag-indicator" width="1.25rem" height="1.25rem" />
         </span>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Group, ActionIcon } from "@mantine/core";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { useTranslation } from "react-i18next";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import {
   ButtonDefinition,
   type FlowState,
@@ -89,7 +89,11 @@ export function SlideButtons({
           }}
         >
           {button.icon === "chevron-left" && (
-            <ChevronLeftIcon fontSize="small" />
+            <LocalIcon
+              icon="chevron-left-rounded"
+              width="1.25rem"
+              height="1.25rem"
+            />
           )}
         </ActionIcon>
       );

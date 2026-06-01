@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Stack, Text, Group, Badge } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import CheckIcon from "@mui/icons-material/Check";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { SelectDocumentStep } from "@app/components/shared/signing/steps/SelectDocumentStep";
 import { SelectParticipantsStep } from "@app/components/shared/signing/steps/SelectParticipantsStep";
 import { ConfigureSignatureDefaultsStep } from "@app/components/shared/signing/steps/ConfigureSignatureDefaultsStep";
@@ -73,7 +73,11 @@ const StepWrapper: React.FC<StepWrapperProps> = ({
             fontSize: "14px",
           }}
         >
-          {isCompleted ? <CheckIcon sx={{ fontSize: 18 }} /> : number}
+          {isCompleted ? (
+            <LocalIcon icon="check-rounded" width={18} height={18} />
+          ) : (
+            number
+          )}
         </div>
         <div style={{ flex: 1 }}>
           <Text size="sm" fw={600}>
