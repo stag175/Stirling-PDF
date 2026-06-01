@@ -13,8 +13,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
@@ -31,9 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -119,6 +115,7 @@ import stirling.software.SPDF.service.pdfjson.type3.Type3ConversionRequest;
 import stirling.software.SPDF.service.pdfjson.type3.Type3FontConversionService;
 import stirling.software.SPDF.service.pdfjson.type3.Type3GlyphExtractor;
 import stirling.software.SPDF.service.pdfjson.type3.model.Type3GlyphOutline;
+import stirling.software.SPDF.service.pdfjson.util.PdfJsonDateUtils;
 import stirling.software.SPDF.service.pdfjson.util.PdfJsonFontUtils;
 import stirling.software.common.service.CustomPDFDocumentFactory;
 import stirling.software.common.service.TaskManager;
@@ -2568,7 +2565,7 @@ public class PdfJsonConversionService {
                         try {
                             Calendar creationDate =
                                     DateConverter.toCalendar(creationDateStr.getString());
-                            ann.setCreationDate(formatCalendar(creationDate));
+                            ann.setCreationDate(PdfJsonDateUtils.formatCalendar(creationDate));
                         } catch (Exception e) {
                             log.debug(
                                     "Failed to parse annotation creation date: {}", e.getMessage());
@@ -2579,7 +2576,7 @@ public class PdfJsonConversionService {
                     if (modDateStr != null) {
                         try {
                             Calendar modDate = DateConverter.toCalendar(modDateStr.getString());
-                            ann.setModificationDate(formatCalendar(modDate));
+                            ann.setModificationDate(PdfJsonDateUtils.formatCalendar(modDate));
                         } catch (Exception e) {
                             log.debug(
                                     "Failed to parse annotation modification date: {}",
@@ -2753,8 +2750,9 @@ public class PdfJsonConversionService {
             metadata.setKeywords(info.getKeywords());
             metadata.setCreator(info.getCreator());
             metadata.setProducer(info.getProducer());
-            metadata.setCreationDate(formatCalendar(info.getCreationDate()));
-            metadata.setModificationDate(formatCalendar(info.getModificationDate()));
+            metadata.setCreationDate(PdfJsonDateUtils.formatCalendar(info.getCreationDate()));
+            metadata.setModificationDate(
+                    PdfJsonDateUtils.formatCalendar(info.getModificationDate()));
             metadata.setTrapped(info.getTrapped());
         }
         metadata.setNumberOfPages(document.getNumberOfPages());
@@ -2795,12 +2793,15 @@ public class PdfJsonConversionService {
         info.setCreator(metadata.getCreator());
         info.setProducer(metadata.getProducer());
         if (metadata.getCreationDate() != null) {
-            parseInstant(metadata.getCreationDate())
-                    .ifPresent(instant -> info.setCreationDate(toCalendar(instant)));
+            PdfJsonDateUtils.parseInstant(metadata.getCreationDate())
+                    .ifPresent(
+                            instant -> info.setCreationDate(PdfJsonDateUtils.toCalendar(instant)));
         }
         if (metadata.getModificationDate() != null) {
-            parseInstant(metadata.getModificationDate())
-                    .ifPresent(instant -> info.setModificationDate(toCalendar(instant)));
+            PdfJsonDateUtils.parseInstant(metadata.getModificationDate())
+                    .ifPresent(
+                            instant ->
+                                    info.setModificationDate(PdfJsonDateUtils.toCalendar(instant)));
         }
         info.setTrapped(metadata.getTrapped());
     }
@@ -5042,28 +5043,6 @@ public class PdfJsonConversionService {
         return value;
     }
 
-    private String formatCalendar(Calendar calendar) {
-        if (calendar == null) {
-            return null;
-        }
-        return calendar.toInstant().toString();
-    }
-
-    private Optional<Instant> parseInstant(String value) {
-        try {
-            return Optional.of(Instant.parse(value));
-        } catch (DateTimeParseException ex) {
-            log.warn("Failed to parse instant '{}': {}", value, ex.getMessage());
-            return Optional.empty();
-        }
-    }
-
-    private Calendar toCalendar(Instant instant) {
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.setTimeInMillis(instant.toEpochMilli());
-        return calendar;
-    }
-
     private class ImageCollectingEngine extends PDFGraphicsStreamEngine {
 
         private final int pageNumber;
@@ -6331,7 +6310,7 @@ public class PdfJsonConversionService {
                         try {
                             Calendar creationDate =
                                     DateConverter.toCalendar(creationDateStr.getString());
-                            ann.setCreationDate(formatCalendar(creationDate));
+                            ann.setCreationDate(PdfJsonDateUtils.formatCalendar(creationDate));
                         } catch (Exception e) {
                             log.debug(
                                     "Failed to parse annotation creation date: {}", e.getMessage());
@@ -6342,7 +6321,7 @@ public class PdfJsonConversionService {
                     if (modDateStr != null) {
                         try {
                             Calendar modDate = DateConverter.toCalendar(modDateStr.getString());
-                            ann.setModificationDate(formatCalendar(modDate));
+                            ann.setModificationDate(PdfJsonDateUtils.formatCalendar(modDate));
                         } catch (Exception e) {
                             log.debug(
                                     "Failed to parse annotation modification date: {}",
