@@ -20,11 +20,6 @@ import {
 } from "@app/contexts/NavigationContext";
 import { BASE_PATH, withBasePath } from "@app/constants/app";
 import { useRedaction, useRedactionMode } from "@app/contexts/RedactionContext";
-import TextFieldsIcon from "@mui/icons-material/TextFields";
-import StraightenIcon from "@mui/icons-material/Straighten";
-import LayersIcon from "@mui/icons-material/Layers";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import StopIcon from "@mui/icons-material/Stop";
 import { useViewerReadAloud } from "@app/components/viewer/useViewerReadAloud";
 
 export function useViewerWorkbenchBarButtons(
@@ -228,7 +223,13 @@ export function useViewerWorkbenchBarButtons(
       },
       {
         id: "viewer-ruler",
-        icon: <StraightenIcon sx={{ fontSize: "1.25rem" }} />,
+        icon: (
+          <LocalIcon
+            icon="straighten-rounded"
+            width="1.25rem"
+            height="1.25rem"
+          />
+        ),
         tooltip: rulerLabel,
         ariaLabel: rulerLabel,
         section: "top" as const,
@@ -319,7 +320,13 @@ export function useViewerWorkbenchBarButtons(
         ? [
             {
               id: "viewer-toggle-layers",
-              icon: <LayersIcon sx={{ fontSize: "1.25rem" }} />,
+              icon: (
+                <LocalIcon
+                  icon="layers-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              ),
               tooltip: layersLabel,
               ariaLabel: layersLabel,
               section: "top" as const,
@@ -383,9 +390,17 @@ export function useViewerWorkbenchBarButtons(
                     color={isReadingAloud ? "blue" : undefined}
                   >
                     {isReadingAloud ? (
-                      <StopIcon sx={{ fontSize: "1.25rem" }} />
+                      <LocalIcon
+                        icon="stop-rounded"
+                        width="1.25rem"
+                        height="1.25rem"
+                      />
                     ) : (
-                      <VolumeUpIcon sx={{ fontSize: "1.25rem" }} />
+                      <LocalIcon
+                        icon="volume-up-rounded"
+                        width="1.25rem"
+                        height="1.25rem"
+                      />
                     )}
                   </ActionIcon>
                 </Tooltip>
@@ -531,7 +546,11 @@ export function useViewerWorkbenchBarButtons(
               aria-pressed={isFormFillActive}
               color={isFormFillActive ? "blue" : undefined}
             >
-              <TextFieldsIcon sx={{ fontSize: "1.25rem" }} />
+              <LocalIcon
+                icon="text-fields-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
             </ActionIcon>
           </Tooltip>
         ),

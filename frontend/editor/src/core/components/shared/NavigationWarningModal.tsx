@@ -2,9 +2,7 @@ import { useRef, useEffect } from "react";
 import { Modal, Text, Button, Group, Stack } from "@mantine/core";
 import { useNavigationGuard } from "@app/contexts/NavigationContext";
 import { useTranslation } from "react-i18next";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { Z_INDEX_TOAST } from "@app/styles/zIndex";
 
 const NavigationWarningModal = () => {
@@ -103,7 +101,13 @@ const NavigationWarningModal = () => {
               color="var(--mantine-color-gray-8)"
               onClick={handleKeepWorking}
               w={BUTTON_WIDTH}
-              leftSection={<ArrowBackIcon fontSize="small" />}
+              leftSection={
+                <LocalIcon
+                  icon="arrow-back-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              }
             >
               {t("keepWorking", "Keep Working")}
             </Button>
@@ -114,7 +118,13 @@ const NavigationWarningModal = () => {
               color="var(--mantine-color-red-9)"
               onClick={handleDiscardChanges}
               w={BUTTON_WIDTH}
-              leftSection={<DeleteOutlineIcon fontSize="small" />}
+              leftSection={
+                <LocalIcon
+                  icon="delete-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              }
             >
               {t("discardChanges", "Discard Changes")}
             </Button>
@@ -123,7 +133,13 @@ const NavigationWarningModal = () => {
                 variant="filled"
                 onClick={handleApplyAndContinue}
                 w={BUTTON_WIDTH}
-                leftSection={<CheckCircleOutlineIcon fontSize="small" />}
+                leftSection={
+                  <LocalIcon
+                    icon="check-circle-rounded"
+                    width="1.25rem"
+                    height="1.25rem"
+                  />
+                }
               >
                 {t("applyAndContinue", "Apply & Leave")}
               </Button>
@@ -133,7 +149,13 @@ const NavigationWarningModal = () => {
                 variant="filled"
                 onClick={handleExportAndContinue}
                 w={BUTTON_WIDTH}
-                leftSection={<CheckCircleOutlineIcon fontSize="small" />}
+                leftSection={
+                  <LocalIcon
+                    icon="check-circle-rounded"
+                    width="1.25rem"
+                    height="1.25rem"
+                  />
+                }
               >
                 {t("exportAndContinue", "Export & Leave")}
               </Button>
@@ -148,7 +170,13 @@ const NavigationWarningModal = () => {
             color="var(--mantine-color-gray-8)"
             onClick={handleKeepWorking}
             w={BUTTON_WIDTH}
-            leftSection={<ArrowBackIcon fontSize="small" />}
+            leftSection={
+              <LocalIcon
+                icon="arrow-back-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
+            }
           >
             {t("keepWorking", "Keep Working")}
           </Button>
@@ -157,7 +185,13 @@ const NavigationWarningModal = () => {
             color="var(--mantine-color-red-9)"
             onClick={handleDiscardChanges}
             w={BUTTON_WIDTH}
-            leftSection={<DeleteOutlineIcon fontSize="small" />}
+            leftSection={
+              <LocalIcon
+                icon="delete-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
+            }
           >
             {t("discardChanges", "Discard Changes")}
           </Button>
@@ -166,7 +200,13 @@ const NavigationWarningModal = () => {
               variant="filled"
               onClick={handleApplyAndContinue}
               w={BUTTON_WIDTH}
-              leftSection={<CheckCircleOutlineIcon fontSize="small" />}
+              leftSection={
+                <LocalIcon
+                  icon="check-circle-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              }
             >
               {t("applyAndContinue", "Apply & Leave")}
             </Button>
@@ -176,7 +216,13 @@ const NavigationWarningModal = () => {
               variant="filled"
               onClick={handleExportAndContinue}
               w={BUTTON_WIDTH}
-              leftSection={<CheckCircleOutlineIcon fontSize="small" />}
+              leftSection={
+                <LocalIcon
+                  icon="check-circle-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              }
             >
               {t("exportAndContinue", "Export & Leave")}
             </Button>

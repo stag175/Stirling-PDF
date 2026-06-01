@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Modal, Stack, Text, Button, Group, Alert } from "@mantine/core";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useTranslation } from "react-i18next";
 
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { alert } from "@app/components/toast";
 import { Z_INDEX_OVER_FILE_MANAGER_MODAL } from "@app/styles/zIndex";
 import type { StirlingFileStub } from "@app/types/fileContext";
@@ -124,7 +124,9 @@ const UploadToServerModal: React.FC<UploadToServerModalProps> = ({
             {t("cancel", "Cancel")}
           </Button>
           <Button
-            leftSection={<CloudUploadIcon style={{ fontSize: 18 }} />}
+            leftSection={
+              <LocalIcon icon="upload-rounded" width={18} height={18} />
+            }
             onClick={handleUpload}
             loading={isUploading}
           >

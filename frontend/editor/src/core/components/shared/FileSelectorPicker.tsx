@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Box, Popover, ScrollArea, Text, Loader } from "@mantine/core";
-import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
 import {
   createStirlingFile,
@@ -22,6 +21,7 @@ import {
 } from "@app/services/shareBundleUtils";
 import { truncateCenter } from "@app/utils/textUtils";
 import { generateThumbnailForFile } from "@app/utils/thumbnailUtils";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import styles from "@app/components/shared/FileSelectorPicker.module.css";
 import "@app/components/shared/FileSidebarFileItem.css";
 
@@ -428,9 +428,11 @@ export function FileSelectorPicker({
               {placeholder ||
                 t("fileSelectorPicker.placeholder", "Select file")}
             </Text>
-            <AddIcon
+            <LocalIcon
+              icon="add-rounded"
+              width={18}
+              height={18}
               style={{
-                fontSize: 18,
                 color: "var(--mantine-color-dimmed)",
                 flexShrink: 0,
               }}

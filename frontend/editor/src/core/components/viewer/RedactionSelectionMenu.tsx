@@ -7,8 +7,7 @@ import { ActionIcon, Tooltip, Button, Group } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
 import { useEffect, useState, useRef, useCallback } from "react";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useRedaction } from "@app/contexts/RedactionContext";
 import { useActiveDocumentId } from "@app/components/viewer/useActiveDocumentId";
 
@@ -159,7 +158,7 @@ function RedactionSelectionMenuInner({
               },
             }}
           >
-            <DeleteIcon style={{ fontSize: 18 }} />
+            <LocalIcon icon="delete-rounded" width={18} height={18} />
           </ActionIcon>
         </Tooltip>
 
@@ -176,7 +175,9 @@ function RedactionSelectionMenuInner({
             color="red"
             size="xs"
             onClick={handleApply}
-            leftSection={<CheckCircleIcon style={{ fontSize: 16 }} />}
+            leftSection={
+              <LocalIcon icon="check-circle-rounded" width={16} height={16} />
+            }
             styles={{
               root: { flexShrink: 0, whiteSpace: "nowrap" },
             }}

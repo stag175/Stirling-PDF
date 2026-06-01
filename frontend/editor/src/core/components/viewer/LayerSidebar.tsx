@@ -9,9 +9,7 @@ import {
   ActionIcon,
   Tooltip,
 } from "@mantine/core";
-import LayersIcon from "@mui/icons-material/Layers";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import "@app/components/viewer/SidebarBase.css";
 import "@app/components/viewer/LayerSidebar.css";
 import {
@@ -329,7 +327,7 @@ export function LayerSidebar({
       <div className="sidebar-base__header">
         <div className="sidebar-base__header-title">
           <span className="sidebar-base__header-icon">
-            <LayersIcon fontSize="small" />
+            <LocalIcon icon="layers-rounded" width="1.25rem" height="1.25rem" />
           </span>
           <Text fw={600} size="sm" tt="uppercase" lts={0.5} style={{ flex: 1 }}>
             Layers
@@ -347,7 +345,7 @@ export function LayerSidebar({
               aria-label="Show all layers"
               title="Show all"
             >
-              <VisibilityIcon sx={{ fontSize: "1rem" }} />
+              <LocalIcon icon="visibility-rounded" width="1rem" height="1rem" />
             </ActionIcon>
             <ActionIcon
               variant="subtle"
@@ -357,7 +355,11 @@ export function LayerSidebar({
               aria-label="Hide all layers"
               title="Hide all"
             >
-              <VisibilityOffIcon sx={{ fontSize: "1rem" }} />
+              <LocalIcon
+                icon="visibility-off-rounded"
+                width="1rem"
+                height="1rem"
+              />
             </ActionIcon>
           </div>
         )}

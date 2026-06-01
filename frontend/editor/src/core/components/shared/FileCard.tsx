@@ -11,10 +11,8 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import StorageIcon from "@mui/icons-material/Storage";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import EditIcon from "@mui/icons-material/Edit";
 
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { StirlingFileStub } from "@app/types/fileContext";
 import { getFileSize, getFileDate } from "@app/utils/fileUtils";
 import { useFileThumbnail } from "@app/hooks/useFileThumbnail";
@@ -121,7 +119,11 @@ const FileCard = ({
                       onView();
                     }}
                   >
-                    <VisibilityIcon style={{ fontSize: 16 }} />
+                    <LocalIcon
+                      icon="visibility-rounded"
+                      width={16}
+                      height={16}
+                    />
                   </ActionIcon>
                 </Tooltip>
               )}
@@ -136,7 +138,7 @@ const FileCard = ({
                       onEdit();
                     }}
                   >
-                    <EditIcon style={{ fontSize: 16 }} />
+                    <LocalIcon icon="edit-rounded" width={16} height={16} />
                   </ActionIcon>
                 </Tooltip>
               )}
@@ -167,7 +169,9 @@ const FileCard = ({
               color="green"
               variant="light"
               size="sm"
-              leftSection={<StorageIcon style={{ fontSize: 12 }} />}
+              leftSection={
+                <LocalIcon icon="storage-rounded" width={12} height={12} />
+              }
             >
               DB
             </Badge>

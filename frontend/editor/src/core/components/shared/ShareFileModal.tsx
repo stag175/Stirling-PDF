@@ -10,10 +10,9 @@ import {
   Paper,
   Select,
 } from "@mantine/core";
-import LinkIcon from "@mui/icons-material/Link";
-import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import { useTranslation } from "react-i18next";
 
+import LocalIcon from "@app/components/shared/LocalIcon";
 import apiClient from "@app/services/apiClient";
 import { absoluteWithBasePath } from "@app/constants/app";
 import { alert } from "@app/components/toast";
@@ -256,7 +255,11 @@ const ShareFileModal: React.FC<ShareFileModalProps> = ({
                     variant="subtle"
                     size="xs"
                     leftSection={
-                      <ContentCopyRoundedIcon style={{ fontSize: 16 }} />
+                      <LocalIcon
+                        icon="content-copy-rounded"
+                        width={16}
+                        height={16}
+                      />
                     }
                     onClick={handleCopyLink}
                   >
@@ -311,7 +314,9 @@ const ShareFileModal: React.FC<ShareFileModalProps> = ({
             {t("cancel", "Cancel")}
           </Button>
           <Button
-            leftSection={<LinkIcon style={{ fontSize: 18 }} />}
+            leftSection={
+              <LocalIcon icon="link-rounded" width={18} height={18} />
+            }
             onClick={handleGenerateLink}
             loading={isWorking}
             disabled={!shareLinksEnabled}
