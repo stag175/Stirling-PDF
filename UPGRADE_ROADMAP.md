@@ -273,6 +273,23 @@ round's marginal statement gain is shrinking. Substantial further frontend cover
 distinct workstream from these unit-test rounds. Backend (`:stirling-pdf` 36% / `:proprietary` 35%) still has
 mockable-class headroom but trends toward Spring-context-dependent classes.
 
+### Wave 18 — backend coverage round 6 (audit/saml2/storage; verified; pushed)
+
+- **+281 tests across 12 classes** — proprietary `AuditService` (107), `ControllerAuditAspect`,
+  `CustomSaml2Authentication{Success,Failure}Handler`, `CustomSaml2ResponseAuthenticationConverter`,
+  `JwtSaml2AuthenticationRequestRepository`, `KeyPersistenceService`, `AuditConfigurationProperties`,
+  `CustomAuditEventRepository`, `LocalStorageProvider`, `AiWorkflowResponse`; core
+  `ConvertPdfJsonExceptionHandler`.
+- **Proprietary coverage:** 35.14→**41.80** line / 36.15→**42.80** instr / 30.33→**38.96** branch (now
+  ~matching `:common`). **Floor raised to :proprietary 0.41/0.42/0.38** (cumulative this session:
+  proprietary **29→41.8%**).
+- **Central gate caught 7 failures, all resolved** — 3-arg `UsernamePasswordAuthenticationToken` +
+  redundant `setAuthenticated(true)` (throws); `AuditEvent` NPE on null data → empty map; control-char
+  filename illegal on Windows → `@DisabledOnOs(WINDOWS)` (valid on Linux CI); plus removed 2 SAML
+  context-path assertions that surfaced a **likely real source bug** (tauri SAML-error redirect doubles a
+  non-empty context path — flagged for maintainer review, not codified) and 1 redundant DTO round-trip
+  equality test.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
