@@ -165,7 +165,7 @@ def perModuleCoverageFloors = [
     // so it stays at defaultCoverageFloor and the CI build is never broken.
     ':common'      : [INSTRUCTION: 0.42, LINE: 0.40, BRANCH: 0.35], // measured 43.83/41.30/36.96
     ':stirling-pdf': [INSTRUCTION: 0.36, LINE: 0.35, BRANCH: 0.29], // measured 36.37/35.65/29.73
-    ':proprietary' : [INSTRUCTION: 0.33, LINE: 0.32, BRANCH: 0.27], // measured 33.69/32.66/27.16
+    ':proprietary' : [INSTRUCTION: 0.35, LINE: 0.34, BRANCH: 0.30], // measured 36.15/35.14/30.33
 ]
 
 subprojects {
