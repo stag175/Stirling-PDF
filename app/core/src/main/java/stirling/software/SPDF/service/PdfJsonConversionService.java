@@ -117,6 +117,7 @@ import stirling.software.SPDF.service.pdfjson.type3.Type3GlyphExtractor;
 import stirling.software.SPDF.service.pdfjson.type3.model.Type3GlyphOutline;
 import stirling.software.SPDF.service.pdfjson.util.PdfJsonDateUtils;
 import stirling.software.SPDF.service.pdfjson.util.PdfJsonFontUtils;
+import stirling.software.SPDF.service.pdfjson.util.PdfJsonGraphicsUtils;
 import stirling.software.common.service.CustomPDFDocumentFactory;
 import stirling.software.common.service.TaskManager;
 import stirling.software.common.util.ExceptionUtils;
@@ -672,8 +673,8 @@ public class PdfJsonConversionService {
                 log.debug("Reconstructing page {}", pageNumberValue);
                 PDRectangle pageSize =
                         new PDRectangle(
-                                safeFloat(pageModel.getWidth(), 612f),
-                                safeFloat(pageModel.getHeight(), 792f));
+                                PdfJsonGraphicsUtils.safeFloat(pageModel.getWidth(), 612f),
+                                PdfJsonGraphicsUtils.safeFloat(pageModel.getHeight(), 792f));
                 PDPage page = new PDPage(pageSize);
                 if (pageModel.getRotation() != null) {
                     page.setRotation(pageModel.getRotation());
@@ -4991,8 +4992,8 @@ public class PdfJsonConversionService {
             contentStream.setTextMatrix(new Matrix(a, b, c, d, e, f));
             return;
         }
-        float x = safeFloat(element.getX(), 0f);
-        float y = safeFloat(element.getY(), 0f);
+        float x = PdfJsonGraphicsUtils.safeFloat(element.getX(), 0f);
+        float y = PdfJsonGraphicsUtils.safeFloat(element.getY(), 0f);
         contentStream.setTextMatrix(new Matrix(1, 0, 0, 1, x, y));
     }
 
@@ -5016,7 +5017,7 @@ public class PdfJsonConversionService {
                 return horizontalScale;
             }
         }
-        return safeFloat(element.getFontSize(), 12f);
+        return PdfJsonGraphicsUtils.safeFloat(element.getFontSize(), 12f);
     }
 
     private void applyRenderingMode(PDPageContentStream contentStream, Integer renderingMode)
@@ -5024,7 +5025,7 @@ public class PdfJsonConversionService {
         if (renderingMode == null) {
             return;
         }
-        RenderingMode mode = toRenderingMode(renderingMode);
+        RenderingMode mode = PdfJsonGraphicsUtils.toRenderingMode(renderingMode);
         if (mode == null) {
             log.debug("Ignoring unsupported rendering mode {}", renderingMode);
             return;
@@ -5034,13 +5035,6 @@ public class PdfJsonConversionService {
         } catch (IllegalArgumentException ex) {
             log.debug("Failed to apply rendering mode {}: {}", renderingMode, ex.getMessage());
         }
-    }
-
-    private float safeFloat(Float value, float defaultValue) {
-        if (value == null || Float.isNaN(value) || Float.isInfinite(value)) {
-            return defaultValue;
-        }
-        return value;
     }
 
     private class ImageCollectingEngine extends PDFGraphicsStreamEngine {
@@ -5077,7 +5071,7 @@ public class PdfJsonConversionService {
             }
             Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
             Bounds bounds = computeBounds(ctm);
-            float[] matrixValues = toMatrixValues(ctm);
+            float[] matrixValues = PdfJsonGraphicsUtils.toMatrixValues(ctm);
 
             PdfJsonImageElement element =
                     PdfJsonImageElement.builder()
@@ -5251,17 +5245,6 @@ public class PdfJsonConversionService {
 
     private record EncodedImage(String base64, String format) {}
 
-    private float[] toMatrixValues(Matrix matrix) {
-        return new float[] {
-            matrix.getValue(0, 0),
-            matrix.getValue(0, 1),
-            matrix.getValue(1, 0),
-            matrix.getValue(1, 1),
-            matrix.getValue(2, 0),
-            matrix.getValue(2, 1)
-        };
-    }
-
     private EncodedImage encodeImage(PDImage image) {
         try {
             BufferedImage bufferedImage = image.getImage();
@@ -5374,18 +5357,18 @@ public class PdfJsonConversionService {
         if (transform != null && transform.length == 6) {
             Matrix matrix =
                     new Matrix(
-                            safeFloat(transform[0], 1f),
-                            safeFloat(transform[1], 0f),
-                            safeFloat(transform[2], 0f),
-                            safeFloat(transform[3], 1f),
-                            safeFloat(transform[4], 0f),
-                            safeFloat(transform[5], 0f));
+                            PdfJsonGraphicsUtils.safeFloat(transform[0], 1f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[1], 0f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[2], 0f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[3], 1f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[4], 0f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[5], 0f));
             contentStream.drawImage(image, matrix);
             return;
         }
 
-        float width = safeFloat(element.getWidth(), fallbackWidth(element));
-        float height = safeFloat(element.getHeight(), fallbackHeight(element));
+        float width = PdfJsonGraphicsUtils.safeFloat(element.getWidth(), fallbackWidth(element));
+        float height = PdfJsonGraphicsUtils.safeFloat(element.getHeight(), fallbackHeight(element));
         if (width <= 0f) {
             width = Math.max(1f, fallbackWidth(element));
         }
@@ -5902,32 +5885,6 @@ public class PdfJsonConversionService {
                 return "null";
             }
             return color.getColorSpace() + "=" + color.getComponents();
-        }
-    }
-
-    private RenderingMode toRenderingMode(Integer renderingMode) {
-        if (renderingMode == null) {
-            return null;
-        }
-        switch (renderingMode) {
-            case 0:
-                return RenderingMode.FILL;
-            case 1:
-                return RenderingMode.STROKE;
-            case 2:
-                return RenderingMode.FILL_STROKE;
-            case 3:
-                return RenderingMode.NEITHER;
-            case 4:
-                return RenderingMode.FILL_CLIP;
-            case 5:
-                return RenderingMode.STROKE_CLIP;
-            case 6:
-                return RenderingMode.FILL_STROKE_CLIP;
-            case 7:
-                return RenderingMode.NEITHER_CLIP;
-            default:
-                return null;
         }
     }
 
@@ -6622,8 +6579,8 @@ public class PdfJsonConversionService {
         float fallbackWidth = currentBox != null ? currentBox.getWidth() : 612f;
         float fallbackHeight = currentBox != null ? currentBox.getHeight() : 792f;
 
-        float width = safeFloat(pageModel.getWidth(), fallbackWidth);
-        float height = safeFloat(pageModel.getHeight(), fallbackHeight);
+        float width = PdfJsonGraphicsUtils.safeFloat(pageModel.getWidth(), fallbackWidth);
+        float height = PdfJsonGraphicsUtils.safeFloat(pageModel.getHeight(), fallbackHeight);
         PDRectangle newBox = new PDRectangle(width, height);
         page.setMediaBox(newBox);
         page.setCropBox(newBox);
