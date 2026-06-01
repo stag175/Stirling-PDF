@@ -39,13 +39,13 @@ export default defineConfig({
       // since the B1 MUI->Mantine migration added uncovered UI wrapper code without
       // re-verification. Successive waves of new tests (pure utils, then
       // statement-heavy services/hooks/reducers) lifted every metric well above
-      // the old phantom floor. Latest deterministic 161-file green run measured
-      // 13.28 / 75.62 / 42.87 / 13.28; floors pinned just below that. Only move up.
+      // the old phantom floor. Latest deterministic 173-file green run measured
+      // 13.82 / 76.97 / 44.87 / 13.82; floors pinned just below that. Only move up.
       thresholds: {
-        statements: 13.1,
-        branches: 75,
-        functions: 42,
-        lines: 13.1,
+        statements: 13.7,
+        branches: 76,
+        functions: 44,
+        lines: 13.7,
       },
     },
     projects: [
