@@ -30,21 +30,19 @@ export default defineConfig({
       // build fails if coverage drops, NOT as a target. Raise as tests are added
       // (see AGENTS.md Testing Strategy).
       //
-      // 2026-06: corrected a STALE floor. The previous values (stmts/lines 7.7,
-      // funcs 27) sat ABOVE the actual aggregate — a measured baseline was
-      // 6.96 / 53.64(branch) / 25.45(func) / 6.96, i.e. the gate was already red on
-      // all four metrics. Coverage had fallen below the old floor during the B1
-      // MUI->Mantine migration (which added uncovered UI wrapper code) without the
-      // floor being re-verified at that commit. A new batch of pure-logic unit
-      // tests then lifted every metric to 7.24 / 56.05 / 26.79 / 7.24, and these
-      // floors are pinned just below that improved aggregate (branches raised
-      // 55 -> 56). Recovering stmts/lines toward 7.7 is a tracked follow-up:
-      // cover the UI code B1 introduced. Only ever move these up.
+      // 2026-06: a STALE floor (stmts/lines 7.7, funcs 27, branches 55) was found
+      // to sit ABOVE the actual aggregate — a measured baseline was
+      // 6.96 / 53.64 / 25.45 / 6.96, i.e. the gate had been red on all four metrics
+      // since the B1 MUI->Mantine migration added uncovered UI wrapper code without
+      // re-verification. Two waves of new tests (pure-logic utils, then
+      // statement-heavy services/hooks/reducers) lifted every metric, with a full
+      // 101-file green run measuring 8.21 / 61.19 / 30.14 / 8.21 -- now comfortably
+      // ABOVE the old phantom floor. Floors pinned just below that. Only move up.
       thresholds: {
-        statements: 7.2,
-        branches: 56,
-        functions: 26.7,
-        lines: 7.2,
+        statements: 8.1,
+        branches: 60,
+        functions: 30,
+        lines: 8.1,
       },
     },
     projects: [
