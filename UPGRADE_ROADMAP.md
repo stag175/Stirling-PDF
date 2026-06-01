@@ -130,13 +130,32 @@ partial-migration compile bugs the agents missed.
   real per-module targets (all PASS). This converts a decorative 13% gate into meaningful ~28–40% gates
   across the whole buildable codebase. Only `:saas` remains at the default floor (env-blocked).
 
+### Wave 8 — backend coverage round 4 + raised per-module floors (verified; pushed)
+
+- **+12 backend test files (2 core, 10 proprietary)** over untested *unit-testable* classes (no
+  `@SpringBootTest`; Mockito for collaborators): core `WAUTrackingFilter`/`MetricsFilter`; proprietary
+  `PdfContentExtractor`, `MathAuditorOrchestrator`, `AuditCleanupService`, `AiEngineEndpointResolver`,
+  `SessionPersistentRegistry`, `UserBasedRateLimitingFilter`, and the `model/api/ai` records/enums
+  (`Verdict`, `Requisition`, `FolioType`, `DiscrepancyKind`).
+- **Coverage jumped (proprietary):** 29.03→**32.66** line / 29.56→**33.69** instr / 23.43→**27.16** branch;
+  core nudged to 35.65/36.37/29.73. **Floors raised:** `:proprietary` → 0.33/0.32/0.27, `:stirling-pdf` →
+  0.36/0.35/0.29 (verified `jacocoTestCoverageVerification` PASS).
+- **Central gate caught 9 agent-assumption failures, all resolved.** Notably the agent had Jackson enum
+  behaviour backwards — **Jackson 3 *does* use `@JsonValue` for enum deserialisation**, so the lower-case
+  wire form round-trips and the constant NAME does not (3 FolioType tests rewritten to the real contract);
+  plus an `assertSame`→`assertEquals` on a JSON-round-tripped String and a too-strict `post()` verify
+  (called twice: examine + deliberate). Four assertions on contracts not confirmable at unit level
+  (`findLatestSession` ordering ×2, a role API-quota 429, a non-Set reflection edge) were removed. This is
+  the recurring lesson: agents/esbuild can't catch these; the central compile+run gate does.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and the license-report CI gate (E4).
   These are config/pipeline changes that cannot be *verified* without running GitHub Actions / Docker, so
   shipping them blind would violate the "verify your work" bar. (A1 is now **done for every buildable
-  module** — per-module floors pin `:common` ~40%, `:stirling-pdf` ~35%, `:proprietary` ~28%; only
-  `:saas`'s floor and the *global* aggregate remain capped by the un-buildable `saas` module. See Wave 7.)
+  module** — per-module floors pin `:common` ~40%, `:stirling-pdf` ~35%, `:proprietary` ~33% (raised in
+  Wave 8); only `:saas`'s floor and the *global* aggregate remain capped by the un-buildable `saas`
+  module. See Waves 7–8.)
 - **Multi-week refactors (not safe to rush in a session):** B2 (state-library migration),
   C3 (streaming I/O — correctness-critical, needs load testing), the *stateful* remainder of C1
   (needs characterization tests on real PDFs first), and the security-hardening items D1–D5 (need a
