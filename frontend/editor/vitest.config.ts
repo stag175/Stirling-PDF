@@ -13,8 +13,11 @@ export default defineConfig({
       "src/**/*.spec.ts", // Exclude Playwright E2E tests
       "src/tests/test-fixtures/**",
     ],
-    testTimeout: 10000,
-    hookTimeout: 10000,
+    // 20s (not 10s): v8 coverage instrumentation materially slows the heavy
+    // integration tests (e.g. the Convert smart-detection suite), which
+    // intermittently tripped a 10s limit under a fully-parallel --coverage run.
+    testTimeout: 20000,
+    hookTimeout: 20000,
     coverage: {
       reporter: ["text", "json", "json-summary", "html"],
       exclude: [

@@ -634,19 +634,20 @@ describe("Login", () => {
   it("should disable submit button while signing in", async () => {
     const user = userEvent.setup();
 
+    // Hold the sign-in promise pending under our own control so the "signing in"
+    // disabled state is stable, rather than racing a fixed 100ms timer against
+    // userEvent timing (the latter can exceed 100ms under load -> flaky).
+    let resolveSignIn!: () => void;
     vi.mocked(springAuth.signInWithPassword).mockImplementationOnce(
       () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                user: null,
-                session: null,
-                error: { message: "Error" },
-              }),
-            100,
-          ),
-        ),
+        new Promise((resolve) => {
+          resolveSignIn = () =>
+            resolve({
+              user: null,
+              session: null,
+              error: { message: "Error" },
+            });
+        }),
     );
 
     render(
@@ -690,13 +691,12 @@ describe("Login", () => {
     );
     await user.click(submitButton);
 
-    // Button should be disabled while signing in
-    expect(submitButton).toBeDisabled();
+    // Button is disabled while the (still-pending) sign-in promise is in flight.
+    await waitFor(() => expect(submitButton).toBeDisabled());
 
-    // Wait for completion
-    await waitFor(() => {
-      expect(submitButton).not.toBeDisabled();
-    });
+    // Resolve the sign-in; the button re-enables.
+    resolveSignIn();
+    await waitFor(() => expect(submitButton).not.toBeDisabled());
   });
 
   it("should persist location.state.from.pathname before triggering SSO so the user returns to their original URL", async () => {
