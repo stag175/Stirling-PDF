@@ -9,11 +9,6 @@ import {
   CloseButton,
 } from "@mantine/core";
 import { useIsPhone } from "@app/hooks/useIsMobile";
-import CancelIcon from "@mui/icons-material/Cancel";
-import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
 import { LocalIcon } from "@app/components/shared/LocalIcon";
 import { Z_INDEX_FULLSCREEN_SURFACE } from "@app/styles/zIndex";
 import { SignRequestDetail } from "@app/types/signingSession";
@@ -343,7 +338,13 @@ const SignRequestWorkbenchView = ({ data }: SignRequestWorkbenchViewProps) => {
             <Button
               variant="light"
               size="sm"
-              leftSection={<FolderOpenIcon fontSize="small" />}
+              leftSection={
+                <LocalIcon
+                  icon="folder-open-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              }
               onClick={handleAddToActiveFiles}
               style={{
                 backgroundColor: "var(--landing-inner-paper-bg)",
@@ -362,7 +363,13 @@ const SignRequestWorkbenchView = ({ data }: SignRequestWorkbenchViewProps) => {
                   variant="light"
                   color="red"
                   size="sm"
-                  leftSection={<CancelIcon fontSize="small" />}
+                  leftSection={
+                    <LocalIcon
+                      icon="cancel-rounded"
+                      width="1.25rem"
+                      height="1.25rem"
+                    />
+                  }
                   onClick={handleDecline}
                   loading={declining}
                 >
@@ -379,7 +386,11 @@ const SignRequestWorkbenchView = ({ data }: SignRequestWorkbenchViewProps) => {
                     onClick={() => annotationApiRef.current?.zoomOut()}
                     title={t("viewer.zoomOut", "Zoom out")}
                   >
-                    <ZoomOutIcon fontSize="small" />
+                    <LocalIcon
+                      icon="zoom-out-rounded"
+                      width="1.25rem"
+                      height="1.25rem"
+                    />
                   </Button>
                   <Button
                     variant="subtle"
@@ -387,7 +398,11 @@ const SignRequestWorkbenchView = ({ data }: SignRequestWorkbenchViewProps) => {
                     onClick={() => annotationApiRef.current?.resetZoom()}
                     title={t("viewer.resetZoom", "Reset zoom")}
                   >
-                    <ZoomOutMapIcon fontSize="small" />
+                    <LocalIcon
+                      icon="zoom-out-map-rounded"
+                      width="1.25rem"
+                      height="1.25rem"
+                    />
                   </Button>
                   <Button
                     variant="subtle"
@@ -395,7 +410,11 @@ const SignRequestWorkbenchView = ({ data }: SignRequestWorkbenchViewProps) => {
                     onClick={() => annotationApiRef.current?.zoomIn()}
                     title={t("viewer.zoomIn", "Zoom in")}
                   >
-                    <ZoomInIcon fontSize="small" />
+                    <LocalIcon
+                      icon="zoom-in-rounded"
+                      width="1.25rem"
+                      height="1.25rem"
+                    />
                   </Button>
                 </Button.Group>
               </>

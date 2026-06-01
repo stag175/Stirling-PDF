@@ -1,6 +1,6 @@
 import { Button, Stack, Text, Group } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface SignaturePlacementStepProps {
   isPlaced: boolean;
@@ -43,7 +43,9 @@ export const SignaturePlacementStep: React.FC<SignaturePlacementStepProps> = ({
         <Button
           variant="default"
           onClick={onBack}
-          leftSection={<ArrowBackIcon sx={{ fontSize: 16 }} />}
+          leftSection={
+            <LocalIcon icon="arrow-back-rounded" width={16} height={16} />
+          }
         >
           {t("certSign.collab.signRequest.steps.back", "Back")}
         </Button>

@@ -17,13 +17,7 @@ import {
   Text,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import DrawIcon from "@mui/icons-material/Draw";
-import ImageIcon from "@mui/icons-material/Image";
-import OpenWithIcon from "@mui/icons-material/OpenWith";
-import TextFieldsIcon from "@mui/icons-material/TextFields";
-import CloseIcon from "@mui/icons-material/Close";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
-import CheckIcon from "@mui/icons-material/Check";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 import {
   DEFAULT_PARAMETERS,
@@ -500,7 +494,11 @@ export default function SignControlsStrip({
                   value: "place",
                   label: (
                     <Group gap={6} wrap="nowrap">
-                      <DrawIcon sx={{ fontSize: "1.1rem" }} />
+                      <LocalIcon
+                        icon="draw-rounded"
+                        width="1.1rem"
+                        height="1.1rem"
+                      />
                       <span>
                         {t(
                           "certSign.collab.signRequest.mode.place",
@@ -514,7 +512,11 @@ export default function SignControlsStrip({
                   value: "move",
                   label: (
                     <Group gap={6} wrap="nowrap">
-                      <OpenWithIcon sx={{ fontSize: "1.1rem" }} />
+                      <LocalIcon
+                        icon="open-with-rounded"
+                        width="1.1rem"
+                        height="1.1rem"
+                      />
                       <span>
                         {t(
                           "certSign.collab.signRequest.mode.move",
@@ -581,7 +583,11 @@ export default function SignControlsStrip({
                             "Delete signature",
                           )}
                         >
-                          <CloseIcon sx={{ fontSize: "0.9rem" }} />
+                          <LocalIcon
+                            icon="close-rounded"
+                            width="0.9rem"
+                            height="0.9rem"
+                          />
                         </ActionIcon>
                       </Group>
                     </Menu.Item>
@@ -600,7 +606,7 @@ export default function SignControlsStrip({
                   disabled={isAtCapacity}
                 >
                   <Group gap="xs">
-                    <DrawIcon sx={{ fontSize: "1rem" }} />
+                    <LocalIcon icon="draw-rounded" width="1rem" height="1rem" />
                     <span>
                       {t("certSign.collab.signRequest.modeTabs.draw", "Draw")}
                     </span>
@@ -611,7 +617,11 @@ export default function SignControlsStrip({
                   disabled={isAtCapacity}
                 >
                   <Group gap="xs">
-                    <TextFieldsIcon sx={{ fontSize: "1rem" }} />
+                    <LocalIcon
+                      icon="text-fields-rounded"
+                      width="1rem"
+                      height="1rem"
+                    />
                     <span>
                       {t("certSign.collab.signRequest.modeTabs.text", "Type")}
                     </span>
@@ -622,7 +632,11 @@ export default function SignControlsStrip({
                   disabled={isAtCapacity}
                 >
                   <Group gap="xs">
-                    <ImageIcon sx={{ fontSize: "1rem" }} />
+                    <LocalIcon
+                      icon="image-rounded"
+                      width="1rem"
+                      height="1rem"
+                    />
                     <span>
                       {t(
                         "certSign.collab.signRequest.modeTabs.image",
@@ -650,7 +664,7 @@ export default function SignControlsStrip({
                 "Delete selected signature",
               )}
             >
-              <DeleteOutlineIcon sx={{ fontSize: "1.2rem" }} />
+              <LocalIcon icon="delete-rounded" width="1.2rem" height="1.2rem" />
             </button>
 
             <button
@@ -668,7 +682,11 @@ export default function SignControlsStrip({
               )}
             >
               <span className={styles.actionIcon}>
-                <CheckIcon sx={{ fontSize: "1.2rem" }} />
+                <LocalIcon
+                  icon="check-rounded"
+                  width="1.2rem"
+                  height="1.2rem"
+                />
               </span>
               <span className={styles.actionLabel}>
                 {t(

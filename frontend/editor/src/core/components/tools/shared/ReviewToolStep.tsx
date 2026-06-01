@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Button, Stack } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import UndoIcon from "@mui/icons-material/Undo";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import ErrorNotification from "@app/components/tools/shared/ErrorNotification";
 import ResultsPreview from "@app/components/tools/shared/ResultsPreview";
 import { SuggestedToolsSection } from "@app/components/tools/shared/SuggestedToolsSection";
@@ -127,7 +127,9 @@ function ReviewStepContent<TParams = unknown>({
           )}
         >
           <Button
-            leftSection={<UndoIcon />}
+            leftSection={
+              <LocalIcon icon="undo-rounded" width="1.5rem" height="1.5rem" />
+            }
             variant="outline"
             color="var(--mantine-color-gray-6)"
             onClick={handleUndo}

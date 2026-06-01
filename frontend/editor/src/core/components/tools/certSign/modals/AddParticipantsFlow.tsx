@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Modal, Stack, TextInput, Button, Group } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import AddIcon from "@mui/icons-material/Add";
 import UserSelector from "@app/components/shared/UserSelector";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface AddParticipantsFlowProps {
   opened: boolean;
@@ -81,7 +81,9 @@ export const AddParticipantsFlow: React.FC<AddParticipantsFlowProps> = ({
             onClick={handleSubmit}
             loading={submitting}
             disabled={selectedUserIds.length === 0}
-            leftSection={<AddIcon sx={{ fontSize: 16 }} />}
+            leftSection={
+              <LocalIcon icon="add-rounded" width={16} height={16} />
+            }
             color="green"
           >
             {t(

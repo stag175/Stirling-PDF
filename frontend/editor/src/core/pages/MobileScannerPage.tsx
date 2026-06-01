@@ -14,12 +14,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { LogoIcon } from "@app/components/shared/LogoIcon";
 import { Wordmark } from "@app/components/shared/Wordmark";
-import ErrorRoundedIcon from "@mui/icons-material/ErrorRounded";
-import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
-import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
-import UploadRoundedIcon from "@mui/icons-material/UploadRounded";
-import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { loadJscanify } from "@app/utils/loadJscanify";
 
 /**
@@ -947,8 +942,11 @@ export default function MobileScannerPage() {
           padding: "2rem",
         }}
       >
-        <CheckCircleRoundedIcon
-          style={{ fontSize: "4rem", color: "var(--mantine-color-green-6)" }}
+        <LocalIcon
+          icon="check-circle-rounded"
+          width="4rem"
+          height="4rem"
+          style={{ color: "var(--mantine-color-green-6)" }}
         />
         <Text size="xl" fw="bold" mt="md">
           {t("mobileScanner.uploadSuccess", "Upload Successful!")}
@@ -1011,7 +1009,9 @@ export default function MobileScannerPage() {
         <Box p="md">
           <Alert
             color="red"
-            icon={<ErrorRoundedIcon />}
+            icon={
+              <LocalIcon icon="error-rounded" width="1.5rem" height="1.5rem" />
+            }
             onClose={() => setUploadError(null)}
             withCloseButton
           >
@@ -1031,7 +1031,12 @@ export default function MobileScannerPage() {
 
       {cameraError && (
         <Box p="md">
-          <Alert color="orange" icon={<InfoRoundedIcon />}>
+          <Alert
+            color="orange"
+            icon={
+              <LocalIcon icon="info-rounded" width="1.5rem" height="1.5rem" />
+            }
+          >
             {cameraError}
           </Alert>
         </Box>
@@ -1076,9 +1081,11 @@ export default function MobileScannerPage() {
               }}
             >
               <Stack align="center" gap="md">
-                <PhotoCameraRoundedIcon
+                <LocalIcon
+                  icon="photo-camera-rounded"
+                  width="3rem"
+                  height="3rem"
                   style={{
-                    fontSize: "3rem",
                     color: "var(--mantine-color-blue-6)",
                   }}
                 />
@@ -1112,9 +1119,11 @@ export default function MobileScannerPage() {
               }}
             >
               <Stack align="center" gap="md">
-                <UploadRoundedIcon
+                <LocalIcon
+                  icon="upload-rounded"
+                  width="3rem"
+                  height="3rem"
                   style={{
-                    fontSize: "3rem",
                     color: "var(--mantine-color-green-6)",
                   }}
                 />
@@ -1280,9 +1289,11 @@ export default function MobileScannerPage() {
             style={{ width: "100%" }}
           >
             <Stack align="center" gap="lg">
-              <UploadRoundedIcon
+              <LocalIcon
+                icon="upload-rounded"
+                width="4rem"
+                height="4rem"
                 style={{
-                  fontSize: "4rem",
                   color: "var(--mantine-color-gray-5)",
                 }}
               />
@@ -1302,7 +1313,13 @@ export default function MobileScannerPage() {
                 variant="filled"
                 fullWidth
                 onClick={() => fileInputRef.current?.click()}
-                leftSection={<AddPhotoAlternateRoundedIcon />}
+                leftSection={
+                  <LocalIcon
+                    icon="add-photo-alternate-rounded"
+                    width="1.5rem"
+                    height="1.5rem"
+                  />
+                }
               >
                 {t("mobileScanner.selectImage", "Select Image")}
               </Button>

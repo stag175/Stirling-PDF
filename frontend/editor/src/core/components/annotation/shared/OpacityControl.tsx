@@ -8,7 +8,7 @@ import {
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import OpacityIcon from "@mui/icons-material/Opacity";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface OpacityControlProps {
   value: number; // 0-100
@@ -48,7 +48,7 @@ export function OpacityControl({
               },
             }}
           >
-            <OpacityIcon style={{ fontSize: 18 }} />
+            <LocalIcon icon="opacity-rounded" width={18} height={18} />
           </ActionIcon>
         </Tooltip>
       </Popover.Target>
