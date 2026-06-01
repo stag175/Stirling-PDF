@@ -148,9 +148,26 @@ partial-migration compile bugs the agents missed.
   (`findLatestSession` ordering ×2, a role API-quota 429, a non-Set reflection edge) were removed. This is
   the recurring lesson: agents/esbuild can't catch these; the central compile+run gate does.
 
+### Wave 9 — E4 license-compliance gates (functional both sides; verified)
+
+- **Backend gate confirmed working.** The repo already had `com.github.jk1.dependency-license-report`
+  3.1.2 + `app/allowed-licenses.json` + a `task licenses:check`. Under Gradle 9.3.1 a bare
+  `./gradlew checkLicense` fails ("configuration resolved without an exclusive lock"), but the Taskfile
+  already invokes it with `--no-parallel` — and verified that way it **BUILD SUCCESSFUL** (every backend
+  dependency complies with the allow-list).
+- **Frontend gate added (the real gap).** The frontend only had `licenses:generate` (a report), no gate.
+  Added an `npm run license:check` script (`license-checker --production` against an explicit `--onlyAllow`
+  allow-list, excluding the private root package) plus a matching `task frontend:licenses:check`. Verified
+  locally: **exit 0** across all 548 production deps; the only non-standard licenses are the private root
+  (excluded) and `posthog-js` (`MIT*` = MIT). `--onlyAllow` fails on anything unlisted, so it genuinely
+  gates. (Task runner isn't installed here, so the underlying `npm run license:check` was verified directly.)
+- **Still CI-gated:** wiring both `licenses:check` tasks into a GitHub Actions step is the only remaining
+  piece, and that can't be *run*/verified without Actions — so it stays plan-only per the verify bar.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
-  consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and the license-report CI gate (E4).
+  consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
+  gates (E4 — the gates themselves now work on both backend and frontend; see Wave 9).
   These are config/pipeline changes that cannot be *verified* without running GitHub Actions / Docker, so
   shipping them blind would violate the "verify your work" bar. (A1 is now **done for every buildable
   module** — per-module floors pin `:common` ~40%, `:stirling-pdf` ~35%, `:proprietary` ~33% (raised in

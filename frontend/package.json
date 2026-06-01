@@ -83,7 +83,8 @@
     "update:minor": "node scripts/update-minor.js",
     "update:major": "npx npm-check-updates -u && npm install",
     "update:interactive": "npx npm-check-updates -i",
-    "update:minor-strict": "npx npm-check-updates -u --target minor && npm install"
+    "update:minor-strict": "npx npm-check-updates -u --target minor && npm install",
+    "license:check": "license-checker --production --excludePackages \"frontend@0.1.0\" --onlyAllow \"MIT;MIT*;ISC;Apache-2.0;BSD-3-Clause;BSD-2-Clause;0BSD;OFL-1.1;MPL-2.0;CC-BY-4.0;Unlicense;MIT OR Apache-2.0;Apache-2.0 OR MIT;(MPL-2.0 OR Apache-2.0);(MIT OR GPL-3.0-or-later);(MIT AND Zlib);(BSD-2-Clause OR MIT OR Apache-2.0);(MIT OR CC0-1.0);MIT AND ISC\""
   },
   "browserslist": {
     "production": [

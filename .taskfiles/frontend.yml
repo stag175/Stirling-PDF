@@ -298,3 +298,9 @@ tasks:
     deps: [install]
     cmds:
       - node editor/scripts/generate-licenses.js
+
+  licenses:check:
+    desc: "Gate frontend production dependency licenses against the allow-list"
+    deps: [install]
+    cmds:
+      - npm run license:check
