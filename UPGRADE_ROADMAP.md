@@ -164,6 +164,18 @@ partial-migration compile bugs the agents missed.
 - **Still CI-gated:** wiring both `licenses:check` tasks into a GitHub Actions step is the only remaining
   piece, and that can't be *run*/verified without Actions — so it stays plan-only per the verify bar.
 
+### Wave 10 — de-flake the coverage gate (verified)
+
+- The two pre-existing load-flaky frontend tests (which had forced `--coverage` runs to use `--retry`) are
+  fixed, so `vitest run --coverage` is **deterministic again without `--retry`** (verified on two
+  consecutive clean 101-file runs):
+  - `Login.test.tsx` "disable submit button while signing in" asserted a *transient* disabled state
+    synchronously after `await user.click()`, racing a fixed 100ms `setTimeout` in the sign-in mock
+    (userEvent can exceed 100ms under load). Replaced with a controlled deferred promise:
+    `waitFor(disabled)` → resolve → `waitFor(enabled)` — no timing dependency.
+  - The Convert smart-detection integration suite timed out only under v8 coverage instrumentation;
+    raised `testTimeout`/`hookTimeout` 10s → 20s (headroom for instrumentation, not masking a hang).
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
