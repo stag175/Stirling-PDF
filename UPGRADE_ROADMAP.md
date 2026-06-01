@@ -1,0 +1,240 @@
+# Stirling-PDF — Full-Stack Upgrade Roadmap
+
+> Prepared on a fork of `Stirling-Tools/stirling-pdf` @ v2.11.0 (`stag175/Stirling-PDF`).
+> Originally analysis-only; **§0 now tracks the first implementation wave landed on this fork (each item verified by running the real toolchain).**
+
+---
+
+## 0. Implementation progress (wave 1 — verified)
+
+Environment note: this machine had **no JDK and no Docker**. To make backend work *verifiable* (not
+guesswork on a Spring Boot 4 / Java 25 / Jackson 3 stack), a portable **Temurin JDK 25** was installed
+(`C:\Users\charl\jdk25`) and frontend deps installed via `npm ci`. Docker/Tauri/multi-OS/release-signing
+items remain **environment-blocked** here and are plan-only until built on a CI box.
+
+| Item | Change | Verification (actually run) |
+|---|---|---|
+| A6 | Corrected AGENTS.md "no unit tests" claim → real inventory (~314 backend / ~670 frontend) | re-read |
+| A2 | Added Vitest `coverage.thresholds` **ratchet**, raised after new tests → `branches 50 / funcs 24 / lines 6.8` | `vitest run --coverage` exit 0 |
+| A3/A5 (FE) | **12 new test files, 385 tests** (core/proprietary/saas utils) via agent swarm | full suite **1090 pass**; ESLint `--max-warnings=0` + Prettier clean |
+| A3/A5 (BE) | **8 new test files, 231 cases** in `app/common` (enums, JobResult, OAuth2 providers, ZipExtractionUtils) via agent swarm | `:common:test` **BUILD SUCCESSFUL**, 0 failures (fixed 1 `final`-method compile error a compiler-less agent couldn't catch) |
+| B5 (partial) | Enabled `noFallthroughCasesInSwitch` + `noImplicitOverride`; added `override` in `ErrorBoundary`. `noImplicitReturns` left off (documented: ~22 useEffect sites — good next swarm) | all **6 tsc variants** 0 errors |
+| C7 | `System.err`/`println` → SLF4J in `PrintFileController` + `LocaleConfiguration` (left the legit CLI tool & test diagnostics) | `gradlew :stirling-pdf:compileJava` exit 0 |
+| — | `frontend/editor/coverage` added to `.gitignore` (gap from Vitest root) | confirmed |
+| H1 | **Evidence only:** Gradle config cache stores cleanly for the compile graph; *not* enabled globally until `bootRun`/`openapi`/`build` are validated (team left it off deliberately) | `--configuration-cache` probe |
+
+### Wave 2 — more coverage swarms (verified)
+
+- **Backend `app/core` + `app/proprietary`:** 12 new test files (~177 test methods) — SAML/desktop
+  utils, audit enums, AI-workflow DTOs (incl. Jackson-3 round-trips), `CertificateInfo`, `FolderResponse`.
+  Verified via targeted `:proprietary:test` / `:stirling-pdf:test`, **all pass** after I fixed **1 real
+  Jackson-3 gotcha** (`FAIL_ON_NULL_FOR_PRIMITIVES` defaults to *true* in Jackson 3; the test mapper now
+  mirrors the app's `application.properties` so absent primitive record components default to 0).
+- **Frontend round 2:** 12 new test files / 288 tests (services, error/http utils, hooks, license/protocol
+  utils, desktop OAuth HTML). Full FE suite now **77 files / 1378 tests**, all green. Vitest ratchet raised
+  again → **branches 55 / funcs 27 / lines 7.7** (gate passes). Fixed 1 ESLint `@app/*` import violation.
+- **A1 (JaCoCo ratchet) — measured, not blindly raised:** `app/common` is at **41% line / 44% instruction**
+  (vs the 13/14% gate). I did **not** raise the *global* `jacocoTestCoverageVerification` minimum from here,
+  because it applies to every module including `saas`, which can't be built in this environment
+  (Stripe/Supabase deps) — raising it blind risks breaking the enterprise CI build. Correct follow-up:
+  convert to **per-module** thresholds on a CI box where all suites run green.
+
+**Cumulative wave 1+2:** ~33 new test files; frontend 673→**1378** tests; `app/common` 1168 tests; backend
+`core`/`proprietary` additions green. Two compiler-only bugs in agent-written tests caught and fixed by
+central verification (the whole point of not trusting un-compiled output).
+
+**Not yet done (and why):** the four Effort-L refactors (B1 MUI→Mantine, B2 state library, C1 god-class
+split, C3 streaming I/O) are multi-week and were not rushed; backend coverage beyond `app/common`,
+SBOM/provenance (E2/E3), CI consolidation (H2/H3), and the security-hardening items (D1–D5) remain open.
+No commits/pushes were made — changes are in the working tree for review.
+
+---
+
+## 1. Current-state assessment (what's already good)
+
+Before listing upgrades, it's important to be honest: **this is not a stale codebase.** The core
+stack is bleeding-edge and well-governed, so "upgrade" here mostly means *hardening, consolidating,
+and filling gaps* — not version bumping.
+
+Already excellent:
+
+- **JVM stack is ahead of the curve:** Spring Boot 4.0.6, Java 25 toolchain, Jackson 3
+  (`tools.jackson`), PDFBox 3.0.7, Jetty (Tomcat deliberately excluded), HTTP/2 + ALPN.
+- **Frontend is modern:** React 19, Vite 7, TypeScript 5.9 (`strict: true`), Tailwind 4,
+  ESLint 10, Mantine 8, pdfjs 5 + a new `@embedpdf` viewer.
+- **Supply-chain posture is strong:** every GitHub Action is **SHA-pinned** (313 uses, 0 floating),
+  `step-security/harden-runner` on all workflows, OSSF Scorecards, dependency-review, Dependabot
+  (weekly, grouped), Gitleaks pre-commit, license allow-listing.
+- **Build is sophisticated:** Gradle 9.3.1, Depot remote build cache, multi-flavor builds
+  (core / proprietary / saas), Task-based unified command runner, SonarQube + Spotless + JaCoCo.
+- **Architecture is genuinely multi-product:** clustering backplane abstraction, S3 storage,
+  Stripe billing (SaaS), Tauri desktop, a typed Python FastAPI AI engine (pydantic-ai, pgvector).
+
+So the roadmap below targets the *gaps between an ambitious feature set and its engineering
+guardrails*, not the version numbers.
+
+---
+
+## 2. Headline findings (the things that actually matter)
+
+| # | Finding | Evidence |
+|---|---------|----------|
+| 1 | **Test coverage gates are floored at 13% line / 14% instruction / 9% branch** — a release can ship with almost no coverage and stay green. | `build.gradle:293–397` |
+| 2 | **Two full UI libraries ship side-by-side: Mantine 8 (~250 files) AND MUI 9 (~157 files).** Duplicate design systems, double the bundle, inconsistent UX. | `frontend/package.json:37–41`; import counts |
+| 3 | **God-classes / mega-components.** `PdfJsonConversionService.java` ≈ **6,958 LoC**; `ConvertPDFToPDFA.java` ≈ 2,565 LoC; `PdfTextEditorView.tsx` ≈ 2,897 lines. | backend + frontend audits |
+| 4 | **~5–6 CVEs are patched by hand via `resolutionStrategy.force` + module excludes**, several to compensate for a lagging **veraPDF** that still drags in `javax.xml.bind` (EOL namespace). | `build.gradle:196–214`; `app/core/build.gradle:82–89` |
+| 5 | **41 React contexts**, `FileContext.tsx` ≈ 758 lines, manual blob/worker/IndexedDB lifecycle for the 100 GB+ target — high-risk memory surface with no state library. | frontend audit |
+| 6 | **Large-file path uses blocking, whole-file I/O** (`Files.readAllBytes`/`readAllLines` in many converters) despite a stated 100 GB+ goal. | backend audit |
+| 7 | **No SBOM, no release provenance/attestation, no signed releases**, despite otherwise strong supply-chain hygiene. | CI audit |
+| 8 | **AGENTS.md is stale** ("No unit tests currently") and CI/workflow sprawl (37 workflows) makes the pipeline hard to reason about. | `AGENTS.md:399`; `.github/workflows/` |
+
+---
+
+## 3. Roadmap by workstream
+
+Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
+
+### Workstream A — Test & quality guardrails *(highest leverage)*
+
+- **A1. Raise JaCoCo thresholds on a ratchet.** Move line/branch from 13/9% toward 40% near-term,
+  60%+ long-term, and *never let the number go down*. Today the gate is decorative.
+  *Evidence:* `build.gradle:371–397`. *Effort:* S to set, L to satisfy. *Risk:* low.
+- **A2. Add frontend coverage thresholds.** `vitest.config.ts` configures reporters but no
+  enforced thresholds; 100 test files but no floor. *Effort:* S. *Risk:* low.
+- **A3. Backend integration tests with Testcontainers** for the top PDF endpoints (merge, split,
+  convert, OCR, sign) — bridges the gap between unit tests and Cucumber e2e. *Effort:* M. *Risk:* low.
+- **A4. Accessibility tests** (axe-core / jest-axe) — 399 aria/role usages, zero a11y assertions.
+  Wire into CI as a regression gate. *Effort:* M. *Risk:* low.
+- **A5. Unified coverage reporting** across Java (JaCoCo) + TS (v8) + Python (pytest-cov),
+  surfaced as a single PR comment. *Effort:* M. *Risk:* low.
+- **A6. Refresh AGENTS.md / DeveloperGuide** — the "no unit tests" claim is wrong and misleads
+  both humans and agents. *Effort:* S. *Risk:* low.
+
+### Workstream B — Frontend architecture & consolidation
+
+- **B1. Pick one UI library and retire the other.** Mantine is the larger footprint and the
+  documented stack; plan a layered migration (core → proprietary → saas → desktop) off MUI 9.
+  *Evidence:* `@mui/material` + `@mui/icons-material` in ~157 files. *Effort:* L. *Risk:* med (billing/auth UI churn).
+- **B2. Introduce a real state library for file state** (Zustand or Jotai) and collapse the 41
+  contexts into ~8 domains (file, UI, auth, billing, viewer, tool-workflow…). *Effort:* L. *Risk:* med.
+- **B3. Extract memory/lifecycle management out of `FileContext`** into a dedicated, unit-tested
+  service (blob URL revocation, PDF.js `.destroy()`, worker termination). This is the crash-risk
+  hotspot for the 100 GB+ goal. *Effort:* M. *Risk:* med.
+- **B4. Decompose mega-components** — `PdfTextEditorView.tsx` (2,897), `pdfiumService.ts` (1,934),
+  `AdminAdvancedSection.tsx` (1,790) into focused units; lazy-load per-tool UIs with `React.lazy`.
+  *Effort:* M–L. *Risk:* low.
+- **B5. Tighten TypeScript incrementally** — enable `noUncheckedIndexedAccess`, `noUnusedLocals`,
+  `noImplicitReturns` (currently commented out); burn down 71 `as any` casts (worst in
+  `layerUtils.ts`, `StampPreview.tsx`). *Effort:* M. *Risk:* low.
+- **B6. Add circular-dep + bundle gates to CI** — `madge`/`dpdm` and `rollup-plugin-visualizer`
+  are installed but not run in CI. *Effort:* S. *Risk:* low.
+
+### Workstream C — Backend architecture & code health
+
+- **C1. Break up `PdfJsonConversionService` (≈6,958 LoC)** into extractor / serializer / cache /
+  graphics collaborators — currently untestable and unmaintainable. *Effort:* L. *Risk:* med.
+- **C2. Thin out fat controllers** (e.g. `ConvertPDFToPDFA` ≈2,565 LoC) — push logic into services,
+  keep controllers as HTTP mappers. ~18% of files are controllers. *Effort:* M–L. *Risk:* low.
+- **C3. Streaming I/O for large files.** Replace whole-file `Files.readAllBytes`/`readAllLines`
+  in converters with `InputStream→OutputStream` streaming to make the 100 GB+ target real and cap
+  memory under concurrency. *Effort:* L. *Risk:* med.
+- **C4. Formalize temp-file lifecycle.** Unify `TempFileManager` vs ad-hoc `Files.createTempFile`,
+  guarantee try-with-resources, add leaked-temp-file metrics, harden temp dir permissions.
+  *Effort:* M. *Risk:* low.
+- **C5. Add a caching layer** (Caffeine embedded / Valkey distributed via the existing backplane)
+  for hot reads (users, roles, settings); profile JPA N+1s. *Effort:* M. *Risk:* low.
+- **C6. Centralize DB migrations.** Flyway exists only in `saas`; bring core schema under one
+  migration strategy (see `DATABASE.md`). *Effort:* M. *Risk:* med (data).
+- **C7. Logging hygiene.** Remove `System.out`/`printStackTrace` holdovers; adopt structured
+  (JSON) logging with trace/correlation IDs. *Effort:* S–M. *Risk:* low.
+
+### Workstream D — Security & auth hardening
+
+- **D1. Audit the Tauri/desktop OAuth2 callback flow.** CSRF is intentionally disabled in the
+  proprietary security config (stateless + nonce-in-state); verify the nonce/state cannot be
+  swapped on the desktop `window.location` redirect path. *Evidence:* `SecurityConfiguration.java`.
+  *Effort:* M. *Risk:* high if wrong.
+- **D2. PII-safe OIDC diagnostics.** `security.oauth2.debugLogging` dumps ID-token/UserInfo claims;
+  add automatic scrubbing/redaction and short log retention so an operator can't leave PII in logs.
+  *Effort:* S. *Risk:* med.
+- **D3. Harden Java↔engine trust.** `AiProxyService` forwards `X-API-KEY` to the Python engine over
+  plain localhost HTTP; add mTLS or scoped service tokens for any non-loopback deployment.
+  *Effort:* M. *Risk:* med.
+- **D4. SSRF review of URL-fetch features** (HTML→PDF, URL→PDF, TSA timestamp client uses raw
+  `URLConnection`): allow-list/deny internal ranges, validate user-supplied URLs. *Effort:* M. *Risk:* med.
+- **D5. S3 backend deployment guardrails.** New S3 store is reasonably tested in-repo, but document
+  and template bucket encryption, least-privilege IAM, and lifecycle/expiry for `transient/` keys.
+  *Effort:* S–M. *Risk:* med.
+
+### Workstream E — Supply chain & dependencies
+
+- **E1. Reduce the manual CVE-pin burden by upgrading/replacing veraPDF.** Several
+  `resolutionStrategy.force` entries (rhino, etc.) and the `javax.xml.bind` EOL stack exist only to
+  paper over veraPDF lag. *Evidence:* `build.gradle:196–214`, `app/core/build.gradle:82–89`.
+  *Effort:* M–L. *Risk:* med.
+- **E2. Generate an SBOM** (CycloneDX Gradle + npm + Python) and attach to releases. *Effort:* S. *Risk:* low.
+- **E3. Release provenance + signing.** Add SLSA provenance/attestations and signed tags/artifacts
+  for JAR, Docker images, and Tauri installers. *Effort:* M. *Risk:* low.
+- **E4. Enforce the license report in CI** (currently generated but not gated). *Effort:* S. *Risk:* low.
+- **E5. Re-evaluate stale deps** — `telegrambots 6.9.7.1` (4+ yrs, heavily excluded) and the JAXB 2
+  stack. Remove if unused. *Effort:* S–M. *Risk:* low.
+
+### Workstream F — Performance & scalability
+
+- **F1. Back the streaming work (C3) with load tests** at the 100 GB+ target and concurrent-request
+  memory profiling. *Effort:* M. *Risk:* low.
+- **F2. Async job execution review.** The `@AutoJobPostMapping` system + "cancel long-running AI
+  task" feature is new; verify cancellation actually frees threads/temp files and is backpressured.
+  *Effort:* M. *Risk:* med.
+- **F3. Frontend bundle budget** — run the installed visualizer in CI, set a size budget, lazy-load
+  tools and admin sections. *Effort:* S–M. *Risk:* low.
+
+### Workstream G — Observability
+
+- **G1. End-to-end OpenTelemetry tracing.** The Python engine already uses OTel; the Java side has
+  Micrometer/actuator but no distributed tracing. Propagate W3C TraceContext across
+  frontend → Java → engine. *Effort:* M. *Risk:* low.
+- **G2. Structured logging + log correlation** (pairs with C7). *Effort:* S–M. *Risk:* low.
+- **G3. Telemetry consent clarity.** PostHog is wired across all three tiers; document the opt-out
+  and provide a single privacy-first kill switch. *Effort:* S. *Risk:* low.
+
+### Workstream H — DevOps / CI / build / release
+
+- **H1. Enable Gradle configuration cache** (currently commented out in `gradle.properties:12`) —
+  meaningful incremental-build speedup once tasks are compatible. *Effort:* M. *Risk:* low.
+- **H2. Consolidate workflow sprawl.** Collapse the 4 e2e workflows and 3 PR-deploy workflows into
+  parameterized reusable workflows; document CI profiles/flags. *Effort:* M. *Risk:* low.
+- **H3. Unify Docker build matrix** (base / embedded / fat / ultra-lite / frontend / unoserver) into
+  one cache-shared build. *Effort:* M. *Risk:* low.
+- **H4. Add a release approval gate** before AUR/package-manager auto-publish. *Effort:* S. *Risk:* low.
+
+### Workstream I — Python AI engine & infra maturity
+
+- **I1. Engine coverage visibility** — surface pytest-cov in CI (currently invisible). *Effort:* S. *Risk:* low.
+- **I2. Cluster backplane resilience tests** — exercise Valkey partition/failover, lock release, and
+  rate-limit key expiry; the in-process impl is well-tested but the external path less so. *Effort:* M. *Risk:* med.
+- **I3. Document the engine contract & failure modes** (typed in/typed out, what happens when the
+  model/provider is down or returns malformed structured output). *Effort:* S–M. *Risk:* low.
+
+---
+
+## 4. Suggested phasing
+
+**Now (0–1 month) — cheap, high-leverage, low-risk:**
+A1, A2, A6, B5(start), B6, E2, E4, G3, H1, H4, I1, D2.
+
+**Next (1–3 months) — structural foundations:**
+A3, A4, A5, B3, C4, C5, C7, D1, D3, D4, E3, G1, G2, H2, H3, I3.
+
+**Later (3–9 months) — large refactors / migrations:**
+B1 (MUI→Mantine), B2 (state library), B4, C1, C2, C3 + F1, C6, E1 (veraPDF/Jakarta), F2, I2.
+
+---
+
+## 5. Things deliberately *not* recommended
+
+- **Don't bump the core JVM/JS stack** — already ahead of mainstream; chasing newer is churn for
+  churn's sake. Let Dependabot handle routine bumps.
+- **Don't add Redux** — the right move is *fewer* state containers, not a heavier one.
+- **Don't rip out the proprietary/saas split** — the compile-time flavor system is intentional and
+  load-bearing for their commercial model.

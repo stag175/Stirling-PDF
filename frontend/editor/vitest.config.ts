@@ -16,7 +16,7 @@ export default defineConfig({
     testTimeout: 10000,
     hookTimeout: 10000,
     coverage: {
-      reporter: ["text", "json", "html"],
+      reporter: ["text", "json", "json-summary", "html"],
       exclude: [
         "node_modules/",
         "src/core/setupTests.ts",
@@ -26,6 +26,15 @@ export default defineConfig({
         "src/tests/test-fixtures/**",
         "src/**/*.spec.ts",
       ],
+      // Regression-floor ratchet. These are intentionally set just below the
+      // current aggregate so the build fails if coverage drops, NOT as a target.
+      // Raise them as tests are added (see AGENTS.md Testing Strategy). Never lower.
+      thresholds: {
+        statements: 7.7,
+        branches: 55,
+        functions: 27,
+        lines: 7.7,
+      },
     },
     projects: [
       {

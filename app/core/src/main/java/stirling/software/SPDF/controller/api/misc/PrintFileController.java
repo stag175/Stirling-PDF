@@ -126,7 +126,7 @@ public class PrintFileController {
             return new ResponseEntity<>(
                     "File printed successfully to " + selectedService.getName(), HttpStatus.OK);
         } catch (Exception e) {
-            System.err.println("Failed to print: " + e.getMessage());
+            log.error("Failed to print: {}", e.getMessage(), e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

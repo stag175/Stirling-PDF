@@ -394,9 +394,13 @@ The frontend is organized with a clear separation of concerns:
 - **Security Mode**: Adds authentication, user management, and enterprise features
 
 ### Testing Strategy
+- **Backend unit tests**: JUnit 5 across `app/*/src/test` (~314 tests). Run via `task backend:test`.
+- **Frontend unit tests**: Vitest across `frontend/editor/src` (~670 tests; multi-project: core/proprietary/saas/desktop/prototypes). Run via `task frontend:test` (or `npx vitest run --root editor`).
 - **Integration Tests**: Cucumber tests in `testing/cucumber/`
+- **E2E Tests**: Playwright (`*.spec.ts`); see `task e2e:*`
+- **Engine tests**: pytest in `engine/` (`task engine:test`)
 - **Docker Testing**: `test.sh` validates all Docker variants
-- **Manual Testing**: No unit tests currently - relies on UI and API testing
+- **Coverage gates**: JaCoCo thresholds in `build.gradle` (ratchet) and Vitest `coverage.thresholds` in `frontend/editor/vitest.config.ts` (ratchet). Raise these as coverage improves — never lower them.
 
 ## Development Workflow
 
