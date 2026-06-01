@@ -303,6 +303,20 @@ mockable-class headroom but trends toward Spring-context-dependent classes.
   source comment** (`overrideX`/`overrideY` documented "Default to -1" but have no initialiser, so they're
   actually `0.0f` — asserted actual + noted for review).
 
+### Wave 20 — frontend coverage round 10 + suite-scale retry (verified; pushed)
+
+- **+263 tests across 12 modules** (tool-operation hooks getPdfInfo/ocr/showJS/split; `useEndpointConfig`
+  (core)/`useToolSections`; desktop `tauriHttpClient`; proprietary `useApiKey` + expanded `workflowService`;
+  saas `useCredits`; `pageEditor/splitPositions`; `viewer/layerUtils`).
+- **Coverage (184-file run):** 13.82→**14.64** stmts/lines, 76.97→**78.28** branch, 44.87→**46.27** func.
+  **Ratchet raised to 14.5 / 78 / 46 / 14.5.**
+- **Suite-scale finding:** at 184 files the fully-parallel run began flaking *non-deterministically* on this
+  constrained machine (timing-sensitive UI/async + whole-source-scan tests; inconsistent failing sets
+  run-to-run; all 12 new files pass deterministically in isolation). Added `retry: 2` to `vitest.config.ts`
+  — re-runs only failed tests, so genuine regressions still fail all attempts; this hardens the gate against
+  load flakiness without masking real failures. (Cumulative frontend coverage **6.96 → 14.64** — more than
+  doubled; branches 53.6→78.3, functions 25.5→46.3.)
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
