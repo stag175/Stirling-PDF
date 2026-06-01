@@ -98,13 +98,17 @@ partial-migration compile bugs the agents missed.
 - **Corrected a STALE Vitest floor (honest):** a measured baseline (new tests removed) was
   **6.96 / 53.64(branch) / 25.45(func) / 6.96** — i.e. the prior floor (7.7/55/27/7.7) sat *above* actual
   and the gate had been silently **red on all four metrics** since the B1 MUI→Mantine migration added
-  uncovered UI wrapper code (never re-verified at that commit). The new tests lift every metric to
-  **7.24 / 56.05 / 26.79 / 7.24**; floors pinned just below that (branches **raised 55→56**;
-  stmts/lines/funcs corrected to real). Recovering stmts/lines back toward 7.7 by covering B1's UI code is
-  the documented next step. Commit `ae1fe6b8d`; pushed `c773d72d0`.
-- **Flaky-test finding:** one convert integration test intermittently times out **only under `--coverage`**
-  instrumentation (heavy async vs 10s `testTimeout`); pre-existing, flagged as a separate task — not a
-  regression from the new pure unit tests.
+  uncovered UI wrapper code (never re-verified at that commit). The first batch lifted every metric to
+  **7.24 / 56.05 / 26.79 / 7.24** (floors pinned just below; branches raised 55→56). A **round-3 swarm
+  (+316 tests / 12 statement-heavy service/hook/util files)** then lifted the full 101-file green run to
+  **8.21 / 61.19 / 30.14 / 8.21** — now **above the old phantom floor** — so the ratchet was raised again to
+  **8.1 / 60 / 30 / 8.1**. Central typecheck caught **4** type errors esbuild/vitest missed (branded FileId
+  in `downloadUtils`; unknown-typed awaited errors in `processingErrorHandler`), all fixed. Commits
+  `ae1fe6b8d` → `c924af949`.
+- **Flaky-test finding:** two PRE-EXISTING tests are load-flaky on this machine and intermittently fail in
+  the heavy full-suite run — a convert integration test (only under `--coverage`) and
+  `proprietary/routes/Login.test.tsx` ("disable submit button while signing in"); coverage was measured with
+  `--retry` to bypass them. Not regressions from the new tests; flagged as a separate task.
 - **Out-of-roadmap research deliverable:** `GOODNOTES_GAP_ANALYSIS.md` — deep research on Goodnotes + a
   structured gap analysis vs this fork, including an explicit **Claude-vs-Codex** comparison (Codex run
   read-only over the repo). Analysis only; no code changes.
