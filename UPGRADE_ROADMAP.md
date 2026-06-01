@@ -255,6 +255,24 @@ partial-migration compile bugs the agents missed.
   files (TS 5.7 `Uint8Array`/`BlobPart`; old 2-arg `vi.fn` generics), fixed. Cumulative frontend coverage
   **6.96 → 13.28** (statements ~doubled; branches 53.6→75.6, functions 25.5→42.9).
 
+### Wave 17 — frontend coverage round 9 (viewer/tools/services; verified; pushed)
+
+- **+228 tests across 12 modules** (core `viewerActions`/`showJS/utils`/`specialErrorToasts`/
+  `usageAnalyticsService`/`toolResponseProcessor`/`settingsNavigation`/`useAuditFilters`/`useSuggestedTools`/
+  `signatureReportBuilder`; desktop `operationResultsSaveService`/`authTokenStore`; saas `userService`).
+- **Coverage (deterministic 173-file run):** 13.28→**13.82** stmts/lines, 75.62→**76.97** branch,
+  42.87→**44.87** func. **Ratchet raised to 13.7 / 76 / 44 / 13.7.** Central tsc gate caught 3 files (wrong
+  `StirlingFile` import module; old 2-arg `vi.fn`; a `mock.calls` tuple cast needing `as unknown`), fixed.
+  Cumulative frontend coverage **6.96 → 13.82**. (Per-round statements gain is tapering as the clean
+  non-component module pool thins — see note below.)
+
+**Coverage frontier note (after 9 frontend + 2 backend coverage rounds this session):** the pool of clean,
+statement-heavy *non-component* frontend modules (services/hooks/utils/contexts/reducers) is thinning — each
+round's marginal statement gain is shrinking. Substantial further frontend coverage increasingly requires
+**React component render testing** (`@testing-library`), a heavier, higher-type-error-rate effort that is a
+distinct workstream from these unit-test rounds. Backend (`:stirling-pdf` 36% / `:proprietary` 35%) still has
+mockable-class headroom but trends toward Spring-context-dependent classes.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
