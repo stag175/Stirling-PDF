@@ -290,6 +290,19 @@ mockable-class headroom but trends toward Spring-context-dependent classes.
   non-empty context path — flagged for maintainer review, not codified) and 1 redundant DTO round-trip
   equality test.
 
+### Wave 19 — backend coverage round 7 (config/model/service; verified; pushed)
+
+- **+195 tests across 12 classes** — core `OpenApiConfig`/`MultipartConfiguration` + request DTOs
+  (`MergeMultiplePagesRequest`/`AddStampRequest`/`MetadataRequest`/`AddWatermarkRequest`); proprietary
+  `ServerCertificateService`/`KeyPairCleanupService`/`AdminUserSummary`/`WorkflowSessionResponse`/
+  `InviteToken`/`JwtVerificationKey`.
+- **Coverage:** core 35.65→**36.16** line; proprietary 41.80→**42.89** line / 38.96→**39.82** branch.
+  Floors raised: `:stirling-pdf` LINE→0.36; `:proprietary`→0.43/0.42/0.39.
+- **Central gate caught 7 failures, all resolved** — incl. a `buildP12` test fixture storing the key under
+  the wrong alias (so direct keystore lookups returned null), and `AddStampRequest` exposing a **misleading
+  source comment** (`overrideX`/`overrideY` documented "Default to -1" but have no initialiser, so they're
+  actually `0.0f` — asserted actual + noted for review).
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
