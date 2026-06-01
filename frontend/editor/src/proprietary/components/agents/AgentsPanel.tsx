@@ -1,12 +1,6 @@
 import { useState } from "react";
-import type { ElementType } from "react";
 import { Box, Group, Text, UnstyledButton } from "@mantine/core";
-import TableChartRoundedIcon from "@mui/icons-material/TableChartRounded";
-import SummarizeRoundedIcon from "@mui/icons-material/SummarizeRounded";
-import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
-import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
-import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useTranslation } from "react-i18next";
 import { useAppConfig } from "@app/contexts/AppConfigContext";
 import { useChat } from "@app/components/chat/ChatContext";
@@ -20,7 +14,7 @@ interface ComingSoonAgent {
   id: string;
   nameKey: string;
   descriptionKey: string;
-  Icon: ElementType;
+  icon: string;
 }
 
 const COMING_SOON_AGENTS: ComingSoonAgent[] = [
@@ -28,37 +22,37 @@ const COMING_SOON_AGENTS: ComingSoonAgent[] = [
     id: "data-extraction",
     nameKey: "agents.data_extraction_name",
     descriptionKey: "agents.data_extraction_description",
-    Icon: TableChartRoundedIcon,
+    icon: "table-chart",
   },
   {
     id: "doc-summary",
     nameKey: "agents.doc_summary_name",
     descriptionKey: "agents.doc_summary_description",
-    Icon: SummarizeRoundedIcon,
+    icon: "summarize-rounded",
   },
   {
     id: "auto-redaction",
     nameKey: "agents.auto_redaction_name",
     descriptionKey: "agents.auto_redaction_description",
-    Icon: VisibilityOffRoundedIcon,
+    icon: "visibility-off-rounded",
   },
   {
     id: "compliance",
     nameKey: "agents.compliance_name",
     descriptionKey: "agents.compliance_description",
-    Icon: GavelRoundedIcon,
+    icon: "gavel-rounded",
   },
   {
     id: "form-filler",
     nameKey: "agents.form_filler_name",
     descriptionKey: "agents.form_filler_description",
-    Icon: AssignmentRoundedIcon,
+    icon: "assignment-rounded",
   },
   {
     id: "pdf-to-markdown",
     nameKey: "agents.pdf_to_markdown_name",
     descriptionKey: "agents.pdf_to_markdown_description",
-    Icon: CodeRoundedIcon,
+    icon: "code-rounded",
   },
 ];
 
@@ -116,7 +110,7 @@ export function AgentsSection() {
 
       {/* Coming-soon agents */}
       <div className="agents-sidebar-list">
-        {visibleAgents.map(({ id, nameKey, descriptionKey, Icon }) => (
+        {visibleAgents.map(({ id, nameKey, descriptionKey, icon }) => (
           <AppTooltip
             key={id}
             content={comingSoonLabel}
@@ -131,7 +125,7 @@ export function AgentsSection() {
             >
               <Group gap="sm" wrap="nowrap" align="center">
                 <Box className="agent-button__icon-plain">
-                  <Icon sx={{ fontSize: "1.1rem" }} />
+                  <LocalIcon icon={icon} width="1.1rem" height="1.1rem" />
                 </Box>
                 <Box style={{ minWidth: 0, flex: 1 }}>
                   <Text size="sm" fw={500} truncate>
@@ -238,7 +232,7 @@ export function AgentsFullscreenSection() {
 
         {/* Right: 2×3 grid of coming-soon agents */}
         <div className="agents-hero__grid">
-          {COMING_SOON_AGENTS.map(({ id, nameKey, descriptionKey, Icon }) => (
+          {COMING_SOON_AGENTS.map(({ id, nameKey, descriptionKey, icon }) => (
             <AppTooltip
               key={id}
               content={comingSoonLabel}
@@ -252,7 +246,7 @@ export function AgentsFullscreenSection() {
                 aria-disabled="true"
               >
                 <span className="agents-hero__grid-icon">
-                  <Icon sx={{ fontSize: "1rem" }} />
+                  <LocalIcon icon={icon} width="1rem" height="1rem" />
                 </span>
                 <div className="agents-hero__grid-body">
                   <Text size="sm" fw={500} truncate>
