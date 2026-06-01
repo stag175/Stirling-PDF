@@ -11,10 +11,7 @@ import {
   Loader,
 } from "@mantine/core";
 import { Z_INDEX_AUTOMATE_MODAL } from "@app/styles/zIndex";
-import SettingsIcon from "@mui/icons-material/Settings";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import WarningIcon from "@mui/icons-material/Warning";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { ToolRegistry } from "@app/data/toolsTaxonomy";
 import { ToolId } from "@app/types/toolId";
 import { getAvailableToExtensions } from "@app/utils/convertUtils";
@@ -63,7 +60,12 @@ export default function ToolConfigurationModal({
   const renderToolSettings = () => {
     if (!SettingsComponent) {
       return (
-        <Alert icon={<WarningIcon />} color="orange">
+        <Alert
+          icon={
+            <LocalIcon icon="warning-rounded" width="1.5rem" height="1.5rem" />
+          }
+          color="orange"
+        >
           <Text size="sm">
             {t(
               "automate.config.noSettings",
@@ -110,7 +112,7 @@ export default function ToolConfigurationModal({
       onClose={onCancel}
       title={
         <Group gap="xs">
-          <SettingsIcon />
+          <LocalIcon icon="settings-rounded" width="1.5rem" height="1.5rem" />
           <Title order={3}>
             {t("automate.config.title", "Configure {{toolName}}", {
               toolName: tool.name,
@@ -141,12 +143,19 @@ export default function ToolConfigurationModal({
         <Group justify="flex-end" gap="sm">
           <Button
             variant="light"
-            leftSection={<CloseIcon />}
+            leftSection={
+              <LocalIcon icon="close-rounded" width="1.5rem" height="1.5rem" />
+            }
             onClick={onCancel}
           >
             {t("automate.config.cancel", "Cancel")}
           </Button>
-          <Button leftSection={<CheckIcon />} onClick={handleSave}>
+          <Button
+            leftSection={
+              <LocalIcon icon="check-rounded" width="1.5rem" height="1.5rem" />
+            }
+            onClick={handleSave}
+          >
             {t("automate.config.save", "Save Configuration")}
           </Button>
         </Group>

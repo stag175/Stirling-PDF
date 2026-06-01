@@ -1,6 +1,5 @@
 import { Group, Text } from "@mantine/core";
-import CheckCircleIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface FeatureListItemProps {
   children: React.ReactNode;
@@ -19,7 +18,7 @@ export function FeatureListItem({
   fw = 400,
   size = "sm",
 }: FeatureListItemProps) {
-  const Icon = included ? CheckCircleIcon : CloseIcon;
+  const iconName = included ? "check-rounded" : "close-rounded";
   const iconColor = included ? color : "var(--color-red-600)";
 
   // Map Mantine sizes to icon font sizes
@@ -38,9 +37,11 @@ export function FeatureListItem({
 
   return (
     <Group gap="xs" wrap="nowrap" align="flex-start">
-      <Icon
-        sx={{
-          fontSize: iconSize,
+      <LocalIcon
+        icon={iconName}
+        width={iconSize}
+        height={iconSize}
+        style={{
           color: iconColor,
           flexShrink: 0,
           marginTop: "2px",

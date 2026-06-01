@@ -43,15 +43,7 @@ import {
   FIELD_TYPE_ICON,
   FIELD_TYPE_COLOR,
 } from "@app/tools/formFill/fieldMeta";
-import SaveIcon from "@mui/icons-material/Save";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import EditNoteIcon from "@mui/icons-material/EditNote";
-import PostAddIcon from "@mui/icons-material/PostAdd";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
-import BuildCircleIcon from "@mui/icons-material/BuildCircle";
-import DescriptionIcon from "@mui/icons-material/Description";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import {
   extractFormFieldsCsv,
   extractFormFieldsXlsx,
@@ -75,25 +67,53 @@ const _MODE_TABS: ModeTabDef[] = [
   {
     id: "fill",
     label: "Fill",
-    icon: <EditNoteIcon className={styles.modeTabIcon} />,
+    icon: (
+      <LocalIcon
+        icon="edit-note-rounded"
+        width="1.5rem"
+        height="1.5rem"
+        className={styles.modeTabIcon}
+      />
+    ),
     ready: true,
   },
   {
     id: "make",
     label: "Create",
-    icon: <PostAddIcon className={styles.modeTabIcon} />,
+    icon: (
+      <LocalIcon
+        icon="post-add-rounded"
+        width="1.5rem"
+        height="1.5rem"
+        className={styles.modeTabIcon}
+      />
+    ),
     ready: false,
   },
   {
     id: "batch",
     label: "Batch",
-    icon: <FileCopyIcon className={styles.modeTabIcon} />,
+    icon: (
+      <LocalIcon
+        icon="file-copy-rounded"
+        width="1.5rem"
+        height="1.5rem"
+        className={styles.modeTabIcon}
+      />
+    ),
     ready: false,
   },
   {
     id: "modify",
     label: "Modify",
-    icon: <BuildCircleIcon className={styles.modeTabIcon} />,
+    icon: (
+      <LocalIcon
+        icon="build-circle-rounded"
+        width="1.5rem"
+        height="1.5rem"
+        className={styles.modeTabIcon}
+      />
+    ),
     ready: false,
   },
 ];
@@ -440,7 +460,9 @@ const FormFill = (_props: BaseToolProps) => {
             {/* Error state */}
             {formState.error && (
               <Alert
-                icon={<WarningAmberIcon sx={{ fontSize: 16 }} />}
+                icon={
+                  <LocalIcon icon="warning-rounded" width={16} height={16} />
+                }
                 color="red"
                 variant="light"
                 p="xs"
@@ -501,7 +523,9 @@ const FormFill = (_props: BaseToolProps) => {
                 <div className={styles.actionBar}>
                   <div className={styles.primaryActions}>
                     <Button
-                      leftSection={<SaveIcon sx={{ fontSize: 14 }} />}
+                      leftSection={
+                        <LocalIcon icon="save-rounded" width={14} height={14} />
+                      }
                       size="xs"
                       onClick={handleSave}
                       loading={saving}
@@ -517,7 +541,11 @@ const FormFill = (_props: BaseToolProps) => {
                         onClick={handleRefresh}
                         aria-label="Re-scan form fields"
                       >
-                        <RefreshIcon sx={{ fontSize: 16 }} />
+                        <LocalIcon
+                          icon="refresh-rounded"
+                          width={16}
+                          height={16}
+                        />
                       </ActionIcon>
                     </Tooltip>
                   </div>
@@ -526,7 +554,13 @@ const FormFill = (_props: BaseToolProps) => {
                     <Button
                       variant="light"
                       color="blue"
-                      leftSection={<FileDownloadIcon sx={{ fontSize: 14 }} />}
+                      leftSection={
+                        <LocalIcon
+                          icon="download-rounded"
+                          width={14}
+                          height={14}
+                        />
+                      }
                       loading={extracting}
                       onClick={handleExtractJson}
                       size="xs"
@@ -537,7 +571,13 @@ const FormFill = (_props: BaseToolProps) => {
                     <Button
                       variant="light"
                       color="blue"
-                      leftSection={<FileDownloadIcon sx={{ fontSize: 14 }} />}
+                      leftSection={
+                        <LocalIcon
+                          icon="download-rounded"
+                          width={14}
+                          height={14}
+                        />
+                      }
                       loading={extracting}
                       onClick={handleExtractCsv}
                       size="xs"
@@ -548,7 +588,13 @@ const FormFill = (_props: BaseToolProps) => {
                     <Button
                       variant="light"
                       color="blue"
-                      leftSection={<FileDownloadIcon sx={{ fontSize: 14 }} />}
+                      leftSection={
+                        <LocalIcon
+                          icon="download-rounded"
+                          width={14}
+                          height={14}
+                        />
+                      }
                       loading={extracting}
                       onClick={handleExtractXlsx}
                       size="xs"
@@ -572,7 +618,12 @@ const FormFill = (_props: BaseToolProps) => {
               formState.fields.length === 0 &&
               !formState.error && (
                 <div className={styles.emptyState}>
-                  <DescriptionIcon className={styles.emptyStateIcon} />
+                  <LocalIcon
+                    icon="description-rounded"
+                    width="1.5rem"
+                    height="1.5rem"
+                    className={styles.emptyStateIcon}
+                  />
                   <span className={styles.emptyStateText}>
                     No fillable form fields found in this PDF.
                   </span>

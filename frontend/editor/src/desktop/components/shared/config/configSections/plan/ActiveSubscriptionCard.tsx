@@ -7,9 +7,8 @@ import {
   Tooltip,
   ActionIcon,
 } from "@mantine/core";
-import GroupIcon from "@mui/icons-material/Group";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useTranslation } from "react-i18next";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import type { BillingStatus } from "@app/services/saasBillingService";
 import { BILLING_CONFIG, getFormattedOveragePrice } from "@app/config/billing";
 import { Z_INDEX_OVER_CONFIG_MODAL } from "@app/styles/zIndex";
@@ -124,7 +123,9 @@ export function ActiveSubscriptionCard({
                   <Badge
                     color="violet"
                     variant="light"
-                    leftSection={<GroupIcon sx={{ fontSize: 12 }} />}
+                    leftSection={
+                      <LocalIcon icon="group-rounded" width={12} height={12} />
+                    }
                   >
                     {t("settings.planBilling.tier.teamBadge", "Team")}
                   </Badge>
@@ -158,7 +159,7 @@ export function ActiveSubscriptionCard({
                   zIndex={Z_INDEX_OVER_CONFIG_MODAL}
                 >
                   <ActionIcon variant="subtle" color="gray" size="sm">
-                    <InfoOutlinedIcon style={{ fontSize: 18 }} />
+                    <LocalIcon icon="info-rounded" width={18} height={18} />
                   </ActionIcon>
                 </Tooltip>
                 {isTrialing && (

@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, Text, Button, Stack, List, ThemeIcon } from "@mantine/core";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useTranslation } from "react-i18next";
 import { open as shellOpen } from "@tauri-apps/plugin-shell";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { STIRLING_SAAS_URL } from "@app/constants/connection";
 import { BILLING_CONFIG } from "@app/config/billing";
 import type { TierLevel } from "@app/types/billing";
@@ -48,7 +48,7 @@ export function PlanUpgradeCard({ currentTier }: PlanUpgradeCardProps) {
           size="sm"
           icon={
             <ThemeIcon color="blue" size={20} radius="xl">
-              <CheckCircleIcon sx={{ fontSize: 12 }} />
+              <LocalIcon icon="check-circle-rounded" width={12} height={12} />
             </ThemeIcon>
           }
         >

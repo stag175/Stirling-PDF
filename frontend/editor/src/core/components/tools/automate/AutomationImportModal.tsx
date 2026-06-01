@@ -11,7 +11,7 @@ import {
   Textarea,
 } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { Z_INDEX_AUTOMATE_MODAL } from "@app/styles/zIndex";
 import {
   ParsedAutomationImport,
@@ -145,7 +145,12 @@ export default function AutomationImportModal({
             mih={80}
             justify="center"
           >
-            <UploadFileIcon style={{ fontSize: 32, opacity: 0.6 }} />
+            <LocalIcon
+              icon="upload-file-rounded"
+              width={32}
+              height={32}
+              style={{ opacity: 0.6 }}
+            />
             <div>
               <Text size="sm" fw={500}>
                 {t(

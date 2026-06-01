@@ -21,9 +21,7 @@ import {
   Badge,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import DownloadIcon from "@mui/icons-material/Download";
-import SaveIcon from "@mui/icons-material/Save";
-import EditNoteIcon from "@mui/icons-material/EditNote";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useFormFill } from "@app/tools/formFill/FormFillContext";
 
 interface FormSaveBarProps {
@@ -130,9 +128,11 @@ export function FormSaveBar({
             <Stack gap="xs" p="md">
               <Group justify="space-between" wrap="nowrap">
                 <Group gap="sm" wrap="nowrap">
-                  <EditNoteIcon
-                    sx={{
-                      fontSize: 24,
+                  <LocalIcon
+                    icon="edit-note-rounded"
+                    width={24}
+                    height={24}
+                    style={{
                       color: isDirty
                         ? "var(--mantine-color-blue-6)"
                         : "var(--mantine-color-gray-6)",
@@ -176,7 +176,9 @@ export function FormSaveBar({
                     size="sm"
                     variant="light"
                     color="blue"
-                    leftSection={<SaveIcon sx={{ fontSize: 18 }} />}
+                    leftSection={
+                      <LocalIcon icon="save-rounded" width={18} height={18} />
+                    }
                     loading={applying}
                     disabled={saving}
                     onClick={handleApply}
@@ -188,7 +190,13 @@ export function FormSaveBar({
                     size="sm"
                     variant="filled"
                     color="blue"
-                    leftSection={<DownloadIcon sx={{ fontSize: 18 }} />}
+                    leftSection={
+                      <LocalIcon
+                        icon="download-rounded"
+                        width={18}
+                        height={18}
+                      />
+                    }
                     loading={saving}
                     disabled={applying}
                     onClick={handleDownload}

@@ -14,10 +14,7 @@ import {
   Select,
 } from "@mantine/core";
 import { useParticipantSession } from "@app/hooks/workflow/useParticipantSession";
-import InfoIcon from "@mui/icons-material/Info";
-import DownloadIcon from "@mui/icons-material/Download";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface ParticipantViewProps {
   token: string;
@@ -192,7 +189,13 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ token }) => {
 
   if (error) {
     return (
-      <Alert icon={<InfoIcon fontSize="small" />} color="red" title="Error">
+      <Alert
+        icon={
+          <LocalIcon icon="info-rounded" width="1.25rem" height="1.25rem" />
+        }
+        color="red"
+        title="Error"
+      >
         {error}
       </Alert>
     );
@@ -200,7 +203,12 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ token }) => {
 
   if (!session || !participant) {
     return (
-      <Alert icon={<InfoIcon fontSize="small" />} color="orange">
+      <Alert
+        icon={
+          <LocalIcon icon="info-rounded" width="1.25rem" height="1.25rem" />
+        }
+        color="orange"
+      >
         Session not found or access denied.
       </Alert>
     );
@@ -234,9 +242,13 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ token }) => {
         <Alert
           icon={
             notification.type === "success" ? (
-              <CheckCircleIcon fontSize="small" />
+              <LocalIcon
+                icon="check-circle-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
             ) : (
-              <InfoIcon fontSize="small" />
+              <LocalIcon icon="info-rounded" width="1.25rem" height="1.25rem" />
             )
           }
           color={notification.type === "success" ? "green" : "red"}
@@ -262,7 +274,13 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ token }) => {
 
           {session.message && (
             <Alert
-              icon={<InfoIcon fontSize="small" />}
+              icon={
+                <LocalIcon
+                  icon="info-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              }
               color="blue"
               variant="light"
             >
@@ -279,7 +297,13 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ token }) => {
           <Group gap="xs" mt="sm">
             <Button
               size="sm"
-              leftSection={<DownloadIcon fontSize="small" />}
+              leftSection={
+                <LocalIcon
+                  icon="download-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              }
               onClick={() => downloadDocument(token)}
               variant="light"
             >
@@ -414,7 +438,13 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ token }) => {
 
             <Group gap="xs">
               <Button
-                leftSection={<CheckCircleIcon fontSize="small" />}
+                leftSection={
+                  <LocalIcon
+                    icon="check-circle-rounded"
+                    width="1.25rem"
+                    height="1.25rem"
+                  />
+                }
                 onClick={handleSubmitSignature}
                 loading={isSubmitting}
                 disabled={
@@ -427,7 +457,13 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ token }) => {
               </Button>
 
               <Button
-                leftSection={<CancelIcon fontSize="small" />}
+                leftSection={
+                  <LocalIcon
+                    icon="cancel-rounded"
+                    width="1.25rem"
+                    height="1.25rem"
+                  />
+                }
                 onClick={handleDecline}
                 color="red"
                 variant="light"
@@ -441,14 +477,28 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ token }) => {
       )}
 
       {participant.hasCompleted && (
-        <Alert icon={<CheckCircleIcon fontSize="small" />} color="green">
+        <Alert
+          icon={
+            <LocalIcon
+              icon="check-circle-rounded"
+              width="1.25rem"
+              height="1.25rem"
+            />
+          }
+          color="green"
+        >
           You have {participant.status === "SIGNED" ? "signed" : "declined"}{" "}
           this document.
         </Alert>
       )}
 
       {participant.isExpired && (
-        <Alert icon={<InfoIcon fontSize="small" />} color="orange">
+        <Alert
+          icon={
+            <LocalIcon icon="info-rounded" width="1.25rem" height="1.25rem" />
+          }
+          color="orange"
+        >
           Your access to this document has expired.
         </Alert>
       )}

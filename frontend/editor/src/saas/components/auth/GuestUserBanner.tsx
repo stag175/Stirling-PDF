@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import CloseIcon from "@mui/icons-material/Close";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useAuth } from "@app/auth/UseSession";
 import { isUserAnonymous } from "@app/auth/supabase";
 import { withBasePath } from "@app/constants/app";
@@ -73,10 +72,20 @@ export function GuestUserBanner({ className = "" }: GuestUserBannerProps) {
             aria-label={t("guestBanner.dismiss", "Dismiss banner")}
             className="guest-banner-dismiss"
           >
-            <CloseIcon className="guest-banner-icon" />
+            <LocalIcon
+              icon="close-rounded"
+              width="1.5rem"
+              height="1.5rem"
+              className="guest-banner-icon"
+            />
           </button>
           <button onClick={handleSignUp} className="guest-banner-signup">
-            <PersonAddIcon className="guest-banner-signup-icon" />
+            <LocalIcon
+              icon="person-add-rounded"
+              width="1.5rem"
+              height="1.5rem"
+              className="guest-banner-signup-icon"
+            />
             {t("guestBanner.signUp", "Sign Up Free")}
           </button>
         </div>

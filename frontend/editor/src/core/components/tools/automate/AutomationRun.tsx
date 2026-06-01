@@ -9,8 +9,7 @@ import {
   Progress,
   Loader,
 } from "@mantine/core";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import CheckIcon from "@mui/icons-material/Check";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useViewScopedFiles } from "@app/hooks/tools/shared/useViewScopedFiles";
 import { useToolRegistry } from "@app/contexts/ToolRegistryContext";
 import { AutomationConfig, ExecutionStep } from "@app/types/automation";
@@ -149,7 +148,14 @@ export default function AutomationRun({
   const getStepIcon = (step: ExecutionStep) => {
     switch (step.status) {
       case EXECUTION_STATUS.COMPLETED:
-        return <CheckIcon style={{ fontSize: 16, color: "green" }} />;
+        return (
+          <LocalIcon
+            icon="check-rounded"
+            width={16}
+            height={16}
+            style={{ color: "green" }}
+          />
+        );
       case EXECUTION_STATUS.ERROR:
         return <span style={{ fontSize: 16, color: "red" }}>✕</span>;
       case EXECUTION_STATUS.RUNNING:
@@ -235,7 +241,13 @@ export default function AutomationRun({
         {/* Action Buttons */}
         <Group justify="space-between" mt="xl">
           <Button
-            leftSection={<PlayArrowIcon />}
+            leftSection={
+              <LocalIcon
+                icon="play-arrow-rounded"
+                width="1.5rem"
+                height="1.5rem"
+              />
+            }
             onClick={executeAutomation}
             disabled={
               isExecuting || !selectedFiles || selectedFiles.length === 0

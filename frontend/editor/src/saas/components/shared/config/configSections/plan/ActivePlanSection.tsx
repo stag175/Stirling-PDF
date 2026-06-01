@@ -1,10 +1,9 @@
 import React from "react";
 import { Card, Text, Group, Flex, Alert, Button, Badge } from "@mantine/core";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CreditCardIcon from "@mui/icons-material/CreditCard";
 import { useTranslation } from "react-i18next";
 import { PlanTier } from "@app/hooks/usePlans";
 import { ManageBillingButton } from "@app/components/shared/ManageBillingButton";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface TrialStatus {
   isTrialing: boolean;
@@ -62,7 +61,7 @@ const ActivePlanSection: React.FC<ActivePlanSectionProps> = ({
       {trialStatus?.isTrialing && (
         <Alert
           color="blue"
-          icon={<AccessTimeIcon sx={{ fontSize: 16 }} />}
+          icon={<LocalIcon icon="schedule-rounded" width={16} height={16} />}
           mt="md"
           mb="md"
           title={t("plan.trial.title", "Free Trial Active")}
@@ -95,7 +94,9 @@ const ActivePlanSection: React.FC<ActivePlanSectionProps> = ({
                 variant="light"
                 mt="sm"
                 onClick={onAddPaymentClick}
-                leftSection={<CreditCardIcon sx={{ fontSize: 14 }} />}
+                leftSection={
+                  <LocalIcon icon="credit-card" width={14} height={14} />
+                }
               >
                 {t("plan.trial.subscribeToPro", "Subscribe to Pro")}
               </Button>

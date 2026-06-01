@@ -1,6 +1,5 @@
 import React from "react";
 import { Modal, Stack } from "@mantine/core";
-import DiamondOutlinedIcon from "@mui/icons-material/DiamondOutlined";
 import { useTranslation } from "react-i18next";
 import LocalIcon from "@app/components/shared/LocalIcon";
 import AnimatedSlideBackground from "@app/components/onboarding/slides/AnimatedSlideBackground";
@@ -59,7 +58,12 @@ export default function SaasOnboardingModal(props: SaasOnboardingModalProps) {
           />
         )}
         {slideDefinition.hero.type === "diamond" && (
-          <DiamondOutlinedIcon sx={{ fontSize: 64, color: "#000000" }} />
+          <LocalIcon
+            icon="diamond-rounded"
+            width={64}
+            height={64}
+            style={{ color: "#000000" }}
+          />
         )}
       </div>
     );
