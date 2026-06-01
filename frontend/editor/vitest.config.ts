@@ -37,15 +37,15 @@ export default defineConfig({
       // to sit ABOVE the actual aggregate — a measured baseline was
       // 6.96 / 53.64 / 25.45 / 6.96, i.e. the gate had been red on all four metrics
       // since the B1 MUI->Mantine migration added uncovered UI wrapper code without
-      // re-verification. Two waves of new tests (pure-logic utils, then
-      // statement-heavy services/hooks/reducers) lifted every metric, with a full
-      // 101-file green run measuring 8.21 / 61.19 / 30.14 / 8.21 -- now comfortably
-      // ABOVE the old phantom floor. Floors pinned just below that. Only move up.
+      // re-verification. Successive waves of new tests (pure utils, then
+      // statement-heavy services/hooks/reducers) lifted every metric well above
+      // the old phantom floor. Latest deterministic 113-file green run measured
+      // 9.38 / 65.47 / 33.33 / 9.38; floors pinned just below that. Only move up.
       thresholds: {
-        statements: 8.1,
-        branches: 60,
-        functions: 30,
-        lines: 8.1,
+        statements: 9.3,
+        branches: 65,
+        functions: 33,
+        lines: 9.3,
       },
     },
     projects: [
