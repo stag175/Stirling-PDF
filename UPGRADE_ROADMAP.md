@@ -72,16 +72,29 @@ not trusting un-compiled output.
 - **E2 (SBOM) done:** added the CycloneDX Gradle plugin 3.1.0; `./gradlew cyclonedxBom` emits a full
   CycloneDX SBOM for the multi-module graph (verified, ~1.1 MB `application.cdx.json`).
 
+### Wave 5 — B1 (MUI→Mantine) COMPLETE (verified; pushed)
+
+Turned out the codebase used MUI **only** for `@mui/icons-material` (zero `@mui/material` component
+usage), so B1 was a mechanical+verifiable icon migration, not a risky component/visual rewrite. All
+**154** icon files migrated to the existing `LocalIcon` (iconify material-symbols) system across 5
+swarm batches + 3 registry/value-map passes (`AgentsPanel`, the `iconMap`/`badgeIcon` automate
+cluster, and the `.ts` icon hooks/maps + their consumers). Hardened `generate-icons.js` with an
+`EXTRA_ICONS` allowlist so dynamically-referenced icons still bundle for offline builds. **Both MUI
+packages removed from `package.json`.** Verified at every step: `generate-icons` 0 missing, typecheck
+all 6 variants = 0, ESLint/Prettier clean, full Vitest 1378 green, and a production `vite build`
+succeeds with zero MUI. Central verification caught ~50 non-existent `-rounded` icon names and several
+partial-migration compile bugs the agents missed.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, license-report CI gate (E4), and the global
   JaCoCo ratchet (A1 — governed by the `saas` module, which can't be built here without Stripe/Supabase).
   These are config/pipeline changes that cannot be *verified* without running GitHub Actions / Docker, so
   shipping them blind would violate the "verify your work" bar.
-- **Multi-week refactors (not safe to rush in a session):** B1 (MUI→Mantine, ~157 files + visual QA),
-  B2 (state-library migration), C3 (streaming I/O — correctness-critical, needs load testing), the
-  *stateful* remainder of C1, and the security-hardening items D1–D5 (need a running app + real auth
-  providers to verify). Each is begun-or-scoped in this doc, not faked.
+- **Multi-week refactors (not safe to rush in a session):** B2 (state-library migration),
+  C3 (streaming I/O — correctness-critical, needs load testing), the *stateful* remainder of C1
+  (needs characterization tests on real PDFs first), and the security-hardening items D1–D5 (need a
+  running app + real auth providers to verify). (B1 is now **done** — see Wave 5.)
 
 ---
 
