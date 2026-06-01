@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Box,
@@ -9,7 +9,7 @@ import {
   Tooltip,
   Popover,
 } from "@mantine/core";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { iconMap, iconOptions } from "@app/components/tools/automate/iconMap";
 import { Z_INDEX_AUTOMATE_DROPDOWN } from "@app/styles/zIndex";
 
@@ -27,7 +27,7 @@ export default function IconSelector({
   const { t } = useTranslation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const selectedIconComponent =
+  const selectedIconName =
     iconMap[value as keyof typeof iconMap] || iconMap.SettingsIcon;
 
   const handleIconSelect = (iconKey: string) => {
@@ -72,12 +72,16 @@ export default function IconSelector({
               color: "var(--mantine-color-text)",
             }}
           >
-            {React.createElement(selectedIconComponent, {
-              style: { fontSize: iconSize },
-            })}
-            <KeyboardArrowDownIcon
+            <LocalIcon
+              icon={selectedIconName}
+              width={iconSize}
+              height={iconSize}
+            />
+            <LocalIcon
+              icon="keyboard-arrow-down-rounded"
+              width={iconSize * 0.8}
+              height={iconSize * 0.8}
               style={{
-                fontSize: iconSize * 0.8,
                 position: "absolute",
                 right: "0.25rem",
                 top: "50%",
@@ -91,8 +95,7 @@ export default function IconSelector({
           <Stack gap="xs">
             <SimpleGrid cols={4} spacing="xs">
               {iconOptions.map((option) => {
-                const IconComponent =
-                  iconMap[option.value as keyof typeof iconMap];
+                const iconName = iconMap[option.value as keyof typeof iconMap];
                 const isSelected = value === option.value;
 
                 return (
@@ -122,9 +125,11 @@ export default function IconSelector({
                         }
                       }}
                     >
-                      <IconComponent
+                      <LocalIcon
+                        icon={iconName}
+                        width={iconSize}
+                        height={iconSize}
                         style={{
-                          fontSize: iconSize,
                           color: isSelected
                             ? "var(--mantine-color-gray-9)"
                             : "var(--mantine-color-gray-7)",
