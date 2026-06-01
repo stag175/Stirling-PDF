@@ -220,6 +220,18 @@ partial-migration compile bugs the agents missed.
   `setAuthenticationType()` (NPE, 9 tests); a raw-arg/matcher mix in `verify()`; Spring `MockMultipartFile`
   coercing null filename→`""`; and strict-stubbing flagging an unmatched `delete()` call (→ `lenient()`).
 
+### Wave 14 — frontend coverage round 6 (pageEditor/storage/charts; verified; pushed)
+
+- **+285 tests across 12 modules** (core pageEditor `commands/pageCommands`[55]/`hooks/useEditedDocumentState`;
+  core services `serverStorageBundle`/`serverStorageUpload`/`folderSyncService`/`signatureDetectionService`;
+  desktop `backendHealthMonitor`/`defaultAppService`; proprietary `apiClientSetup`/`auditService`; saas charts
+  `d3Utils`/`tooltipUtils`).
+- **Coverage (deterministic 137-file run):** 9.98→**11.03** stmts/lines (broke 11%), 68.41→**71.31** branch,
+  35.01→**38.34** func. **Ratchet raised to 10.9 / 71 / 38 / 10.9.** Central tsc gate caught **~14** type
+  errors across 4 files (old 2-arg `vi.fn` generics; a closure-captured var narrowed to `never`; branded
+  `StirlingFile` vs `File`; a TS 5.7 `Uint8Array`/`BlobPart` mismatch; `vi.mocked()` not surfacing Mock
+  helpers on axios's overloaded `post`), all fixed. Cumulative frontend coverage **6.96 → 11.03**.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
