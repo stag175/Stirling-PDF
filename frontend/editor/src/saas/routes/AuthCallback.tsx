@@ -213,6 +213,7 @@ export default function AuthCallback() {
                   </Button>
                 );
               }
+              return undefined;
             })()}
           </div>
 

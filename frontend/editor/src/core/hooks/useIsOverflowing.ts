@@ -70,6 +70,8 @@ export const useIsOverflowing = (
       // Add a small delay to ensure the element is fully rendered
       setTimeout(trigger, 0);
     }
+
+    return undefined;
   }, [callback, ref]);
 
   return isOverflow;

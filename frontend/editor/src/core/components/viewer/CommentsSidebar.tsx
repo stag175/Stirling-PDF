@@ -304,6 +304,7 @@ export function CommentsSidebar({
       });
     }
     clearHighlightCommentRequest?.();
+    return undefined;
   }, [
     visible,
     highlightCommentRequest,

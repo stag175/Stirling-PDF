@@ -300,6 +300,7 @@ const SignPopout = ({
 
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [isOpen, activeTab, showCreatePanel, fetchData]);
 
   // Combine and filter sessions

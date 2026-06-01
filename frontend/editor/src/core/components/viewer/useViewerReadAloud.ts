@@ -192,6 +192,7 @@ export function useViewerReadAloud(defaultLanguage?: string) {
         );
       };
     }
+    return undefined;
   }, [speechLanguage, findVoiceForLanguage, getSupportedLanguageCodes]);
 
   const clearHighlights = useCallback(() => {

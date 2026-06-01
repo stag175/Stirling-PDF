@@ -327,6 +327,7 @@ export function createViewerActions({
       if (api?.search) {
         return api.search(query);
       }
+      return undefined;
     },
     next: () => {
       const api = registry.current.search?.api;

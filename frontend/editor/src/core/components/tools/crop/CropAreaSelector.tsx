@@ -168,6 +168,7 @@ const CropAreaSelector: React.FC<CropAreaSelectorProps> = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
+    return undefined;
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
   return (

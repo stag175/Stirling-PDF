@@ -197,6 +197,7 @@ export default function Login() {
       const id = setTimeout(() => navigate("/", { replace: true }), 0);
       return () => clearTimeout(id);
     }
+    return undefined;
   }, [backendProbe.loginDisabled, navigate]);
 
   useEffect(() => {

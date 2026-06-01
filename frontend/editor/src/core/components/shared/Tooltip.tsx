@@ -175,6 +175,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         handleDocumentClick as EventListener,
       );
     }
+    return undefined;
   }, [open, isPinned, handleDocumentClick]);
 
   useEffect(() => () => clearTimers(), [clearTimers]);

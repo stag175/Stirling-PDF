@@ -846,6 +846,7 @@ const SignSettings = ({
     }
 
     onActivateSignaturePlacement?.();
+    return undefined;
   }, [
     shouldEnablePlacement,
     shouldAutoActivate,
@@ -884,6 +885,7 @@ const SignSettings = ({
     }
 
     trigger();
+    return undefined;
   }, [
     placementSignatureKey,
     shouldAutoActivate,
@@ -913,6 +915,7 @@ const SignSettings = ({
     }
 
     onActivateSignaturePlacement?.();
+    return undefined;
   }, [
     activeFileIndex,
     shouldEnablePlacement,

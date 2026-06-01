@@ -87,6 +87,7 @@ const SessionDetailWorkbenchView = ({
       }, 30000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [session.finalized, onRefresh]);
 
   const handleAddParticipants = async (

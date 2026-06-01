@@ -176,6 +176,7 @@ export function LocalEmbedPDF({
     }
     // When file is present, use the stable key to avoid blob URL churn from FileContext
     // re-renders. When only url is provided, depend on url directly so changes are picked up.
+    return undefined;
   }, [file ? fileStableKey : url]);
 
   // Keyed by fileStableKey to avoid recomputing on every FileContext re-render.

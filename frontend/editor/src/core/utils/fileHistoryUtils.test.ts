@@ -17,9 +17,11 @@ import type { StirlingFileStub } from "@app/types/fileContext";
  * groupFilesByOriginal (id, parentFileId, originalFileId, versionNumber) matter;
  * the rest are filled with deterministic placeholders and cast to the type.
  */
-function makeStub(
-  overrides: Partial<StirlingFileStub> & { id: string },
-): StirlingFileStub {
+type StubOverrides = Partial<
+  Omit<StirlingFileStub, "id" | "parentFileId" | "originalFileId">
+> & { id: string; parentFileId?: string; originalFileId?: string };
+
+function makeStub(overrides: StubOverrides): StirlingFileStub {
   return {
     name: `${overrides.id}.pdf`,
     type: "application/pdf",

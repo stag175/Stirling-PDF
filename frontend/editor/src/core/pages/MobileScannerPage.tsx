@@ -634,6 +634,8 @@ export default function MobileScannerPage() {
         }
       };
     }
+
+    return undefined;
   }, [mode, autoEnhance, openCvReady, cameraReady, currentPreview]);
 
   const captureImage = useCallback(async () => {

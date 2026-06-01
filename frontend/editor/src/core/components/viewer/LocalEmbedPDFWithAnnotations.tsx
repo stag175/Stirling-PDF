@@ -241,6 +241,7 @@ export const LocalEmbedPDFWithAnnotations = forwardRef<
       } else if (url) {
         setPdfUrl(url);
       }
+      return undefined;
     }, [file, url]);
 
     // Notify parent when signature previews change

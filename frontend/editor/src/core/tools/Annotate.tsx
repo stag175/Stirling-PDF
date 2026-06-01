@@ -327,6 +327,7 @@ const Annotate = (_props: BaseToolProps) => {
         return () => clearTimeout(timer);
       }
     }
+    return undefined;
   }, [activeFileIndex, activeTool, setPlacementMode, setSignatureConfig]);
 
   const activateAnnotationTool = (toolId: AnnotationToolId) => {

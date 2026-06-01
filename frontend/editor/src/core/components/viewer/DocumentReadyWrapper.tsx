@@ -14,7 +14,7 @@ export function DocumentReadyWrapper({
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isLoading || !plugin) return;
+    if (isLoading || !plugin) return undefined;
 
     const checkActiveDocument = async () => {
       await ready;
@@ -46,6 +46,8 @@ export function DocumentReadyWrapper({
         }
       };
     }
+
+    return undefined;
   }, [plugin, isLoading, ready]);
 
   if (!activeDocumentId) {

@@ -80,7 +80,7 @@ describe("createBookmarkNode", () => {
       children: [
         { title: "Child A", children: [{ title: "Grandchild" }] },
         { title: "Child B" },
-      ] as Partial<BookmarkNode>[],
+      ] as unknown as BookmarkNode[],
     });
 
     expect(node.id).toBe("root");

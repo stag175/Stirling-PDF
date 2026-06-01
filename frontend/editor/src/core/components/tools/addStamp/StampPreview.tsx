@@ -58,6 +58,7 @@ export default function StampPreview({
       return () => URL.revokeObjectURL(url);
     } else {
       setImageMeta(null);
+      return undefined;
     }
   }, [parameters.stampType, parameters.stampImage]);
 
