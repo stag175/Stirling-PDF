@@ -206,6 +206,20 @@ partial-migration compile bugs the agents missed.
   a `ToolId`-vs-`"apple"` comparison), all fixed. Cumulative frontend coverage **6.96 → 9.98** since the
   stale-floor discovery.
 
+### Wave 13 — backend coverage round 5 (proprietary security/storage; verified; pushed)
+
+- **+143 tests across 12 untested unit-testable proprietary classes** (audit `AuditAspect`; security auth
+  handlers `CustomUserDetailsService`/`CustomAuthentication{Failure,Success}Handler`; filters
+  `IPRateLimitingFilter`/`ParticipantRateLimitInterceptor`/`EnterpriseEndpointFilter`; services
+  `DatabaseNotificationService`/`StorageCleanupService`/`AppUpdateAuthService`/`DynamicLicenseService`;
+  `DatabaseStorageProvider`).
+- **Proprietary coverage:** 32.66→**35.14** line / 33.69→**36.15** instr / 27.16→**30.33** branch. **Floor
+  raised to :proprietary 0.35/0.34/0.30** (cumulative this session: proprietary **29→35%**).
+- **Central gate caught 1 compile error + 12 test failures, all fixed:** `MockitoSettings` wrong import
+  package; a user-builder that fed a reflective-setter's null return into the typed
+  `setAuthenticationType()` (NPE, 9 tests); a raw-arg/matcher mix in `verify()`; Spring `MockMultipartFile`
+  coercing null filename→`""`; and strict-stubbing flagging an unmatched `delete()` call (→ `lenient()`).
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
