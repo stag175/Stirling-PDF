@@ -8,7 +8,8 @@ import api from "@app/services/apiClient";
 import type { AxiosResponse } from "axios";
 
 // Mock the underlying axios api client so we can assert request shape
-// (url, body, params, options) without performing any network I/O.
+// (url, body, params, options) without performing any network I/O. This keeps
+// every test fully deterministic — no real HTTP, no timers, no environment.
 vi.mock("@app/services/apiClient");
 
 const mockedGet = vi.mocked(api.get);
@@ -25,13 +26,23 @@ function lastPostFormData(): FormData {
   return call[1] as FormData;
 }
 
+/**
+ * Flatten the most recent post's FormData into a plain object so we can assert
+ * on the complete set of appended keys (and only those keys).
+ */
+function lastPostFormDataKeys(): string[] {
+  return Array.from(lastPostFormData().keys());
+}
+
 const sampleParticipant: ParticipantResponse = {
   id: 7,
+  userId: 42,
   email: "signer@example.com",
   name: "Signer",
   status: "SIGNED",
   shareToken: null,
   accessRole: "EDITOR",
+  expiresAt: "2026-07-01T00:00:00Z",
   lastUpdated: "2026-06-01T00:00:00Z",
   hasCompleted: true,
   isExpired: false,
@@ -43,12 +54,17 @@ const sampleSession: WorkflowSessionResponse = {
   ownerUsername: "owner",
   workflowType: "SIGNING",
   documentName: "doc.pdf",
+  ownerEmail: "owner@example.com",
+  message: "Please sign",
+  dueDate: "2026-07-01",
   status: "IN_PROGRESS",
   finalized: false,
   createdAt: "2026-06-01T00:00:00Z",
   updatedAt: "2026-06-01T00:00:00Z",
   participants: [sampleParticipant],
   hasProcessedFile: false,
+  originalFileId: 100,
+  processedFileId: 101,
 };
 
 describe("WorkflowService", () => {
@@ -67,7 +83,20 @@ describe("WorkflowService", () => {
         "/api/v1/workflow/participant/session",
         { params: { token: "tok-123" } },
       );
+      // Returns response.data unchanged.
       expect(result).toEqual(sampleSession);
+      expect(result).toBe(sampleSession);
+    });
+
+    it("forwards an empty token string verbatim", async () => {
+      mockedGet.mockResolvedValueOnce(axiosResponse(sampleSession));
+
+      await workflowService.getSessionByToken("");
+
+      expect(mockedGet).toHaveBeenCalledWith(
+        "/api/v1/workflow/participant/session",
+        { params: { token: "" } },
+      );
     });
 
     it("propagates errors from the api client", async () => {
@@ -86,11 +115,20 @@ describe("WorkflowService", () => {
 
       const result = await workflowService.getParticipantDetails("tok-abc");
 
+      expect(mockedGet).toHaveBeenCalledTimes(1);
       expect(mockedGet).toHaveBeenCalledWith(
         "/api/v1/workflow/participant/details",
         { params: { token: "tok-abc" } },
       );
-      expect(result).toEqual(sampleParticipant);
+      expect(result).toBe(sampleParticipant);
+    });
+
+    it("propagates errors from the api client", async () => {
+      mockedGet.mockRejectedValueOnce(new Error("details failed"));
+
+      await expect(
+        workflowService.getParticipantDetails("tok"),
+      ).rejects.toThrow("details failed");
     });
   });
 
@@ -105,9 +143,11 @@ describe("WorkflowService", () => {
       const result = await workflowService.submitSignature(request);
 
       expect(mockedPost).toHaveBeenCalledTimes(1);
-      const [url, body] = mockedPost.mock.calls[0];
+      const [url, body, config] = mockedPost.mock.calls[0];
       expect(url).toBe("/api/v1/workflow/participant/submit-signature");
       expect(body).toBeInstanceOf(FormData);
+      // No extra axios config object is passed for the submit call.
+      expect(config).toBeUndefined();
 
       const fd = lastPostFormData();
       expect(fd.get("participantToken")).toBe("only-token");
@@ -122,8 +162,10 @@ describe("WorkflowService", () => {
       expect(fd.get("reason")).toBeNull();
       expect(fd.get("showLogo")).toBeNull();
       expect(fd.get("wetSignatureData")).toBeNull();
+      // The token is the ONLY key.
+      expect(lastPostFormDataKeys()).toEqual(["participantToken"]);
 
-      expect(result).toEqual(sampleParticipant);
+      expect(result).toBe(sampleParticipant);
     });
 
     it("appends every optional field when all are provided (truthy branches)", async () => {
@@ -160,6 +202,22 @@ describe("WorkflowService", () => {
       expect(fd.get("reason")).toBe("Approval");
       expect(fd.get("showLogo")).toBe("true");
       expect(fd.get("wetSignatureData")).toBe("data:image/png;base64,AAAA");
+      // Every guard fired: all eleven keys present.
+      expect(lastPostFormDataKeys().sort()).toEqual(
+        [
+          "participantToken",
+          "certType",
+          "password",
+          "p12File",
+          "jksFile",
+          "showSignature",
+          "pageNumber",
+          "location",
+          "reason",
+          "showLogo",
+          "wetSignatureData",
+        ].sort(),
+      );
     });
 
     it("serializes explicit false booleans (showSignature/showLogo) but drops falsy pageNumber 0", async () => {
@@ -174,6 +232,8 @@ describe("WorkflowService", () => {
         // pageNumber 0 is falsy, so the `if (request.pageNumber)` guard skips it.
         pageNumber: 0,
         // Empty strings are falsy and must be skipped by the truthy guards.
+        certType: "",
+        password: "",
         location: "",
         reason: "",
         wetSignatureData: "",
@@ -186,9 +246,46 @@ describe("WorkflowService", () => {
       expect(fd.get("showSignature")).toBe("false");
       expect(fd.get("showLogo")).toBe("false");
       expect(fd.get("pageNumber")).toBeNull();
+      expect(fd.get("certType")).toBeNull();
+      expect(fd.get("password")).toBeNull();
       expect(fd.get("location")).toBeNull();
       expect(fd.get("reason")).toBeNull();
       expect(fd.get("wetSignatureData")).toBeNull();
+      // Only the token plus the two explicitly-false booleans survive.
+      expect(lastPostFormDataKeys().sort()).toEqual(
+        ["participantToken", "showSignature", "showLogo"].sort(),
+      );
+    });
+
+    it("serializes a non-zero pageNumber and a single supplied file (mixed branches)", async () => {
+      mockedPost.mockResolvedValueOnce(axiosResponse(sampleParticipant));
+
+      const jksFile = new File(["jks"], "keystore.jks");
+
+      const request: SignatureSubmissionRequest = {
+        participantToken: "mixed-token",
+        // jksFile present, p12File absent — exercises one file branch but not the other.
+        jksFile,
+        // Non-zero pageNumber takes the truthy path and is stringified.
+        pageNumber: 12,
+        // location present, reason absent.
+        location: "Berlin",
+      };
+
+      await workflowService.submitSignature(request);
+
+      const fd = lastPostFormData();
+      expect(fd.get("participantToken")).toBe("mixed-token");
+      expect(fd.get("jksFile")).toBe(jksFile);
+      expect(fd.get("p12File")).toBeNull();
+      expect(fd.get("pageNumber")).toBe("12");
+      expect(fd.get("location")).toBe("Berlin");
+      expect(fd.get("reason")).toBeNull();
+      expect(fd.get("showSignature")).toBeNull();
+      expect(fd.get("showLogo")).toBeNull();
+      expect(lastPostFormDataKeys().sort()).toEqual(
+        ["participantToken", "jksFile", "pageNumber", "location"].sort(),
+      );
     });
 
     it("propagates errors from the api client", async () => {
@@ -209,12 +306,13 @@ describe("WorkflowService", () => {
         "Not my document",
       );
 
+      expect(mockedPost).toHaveBeenCalledTimes(1);
       expect(mockedPost).toHaveBeenCalledWith(
         "/api/v1/workflow/participant/decline",
         null,
         { params: { token: "tok-d", reason: "Not my document" } },
       );
-      expect(result).toEqual(sampleParticipant);
+      expect(result).toBe(sampleParticipant);
     });
 
     it("omits the reason param when none is provided", async () => {
@@ -228,6 +326,14 @@ describe("WorkflowService", () => {
         { params: { token: "tok-only", reason: undefined } },
       );
     });
+
+    it("propagates errors from the api client", async () => {
+      mockedPost.mockRejectedValueOnce(new Error("decline failed"));
+
+      await expect(
+        workflowService.declineParticipation("tok", "reason"),
+      ).rejects.toThrow("decline failed");
+    });
   });
 
   describe("getParticipantDocument", () => {
@@ -237,11 +343,20 @@ describe("WorkflowService", () => {
 
       const result = await workflowService.getParticipantDocument("tok-doc");
 
+      expect(mockedGet).toHaveBeenCalledTimes(1);
       expect(mockedGet).toHaveBeenCalledWith(
         "/api/v1/workflow/participant/document",
         { params: { token: "tok-doc" }, responseType: "blob" },
       );
       expect(result).toBe(blob);
+    });
+
+    it("propagates errors from the api client", async () => {
+      mockedGet.mockRejectedValueOnce(new Error("download failed"));
+
+      await expect(
+        workflowService.getParticipantDocument("tok"),
+      ).rejects.toThrow("download failed");
     });
   });
 });
