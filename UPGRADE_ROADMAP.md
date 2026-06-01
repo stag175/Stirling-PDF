@@ -43,7 +43,13 @@ items remain **environment-blocked** here and are plan-only until built on a CI 
 
 - **B5 complete:** enabled `noImplicitReturns` and fixed all **22 violation files** (24 `useEffect`
   fall-through sites, behavior-preserving `return undefined;`, swarm: one agent per file). `typecheck:all`
-  = 0 across all 6 variants. Three strict flags now on.
+  = 0 across all 6 variants. Three strict flags now on. (Later evaluated `noUnusedLocals` and **deliberately
+  left it off, now documented in-tsconfig**: it flags ~50 sites that are *intentionally* unused under the
+  repo's `_`-prefix convention — e.g. the `_Check1/2/3` compile-time type assertions in
+  `core/types/toolId.ts` and destructured discards — and tsc can't be told to ignore `_`-prefixed names,
+  whereas eslint's `no-unused-vars` already enforces this with `varsIgnorePattern "^_"`. Wrong tool, so
+  eslint remains the enforcement layer. `noUncheckedIndexedAccess` remains the only large strict flag left,
+  and it is genuinely invasive.)
 - **More coverage (`app/core`):** 8 new JUnit test files (DTOs, `model/json` value types, security results).
 - **C1 god-class split — first increment:** extracted 3 pure helpers (`isType1Format`, `isCffFormat`,
   `parseToUnicodeCodepoint`) from the ~7k-line `PdfJsonConversionService` into a new, independently-tested

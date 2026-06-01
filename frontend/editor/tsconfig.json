@@ -100,6 +100,12 @@
     // "noImplicitThis": true,                           /* Enable error reporting when 'this' is given the type 'any'. */
     // "useUnknownInCatchVariables": true,               /* Default catch clause variables as 'unknown' instead of 'any'. */
     // "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
+    // Intentionally OFF: the codebase relies on the `_`-prefix convention for
+    // deliberately-unused locals (e.g. the `_Check1/2/3` compile-time type
+    // assertions in src/core/types/toolId.ts, and destructured discards). tsc's
+    // noUnusedLocals cannot be told to ignore `_`-prefixed names, but eslint's
+    // @typescript-eslint/no-unused-vars (varsIgnorePattern "^_", see
+    // frontend/eslint.config.mjs) does — so unused-local enforcement lives there.
     // "noUnusedLocals": true,                           /* Enable error reporting when local variables aren't read. */
     // "noUnusedParameters": true,                       /* Raise an error when a function parameter isn't read. */
     // "exactOptionalPropertyTypes": true,               /* Interpret optional property types as written, rather than adding 'undefined'. */
