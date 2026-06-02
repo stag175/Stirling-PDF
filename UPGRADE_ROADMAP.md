@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 121 — C2 de-reflection: InvertFullColorStrategy private methods (backend common; verified; pushed)
+
+- **C2 de-reflection (backend `common`)**: `InvertFullColorStrategyTest` reflectively invoked two private
+  methods — `invertImageColors(BufferedImage)` (the per-pixel ARGB 255−channel inversion) and
+  `convertToBufferedImageTpFile(BufferedImage)` (PNG temp-file writer). Made both package-private (were
+  `private`); the same-package test now calls `strategy.invertImageColors(image)` and
+  `strategy.convertToBufferedImageTpFile(image)` directly — compile-checked, with the result already typed
+  `File` (no cast). Dropped the `java.lang.reflect.Method`/`InvocationTargetException` imports and the
+  reflection-only checked-exception clauses (`testInvertImageColors` now `throws` nothing;
+  `testConvertToBufferedImageTpFile` keeps only `IOException`, which the method really declares).
+  Behaviour-preserving. Verified: **gradle `:common:test --tests InvertFullColorStrategyTest` BUILD SUCCESSFUL**
+  (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 120 — C2 de-reflection: CustomColorReplaceStrategy method + fields (backend common; verified; pushed)
 
 - **C2 de-reflection (backend `common`)**: `CustomColorReplaceStrategyTest` reached into the strategy via
