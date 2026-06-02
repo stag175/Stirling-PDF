@@ -696,6 +696,24 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 136 — C2 partial de-reflection: CustomOAuth2UserService helpers (backend proprietary; verified; pushed)
+
+- **C2 de-reflection (backend `proprietary`, partial — methods only)**: `CustomOAuth2UserServiceTest`
+  reflectively invoked two private helpers — the static `suggestUsernameClaims(Set)` (2 sites) and the instance
+  `logClaimDump(String,String,String,OidcIdToken,OidcUserInfo,Map,boolean)` (2 sites) — via
+  `getDeclaredMethod`/`setAccessible`/`invoke` (+ unchecked `(Set<String>)` casts). Made both package-private
+  (kept `static`/`void`); the same-package test now calls `CustomOAuth2UserService.suggestUsernameClaims(available)`
+  and `service.logClaimDump(…, (OidcIdToken) null, (OidcUserInfo) null, merged, true)` directly (explicit null
+  casts select the overload), dropping the `@SuppressWarnings("unchecked")`, the casts, and the
+  `java.lang.reflect.Method` import. The intersection/empty-set and null/non-null dump assertions are unchanged.
+- **Deliberately left reflective**: `replaceDelegateWithStub` sets the **`private final` `delegate`** field
+  (an internally-constructed `OidcUserService`, not constructor-injected) to a mock. De-reflecting that write
+  would require dropping `final` from a production field — a real immutability/semantics change — so the
+  single `getDeclaredField("delegate")` + `Field` import legitimately remain (class-doc updated to say so). This
+  is an honest *partial* de-reflection, not a claim of full removal.
+- Behaviour-preserving. Verified: **gradle `:proprietary:test --tests CustomOAuth2UserServiceTest` BUILD
+  SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 135 — C2 de-reflection: ParticipantRateLimitInterceptor.requestCounts (backend proprietary; verified; pushed)
 
 - **C2 de-reflection (backend `proprietary`)**: `ParticipantRateLimitInterceptorTest` reached the private

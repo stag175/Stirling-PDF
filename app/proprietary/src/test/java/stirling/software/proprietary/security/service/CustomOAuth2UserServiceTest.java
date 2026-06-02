@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,9 +51,10 @@ import ch.qos.logback.core.read.ListAppender;
 /**
  * Coverage-focused round-4 unit test for {@link CustomOAuth2UserService}. Complements {@code
  * CustomOAuth2UserServiceDebugLoggingTest} by exercising the success path, the internal-user
- * locked/has-password branches, the null/blank useAsUsername paths, the unexpected-error debug dump,
- * and the static {@code suggestUsernameClaims}/{@code logClaimDump} helpers via reflection — all
- * without standing up a real OIDC provider (the network delegate is swapped for a stub).
+ * locked/has-password branches, the null/blank useAsUsername paths, the unexpected-error debug
+ * dump, and the (now package-private) {@code suggestUsernameClaims}/{@code logClaimDump} helpers
+ * via direct calls — all without standing up a real OIDC provider (the network delegate, a private
+ * final field, is still swapped for a stub via reflection).
  */
 @ExtendWith(MockitoExtension.class)
 class CustomOAuth2UserServiceTest {
@@ -113,7 +113,8 @@ class CustomOAuth2UserServiceTest {
         verify(loginAttemptService, never()).isBlocked(anyString());
         verify(userService, never()).hasPassword(anyString());
         // debugLogging=false => no diagnostic dump on success.
-        assertThat(appender.list).noneMatch(e -> e.getFormattedMessage().contains("[OAUTH2 DEBUG]"));
+        assertThat(appender.list)
+                .noneMatch(e -> e.getFormattedMessage().contains("[OAUTH2 DEBUG]"));
     }
 
     @Test
@@ -176,7 +177,8 @@ class CustomOAuth2UserServiceTest {
         OAuth2AuthenticationException thrown =
                 assertThrows(
                         OAuth2AuthenticationException.class, () -> service.loadUser(userRequest));
-        // The generic-catch path throws `new OAuth2AuthenticationException(String errorCode)`, which
+        // The generic-catch path throws `new OAuth2AuthenticationException(String errorCode)`,
+        // which
         // stores the text in the OAuth2Error code (getMessage() is null for that constructor).
         assertThat(thrown.getError().getErrorCode())
                 .contains("Unexpected error during authentication");
@@ -229,7 +231,8 @@ class CustomOAuth2UserServiceTest {
         OAuth2AuthenticationException thrown =
                 assertThrows(
                         OAuth2AuthenticationException.class, () -> service.loadUser(userRequest));
-        // The generic-catch path throws `new OAuth2AuthenticationException(String errorCode)`, which
+        // The generic-catch path throws `new OAuth2AuthenticationException(String errorCode)`,
+        // which
         // stores the text in the OAuth2Error code (getMessage() is null for that constructor).
         assertThat(thrown.getError().getErrorCode())
                 .contains("Unexpected error during authentication");
@@ -248,7 +251,8 @@ class CustomOAuth2UserServiceTest {
                         OAuth2AuthenticationException.class, () -> service.loadUser(userRequest));
         assertThat(thrown.getCause()).isInstanceOf(IllegalArgumentException.class);
         // usernameAttributeKey never resolved => no claim dump even with debugLogging on.
-        assertThat(appender.list).noneMatch(e -> e.getFormattedMessage().contains("[OAUTH2 DEBUG]"));
+        assertThat(appender.list)
+                .noneMatch(e -> e.getFormattedMessage().contains("[OAUTH2 DEBUG]"));
     }
 
     @Test
@@ -295,7 +299,8 @@ class CustomOAuth2UserServiceTest {
         OAuth2AuthenticationException thrown =
                 assertThrows(
                         OAuth2AuthenticationException.class, () -> service.loadUser(userRequest));
-        // The generic-catch path throws `new OAuth2AuthenticationException(String errorCode)`, which
+        // The generic-catch path throws `new OAuth2AuthenticationException(String errorCode)`,
+        // which
         // stores the text in the OAuth2Error code (getMessage() is null for that constructor).
         assertThat(thrown.getError().getErrorCode())
                 .contains("Unexpected error during authentication");
@@ -330,7 +335,8 @@ class CustomOAuth2UserServiceTest {
                 .thenThrow(new IllegalStateException("db down"));
 
         assertThrows(OAuth2AuthenticationException.class, () -> service.loadUser(userRequest));
-        assertThat(appender.list).noneMatch(e -> e.getFormattedMessage().contains("[OAUTH2 DEBUG]"));
+        assertThat(appender.list)
+                .noneMatch(e -> e.getFormattedMessage().contains("[OAUTH2 DEBUG]"));
     }
 
     // ---------------------------------------------------------------------
@@ -338,31 +344,20 @@ class CustomOAuth2UserServiceTest {
     // ---------------------------------------------------------------------
 
     @Test
-    @SuppressWarnings("unchecked")
-    void suggestUsernameClaims_returnsIntersectionWithUsernameAttributeEnum() throws Exception {
-        Method m =
-                CustomOAuth2UserService.class.getDeclaredMethod(
-                        "suggestUsernameClaims", Set.class);
-        m.setAccessible(true);
-
+    void suggestUsernameClaims_returnsIntersectionWithUsernameAttributeEnum() {
         // "email" + "preferred_username" are valid UsernameAttribute names; "upn"/"oid" are not.
-        Set<String> available =
-                new TreeSet<>(Set.of("email", "preferred_username", "upn", "oid"));
-        Set<String> result = (Set<String>) m.invoke(null, available);
+        Set<String> available = new TreeSet<>(Set.of("email", "preferred_username", "upn", "oid"));
+        // suggestUsernameClaims is package-private static: call it directly (no reflection).
+        Set<String> result = CustomOAuth2UserService.suggestUsernameClaims(available);
 
         assertThat(result).containsExactlyInAnyOrder("email", "preferred_username");
         assertThat(result).doesNotContain("upn", "oid");
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void suggestUsernameClaims_noMatches_returnsEmptySet() throws Exception {
-        Method m =
-                CustomOAuth2UserService.class.getDeclaredMethod(
-                        "suggestUsernameClaims", Set.class);
-        m.setAccessible(true);
-
-        Set<String> result = (Set<String>) m.invoke(null, Set.of("upn", "oid", "groups"));
+    void suggestUsernameClaims_noMatches_returnsEmptySet() {
+        Set<String> result =
+                CustomOAuth2UserService.suggestUsernameClaims(Set.of("upn", "oid", "groups"));
 
         assertThat(result).isEmpty();
     }
@@ -375,27 +370,15 @@ class CustomOAuth2UserServiceTest {
         CustomOAuth2UserService service =
                 new CustomOAuth2UserService(props, userService, loginAttemptService);
 
-        Method m =
-                CustomOAuth2UserService.class.getDeclaredMethod(
-                        "logClaimDump",
-                        String.class,
-                        String.class,
-                        String.class,
-                        OidcIdToken.class,
-                        OidcUserInfo.class,
-                        Map.class,
-                        boolean.class);
-        m.setAccessible(true);
-
         Map<String, Object> merged = new LinkedHashMap<>();
         merged.put("upn", "jdoe@corp"); // present but not the configured key
-        m.invoke(
-                service,
+        // logClaimDump is package-private: call it directly (no reflection).
+        service.logClaimDump(
                 "DIRECT BANNER",
                 "regId",
                 "email",
-                null, // idToken null branch
-                null, // userInfo null branch
+                (OidcIdToken) null, // idToken null branch
+                (OidcUserInfo) null, // userInfo null branch
                 merged,
                 true); // failure => ERROR level
 
@@ -421,18 +404,6 @@ class CustomOAuth2UserServiceTest {
         CustomOAuth2UserService service =
                 new CustomOAuth2UserService(props, userService, loginAttemptService);
 
-        Method m =
-                CustomOAuth2UserService.class.getDeclaredMethod(
-                        "logClaimDump",
-                        String.class,
-                        String.class,
-                        String.class,
-                        OidcIdToken.class,
-                        OidcUserInfo.class,
-                        Map.class,
-                        boolean.class);
-        m.setAccessible(true);
-
         Map<String, Object> idClaims = new LinkedHashMap<>();
         idClaims.put(IdTokenClaimNames.SUB, "abc");
         OidcIdToken idToken =
@@ -445,7 +416,8 @@ class CustomOAuth2UserServiceTest {
         Map<String, Object> merged = new LinkedHashMap<>();
         merged.put("email", "resolved@example.com");
 
-        m.invoke(service, "OK BANNER", "regId", "email", idToken, userInfo, merged, false);
+        // logClaimDump is package-private: call it directly (no reflection).
+        service.logClaimDump("OK BANNER", "regId", "email", idToken, userInfo, merged, false);
 
         String combined =
                 String.join(

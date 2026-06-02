@@ -150,7 +150,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
      * @param mergedAttributes the merged attribute map Spring uses for {@code getAttribute()}
      * @param failure true if logging in the error path (uses ERROR level), false for INFO
      */
-    private void logClaimDump(
+    // Package-private (not private) so CustomOAuth2UserServiceTest can drive the diagnostic dump
+    // branches directly instead of via reflection.
+    void logClaimDump(
             String banner,
             String registrationId,
             String usernameAttributeKey,
@@ -249,8 +251,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
 
     /**
      * Claim keys whose VALUES are PII / personal identifiers and must be masked in the debug dump.
-     * Structural/operational claims (iss, aud, exp, iat, nbf, token_use, scope, email_verified, ...)
-     * are intentionally not listed so the operator can still see them for routing diagnostics.
+     * Structural/operational claims (iss, aud, exp, iat, nbf, token_use, scope, email_verified,
+     * ...) are intentionally not listed so the operator can still see them for routing diagnostics.
      * Matched case-insensitively.
      */
     private static final Set<String> SENSITIVE_CLAIM_KEYS =
@@ -289,7 +291,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
         }
         String s = String.valueOf(value);
         boolean sensitive =
-                (key != null && SENSITIVE_CLAIM_KEYS.contains(key.toLowerCase(java.util.Locale.ROOT)))
+                (key != null
+                                && SENSITIVE_CLAIM_KEYS.contains(
+                                        key.toLowerCase(java.util.Locale.ROOT)))
                         || s.contains("@");
         if (!sensitive) {
             return s;
@@ -305,7 +309,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
      * {@link UsernameAttribute} accepts — i.e. valid values the operator could put in {@code
      * security.oauth2.useAsUsername} to make this login work.
      */
-    private static Set<String> suggestUsernameClaims(Set<String> availableClaimKeys) {
+    // Package-private (not private) so CustomOAuth2UserServiceTest can call it directly.
+    static Set<String> suggestUsernameClaims(Set<String> availableClaimKeys) {
         Set<String> supported = new TreeSet<>();
         for (UsernameAttribute attr : UsernameAttribute.values()) {
             if (availableClaimKeys.contains(attr.getName())) {
