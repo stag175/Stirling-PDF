@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.regex.Pattern;
@@ -49,14 +48,15 @@ class TotpServiceTest {
     }
 
     @Test
-    void isValidCodeAcceptsCurrentAndAdjacentTimeSteps() throws Exception {
+    void isValidCodeAcceptsCurrentAndAdjacentTimeSteps() {
         TotpService service = buildService("Test App");
         byte[] secretBytes = "super-secret".getBytes(StandardCharsets.UTF_8);
         String secret = Base32Codec.encode(secretBytes);
 
         long timeStep = Instant.now().getEpochSecond() / 30;
-        String currentCode = generateCode(service, secretBytes, timeStep);
-        String nextCode = generateCode(service, secretBytes, timeStep + 1);
+        // generateCode is package-private: call it directly (no reflection).
+        String currentCode = service.generateCode(secretBytes, timeStep);
+        String nextCode = service.generateCode(secretBytes, timeStep + 1);
 
         assertTrue(service.isValidCode(secret, currentCode));
         assertEquals(timeStep, service.getValidTimeStep(secret, currentCode));
@@ -87,13 +87,5 @@ class TotpServiceTest {
         String uri = service.buildOtpAuthUri("user@example.com", "SECRET");
 
         assertTrue(uri.contains("issuer=Stirling%20PDF"));
-    }
-
-    private String generateCode(TotpService service, byte[] secretBytes, long timeStep)
-            throws Exception {
-        Method generateCode =
-                TotpService.class.getDeclaredMethod("generateCode", byte[].class, long.class);
-        generateCode.setAccessible(true);
-        return (String) generateCode.invoke(service, secretBytes, timeStep);
     }
 }

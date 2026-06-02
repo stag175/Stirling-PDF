@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 129 — C2 de-reflection: TotpService.generateCode (backend proprietary; verified; pushed)
+
+- **C2 de-reflection (backend `proprietary`, first in this module)**: `TotpServiceTest`'s `isValidCode…` test
+  generated reference TOTP codes through a `generateCode(service, …)` helper that reflectively invoked the
+  private `generateCode(byte[], long)` (HMAC code derivation) via `getDeclaredMethod`/`setAccessible`/`invoke`
+  with a `(String)` cast. Made the method package-private (was `private`; it has no checked `throws` — internal
+  try/catch); the test now calls `service.generateCode(secretBytes, timeStep)` directly at both sites, the cast
+  is gone, the reflective helper is deleted, the `java.lang.reflect.Method` import is dropped, and the test
+  method no longer needs `throws Exception`. The HMAC/time-step behaviour and validity assertions are unchanged.
+  Behaviour-preserving. Verified: **gradle `:proprietary:test --tests TotpServiceTest` BUILD SUCCESSFUL**
+  (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 128 — C2 de-reflection: ExternalAppDepConfig dispatcher + field getter (backend core; verified; pushed)
 
 - **C2 de-reflection (backend `core`)**: `ExternalAppDepConfigTest` carried its own generic reflective machinery

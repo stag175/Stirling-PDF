@@ -136,7 +136,8 @@ public class TotpService {
         return DEFAULT_ISSUER;
     }
 
-    private String generateCode(byte[] secret, long timeStep) {
+    // Package-private (not private) so TotpServiceTest can generate reference codes directly.
+    String generateCode(byte[] secret, long timeStep) {
         try {
             ByteBuffer buffer = ByteBuffer.allocate(8);
             buffer.putLong(timeStep);
