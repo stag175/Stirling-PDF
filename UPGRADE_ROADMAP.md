@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 166 — I-workstream engine coverage: SqliteVecStore SQL-identifier guard + vector normalize (Python; verified; pushed)
+
+- **Engine coverage (Python, security + math)**: added `tests/test_sqlite_vec_store_helpers.py` (13 tests) for
+  the two pure static helpers on `SqliteVecStore`. `_sanitize_table_name` is the **SQL-identifier safety guard**
+  — a caller-supplied collection name is folded to `vec_<only [A-Za-z0-9_]>` before being interpolated into table
+  DDL/DML, so quotes/semicolons/spaces/unicode can't break out of the identifier; pinned across normal names,
+  hyphen/space/dot/unicode folding, empty (`vec_`), and an explicit `'x"; DROP TABLE t;--'` injection attempt
+  (output is all-safe-chars, `vec_`-prefixed). `_normalize` is L2 vector normalization; pinned `[3,4]→[0.6,0.8]`,
+  the **zero-norm guard** (`[0,0]` and `[]` returned unchanged, no div-by-zero), an already-unit vector, and that
+  a normalized non-trivial vector has unit L2 norm. Verified: **pytest 13/13, ruff clean, pyright 0 errors**.
+
 ### Wave 165 — I-workstream engine coverage: runtime.build_model_settings (Python; verified; pushed)
 
 - **Engine coverage (Python)**: added `tests/test_build_model_settings.py` (3 tests) for the untested pure
