@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 117 — B4 computeGeometry pure-export coverage (frontend; verified; pushed)
+
+- **B4 export-for-test + coverage (frontend)**: exported the previously-module-private `computeGeometry` helper
+  from `useToolPanelGeometry.ts` (the LTR/RTL tool-panel geometry maths) so it's unit-testable without
+  rendering the hook. Added `useToolPanelGeometry.test.ts` (4 tests, hand-computed): LTR width = panel.right −
+  quickAccess.right with the panel anchored at the quick-access edge, LTR left-offset 0 when no quick-access
+  element, the **360px minimum-width clamp**, and the RTL branch (expands rightward from the panel right edge,
+  width = innerWidth − right). Tested with mock `getBoundingClientRect` rects + controlled
+  `window.innerWidth/Height` + `documentElement.dir`. Behaviour-preserving (export-only source change).
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 4/4 green**.
+
 ### Wave 116 — B4 provider-config integrity coverage (frontend renderHook; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `providerDefinitions.test.ts` (3 tests) for the
