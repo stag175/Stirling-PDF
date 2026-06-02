@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 50 — B4 AdminGeneralSection decomposition (verified; pushed)
+
+- **B4 continued (4th component)**: extracted 5 pure helpers from `AdminGeneralSection.tsx` (1,336→1,174
+  LoC) into a tested `adminGeneralSectionUtils.ts` — `parseWatchedFoldersInput`, `validateWatchedFolders`
+  (path-normalization + duplicate/nested/finished-folder-loop warnings), `filterDefaultLocaleOptions`,
+  `buildGeneralSettingsSaveDelta`, `combineGeneralFetchData` — with **39 tests** (section had none). Network
+  calls stay in the component. Verified: proprietary tsc 0, 39 tests, eslint clean. Four large config
+  sections/components now decomposed (PdfTextEditorView + Admin{Advanced,Security,General}Section).
+
 ### Wave 49 — B3 FileContext lifecycle: de-dup + test the revocation decision (verified; pushed)
 
 - **B3 largely DONE**: confirmed the lifecycle execution is already in a dedicated `FileLifecycleManager`
