@@ -588,6 +588,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   existing `ConvertPDFToPDFATest` green. The proven C1 pure-extraction pattern; the heavier
   service-extraction of the PDF/A pipeline remains a larger follow-up.
 
+### Wave 39 — B6 verified + A4 expanded to 22 tests (caught + fixed a real a11y bug); pushed
+
+- **B6 largely DONE**: verified the **circular-dependency gate is live** — `frontend:lint` runs
+  `dpdm … --exit-code circular:1` (**0 cycles**, exit 0) and is in the `check`/`check:all` quality gate;
+  `madge`+`dpdm`+the bundle visualizer (Wave 36) are all wired. Only the bundle size-budget CI threshold remains.
+- **A4 expanded** 10 → **22 a11y tests** (11 more tool/file-editor components). The new tests **caught a
+  real accessibility bug** — `OAuthButtons` `image-redundant-alt` — which I **fixed** (decorative provider
+  icons `alt={p.label}` → `alt=""`) and pinned with `OAuthButtons.a11y.test.tsx`. Verified: 22 a11y tests +
+  the existing 11-test `OAuthButtons.test.tsx` all green, core + proprietary tsc 0 errors, eslint clean.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -667,11 +677,12 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   convert, OCR, sign) — bridges the gap between unit tests and Cucumber e2e. *Effort:* M. *Risk:* low.
 - **A4. Accessibility tests** (axe-core / jest-axe) — 399 aria/role usages, zero a11y assertions.
   Wire into CI as a regression gate. *Effort:* M. *Risk:* low.
-  ⏳ **Foundation + initial coverage DONE (Waves 35–37)**: `jest-axe` (+ `@types/jest-axe`) added; **10
-  automated a11y assertions** now run axe-core against rendered shared components on the existing jsdom
-  infra (ButtonSelector, Badge, TextInput, ButtonToggle, InfoBanner, SkeletonLoader, LoadingFallback,
-  LocalIcon, FitText, PageSelectionSyntaxHint) — all 0 violations. The reusable pattern is established;
-  broadening to the remaining component tree + a dedicated CI a11y gate remain.
+  ⏳ **Foundation + growing coverage DONE (Waves 35–39)**: `jest-axe` (+ `@types/jest-axe`) added; **22
+  automated a11y assertions** now run axe-core against rendered components on the existing jsdom infra (10
+  shared components + 11 tool/file-editor components + the login `OAuthButtons`). **The tests caught a real
+  bug**: `OAuthButtons` had `image-redundant-alt` (each provider icon used `alt={p.label}` while its button
+  already had an `aria-label`/visible label) — **fixed** to decorative `alt=""` and pinned with a test.
+  Reusable pattern established; broadening to the rest of the tree + a dedicated CI a11y gate remain.
 - **A5. Unified coverage reporting** across Java (JaCoCo) + TS (v8) + Python (pytest-cov),
   surfaced as a single PR comment. *Effort:* M. *Risk:* low.
   ✅ **DONE (Wave 34)**: root `task coverage` runs all three tiers' coverage (JaCoCo + Vitest v8 +
@@ -705,6 +716,11 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   tsc 0 errors, 25 tests pass, eslint clean). `noUncheckedIndexedAccess` (genuinely invasive) remains.
 - **B6. Add circular-dep + bundle gates to CI** — `madge`/`dpdm` and `rollup-plugin-visualizer`
   are installed but not run in CI. *Effort:* S. *Risk:* low.
+  ⏳ **Largely DONE**: the **circular-dependency gate is live** — `frontend:lint` runs
+  `npx dpdm editor/src --circular --no-warning --no-tree --exit-code circular:1` (verified: **0 circular
+  dependencies**, exit 0), and `frontend:lint` is part of `frontend:check`/`check:all`, so CI fails on a
+  new cycle. The **bundle visualizer** is wired (`task frontend:analyze`, Wave 36/F3). Only the bundle
+  *size-budget* threshold gate (a CI assertion on chunk size) remains.
 
 ### Workstream C — Backend architecture & code health
 
