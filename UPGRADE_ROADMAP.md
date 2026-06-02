@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 149 — B4 frontend coverage: getApiBaseUrl resolution priority (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `apiClientConfig.test.ts` (4 tests) for the untested `getApiBaseUrl()` —
+  which resolves the API base URL by priority: (1) `window.STIRLING_PDF_API_BASE_URL` runtime override, else
+  (2) `import.meta.env.VITE_API_BASE_URL`. The runtime override exists specifically because the Vite env var is
+  baked into the build, so getting this precedence right matters for production deployments. Pinned: runtime
+  override returned when set; fallback to the env var when unset (via `vi.stubEnv`); override wins when **both**
+  are set; and an **empty-string override is falsy** (the `&& window.…` guard) so it correctly falls through to
+  the env var. `window.STIRLING_PDF_API_BASE_URL` (declared optional on `Window` in `global.d.ts`) is set/cleared
+  per test; envs unstubbed in `afterEach`. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean,
+  `vitest` 4/4 green**.
+
 ### Wave 148 — B2-adjacent coverage: viewer bridge registry (frontend; verified; pushed)
 
 - **B4 coverage / B2-adjacent groundwork (frontend)**: added `viewerBridges.test.ts` (8 tests) for the untested
