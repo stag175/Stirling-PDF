@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 115 — B4 generateId coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `generateId.test.ts` (3 tests) for `generateId` — the
+  UUID-v4 generator with a `crypto.randomUUID` fast path and a `Math.random` fallback. Covers: v4-format
+  output (regex enforcing the `4` version nibble + `[89ab]` variant nibble), uniqueness across 200 calls, and
+  the **fallback path forced via `vi.stubGlobal("crypto", {})`** (so the manual template branch is exercised,
+  not just the native one). Pure value-add, zero source change. Verified: **core `tsc` 0 errors, `eslint
+  --max-warnings=0` clean, `vitest` 3/3 green**.
+
 ### Wave 114 — I-workstream engine ToolOperationStep validator coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/test_tool_operation_step.py` (2 tests) for the
