@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 111 — B4 clickHandlers coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `clickHandlers.test.ts` (4 tests) for `isSpecialClick`
+  (true for meta/ctrl/shift modifiers and middle-click; false for a plain left click) and
+  `handleUnlessSpecialClick` (special click → returns `true` and leaves the browser to follow the href, no
+  `preventDefault`/callback; plain click → `preventDefault` + callback, returns `false`). This guards the
+  "open in new tab/window" behaviour on nav links. Tested with a mock `React.MouseEvent` + `vi.fn()` callback.
+  Pure value-add, zero source change. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean,
+  `vitest` 4/4 green**.
+
 ### Wave 110 — B4 browserIdentifier coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `browserIdentifier.test.ts` (4 tests) for `getBrowserId`
