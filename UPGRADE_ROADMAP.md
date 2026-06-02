@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 151 — B4 frontend coverage: localFileSaveService web-mode stub contract (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `localFileSaveService.test.ts` (4 tests) pinning the **web-mode core stub**
+  contract for `saveToLocalPath` / `showSaveDialog` / `saveMultipleFilesWithPrompt` (the desktop layer overrides
+  these with real Tauri saves). The contract that matters: in web mode they must clearly report "not saved"
+  rather than silently claim success — a silent `success: true` here would lose the user's file. Pinned:
+  `saveToLocalPath` → `{success: false, error: /not available in web mode/}`; `showSaveDialog` → `null` (with and
+  without a directory arg); `saveMultipleFilesWithPrompt` → `{success: false, savedCount: 0, error: …}` including
+  the empty-file-list case. A small but meaningful regression guard against the web build accidentally faking a
+  successful save. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 4/4 green**.
+
 ### Wave 150 — B4 frontend coverage: downloadService anchor contract (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `downloadService.test.ts` (4 tests) for the untested `downloadFile` /
