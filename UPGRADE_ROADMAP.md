@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 164 — I-workstream engine coverage: progress-emission robustness boundary (Python; verified; pushed)
+
+- **Engine coverage (Python, robustness boundary)**: added `tests/test_progress.py` (5 tests) for
+  `services.progress` — the `ContextVar`-plumbed streaming progress emitter — previously only exercised
+  indirectly. Pinned all four `emit_progress` branches: **no-op when no emitter is bound** (set→reset→unbound,
+  emitter not called); forwards the event to a bound emitter; **swallows ordinary emitter exceptions** so
+  progress emission can never break the work it reports on; and **re-raises `asyncio.CancelledError`** so task
+  cancellation is still honoured. Also pinned the `set/reset` Token semantics (reset restores the previous
+  emitter in a nested set). Every test resets the emitter in `finally` so the module-global `ContextVar` can't
+  leak across tests. Verified: **pytest 5/5, ruff clean, pyright 0 errors**.
+
 ### Wave 163 — B4 frontend coverage: tour waitForElement best-effort resolution (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `tourUtils.test.ts` (3 tests) for the untested `waitForElement` onboarding
