@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 144 — B4 frontend coverage: ResourceManager blob-URL tracking + file factories (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `resourceManager.test.ts` (8 tests) for the untested `ResourceManager` util
+  (`@app/utils/resourceManager`) — blob-URL lifecycle tracking and `File` factories. jsdom doesn't implement
+  `URL.createObjectURL`/`revokeObjectURL`, so the test installs deterministic fakes (counter-based create, spied
+  revoke). Pinned: `createBlobUrl` returns + tracks a URL; `revokeBlobUrl` revokes & untracks, is a no-op on a
+  second call (already untracked) and on a never-created URL (the `has()` guard); `revokeAllBlobUrls` revokes
+  every tracked URL exactly once then clears so a second sweep is a no-op; `createResultFile` applies the default
+  `processed_` prefix + `application/pdf` (and honours custom prefix/type); `createTimestampedFile` builds
+  `${prefix}${Date.now()}${ext}` with `Date.now` mocked for determinism (and honours custom extension/type). The
+  shared static URL set is reset between tests. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean,
+  `vitest` 8/8 green**.
+
 ### Wave 143 — I-workstream engine coverage: ContradictionDetector._empty_report (Python invariant; verified; pushed)
 
 - **Engine coverage (Python)**: added `tests/contradiction/test_empty_report.py` (4 tests) for the untested pure
