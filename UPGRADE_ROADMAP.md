@@ -564,6 +564,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   Verified: the a11y test passes, core tsc clean, **full FE suite 185 files / 3952 tests green**, coverage
   14.65/78.27/46.31 (above thresholds). The reusable pattern + a dedicated CI a11y gate remain.
 
+### Wave 36 — B5 cast burndown + F3 bundle visualizer + E1 audit (verified; pushed)
+
+- **B5** (frontend, agent-assisted, centrally re-verified): removed **24 `as any`/`: any` casts** from the
+  two worst files (`layerUtils.ts`, `StampPreview.tsx`) using real pdf-lib/OCG/`React.CSSProperties` types —
+  type-only, no runtime change. Verified: core tsc 0 errors, `layerUtils` 25 tests pass, eslint clean.
+- **F3** (frontend): wired `rollup-plugin-visualizer` into the Vite build, gated on `--mode analyze`
+  (normal builds unaffected) → `frontend/editor/dist/stats.html`; added `npm run analyze` + `task
+  frontend:analyze`. Verified by a real analyze build; **fixed a pre-existing bug** (report written to the
+  wrong directory) and surfaced a 2.84 MB main chunk. CI size-gate + lazy-loading remain.
+- **E1** (backend, audit): `docs/verapdf-pin-audit.md` — full pin classification + staged, test-gated
+  removal plan (see the E1 entry). The upgrade itself is staged (needs an upstream-fact check + new
+  PDF/A fixtures), not shipped blind.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -673,6 +686,11 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **B5. Tighten TypeScript incrementally** — enable `noUncheckedIndexedAccess`, `noUnusedLocals`,
   `noImplicitReturns` (currently commented out); burn down 71 `as any` casts (worst in
   `layerUtils.ts`, `StampPreview.tsx`). *Effort:* M. *Risk:* low.
+  ⏳ **Substantial progress**: 3 strict flags enabled earlier (`noImplicitReturns`/`noFallthroughCasesInSwitch`/
+  `noImplicitOverride`); `noUnusedLocals` evaluated + rejected (conflicts with the `_`-prefix convention,
+  documented). **Wave 36**: burned down the two worst files — **24 `as any`/`: any` casts removed** from
+  `layerUtils.ts` (14, via real pdf-lib + OCG types) and `StampPreview.tsx` (10), type-only, verified (core
+  tsc 0 errors, 25 tests pass, eslint clean). `noUncheckedIndexedAccess` (genuinely invasive) remains.
 - **B6. Add circular-dep + bundle gates to CI** — `madge`/`dpdm` and `rollup-plugin-visualizer`
   are installed but not run in CI. *Effort:* S. *Risk:* low.
 
@@ -736,6 +754,12 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   `resolutionStrategy.force` entries (rhino, etc.) and the `javax.xml.bind` EOL stack exist only to
   paper over veraPDF lag. *Evidence:* `build.gradle:196–214`, `app/core/build.gradle:82–89`.
   *Effort:* M–L. *Risk:* med.
+  ⏳ **Audit DONE (Wave 36)**: `docs/verapdf-pin-audit.md` classifies every pin (3–4 genuinely
+  veraPDF-driven + candidate-removable: the rhino force + `javax.xml.bind` jaxb-api/impl; gson/commons/
+  BouncyCastle are independent CVE pins that must stay), assesses the PDF/A-validation upgrade risk + the
+  missing PDF/A-fixture coverage, and gives a step-by-step removal plan each gated on `:stirling-pdf:test`.
+  The upgrade hinges on one unverified upstream fact (has veraPDF migrated off `javax.xml.bind`?) + needs
+  Maven Central access, so it's staged, not executed blind.
 - **E2. Generate an SBOM** (CycloneDX Gradle + npm + Python) and attach to releases. *Effort:* S. *Risk:* low.
   ✅ **DONE (Wave 31)**: all three SBOMs wired — Gradle (`cyclonedxBom`), Python (`engine:sbom` via
   `cyclonedx-bom`, 213 components), npm (`frontend:sbom` via `@cyclonedx/cyclonedx-npm@4.2.1`, 988
@@ -753,7 +777,13 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **F2. Async job execution review.** The `@AutoJobPostMapping` system + "cancel long-running AI
   task" feature is new; verify cancellation actually frees threads/temp files and is backpressured.
   *Effort:* M. *Risk:* med.
-- **F3. Frontend bundle budget** — run the installed visualizer in CI, set a size budget, lazy-load
+- **F3. Frontend bundle budget** — ⏳ **Foundation DONE (Wave 36)**: wired `rollup-plugin-visualizer`
+  into the Vite build, gated on `--mode analyze` (cross-platform) so normal builds are unaffected; emits
+  `frontend/editor/dist/stats.html` (treemap, gzip+brotli sizes). Added `npm run analyze` + `task
+  frontend:analyze`. Verified by a real build (`✓ built in 42s`, report produced) — which **fixed a real
+  bug** (the report was being written to the wrong dir) and surfaced a 2.84 MB / 843 kB-gzip main chunk to
+  budget. The CI size-budget gate + lazy-loading remain. (original below)
+  run the installed visualizer in CI, set a size budget, lazy-load
   tools and admin sections. *Effort:* S–M. *Risk:* low.
 
 ### Workstream G — Observability

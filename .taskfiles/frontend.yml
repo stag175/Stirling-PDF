@@ -122,6 +122,12 @@ tasks:
     cmds:
       - npx vite build editor
 
+  analyze:
+    desc: "Build with bundle visualizer report (frontend/editor/dist/stats.html)"
+    deps: [prepare]
+    cmds:
+      - npm run analyze
+
   build:core:
     desc: "Build for core mode"
     deps: [prepare]

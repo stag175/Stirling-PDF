@@ -170,11 +170,11 @@ export default function StampPreview({
     bottomPx: number;
   } | null>(null);
   useEffect(() => {
-    const itemStyle = style.item as any;
+    const itemStyle = style.item as React.CSSProperties;
     if (!itemStyle || containerSize.width <= 0 || containerSize.height <= 0)
       return;
 
-    const parse = (v: any) => parseFloat(String(v).replace("px", "")) || 0;
+    const parse = (v: unknown) => parseFloat(String(v).replace("px", "")) || 0;
     const leftPx = parse(itemStyle.left);
     const bottomPx = parse(itemStyle.bottom);
     const widthPx = parse(itemStyle.width);
@@ -206,8 +206,8 @@ export default function StampPreview({
       const newLeftPts = Math.max(0, Math.min(maxLeftPx, newLeftPx)) / scaleX;
       const newBottomPts =
         Math.max(0, Math.min(maxBottomPx, newBottomPx)) / scaleY;
-      onParameterChange("overrideX", newLeftPts as any);
-      onParameterChange("overrideY", newBottomPts as any);
+      onParameterChange("overrideX", newLeftPts);
+      onParameterChange("overrideY", newBottomPts);
     }
 
     prevDimsRef.current = {
@@ -247,7 +247,7 @@ export default function StampPreview({
     if (pageWidth <= 0 || pageHeight <= 0) return;
 
     // Recompute current x,y from style (so that we start from visual position)
-    const itemStyle = style.item as any;
+    const itemStyle = style.item as React.CSSProperties;
     const leftPx = parseFloat(String(itemStyle.left).replace("px", "")) || 0;
     const bottomPx =
       parseFloat(String(itemStyle.bottom).replace("px", "")) || 0;
@@ -263,11 +263,11 @@ export default function StampPreview({
       const maxBottomPx = Math.max(0, pageHeight - heightPx);
       onParameterChange(
         "overrideX",
-        (Math.max(0, Math.min(maxLeftPx, leftPx)) / scaleX) as any,
+        Math.max(0, Math.min(maxLeftPx, leftPx)) / scaleX,
       );
       onParameterChange(
         "overrideY",
-        (Math.max(0, Math.min(maxBottomPx, bottomPx)) / scaleY) as any,
+        Math.max(0, Math.min(maxBottomPx, bottomPx)) / scaleY,
       );
     }
   };
@@ -279,7 +279,7 @@ export default function StampPreview({
     e.preventDefault();
     ensureOverrides();
 
-    const item = style.item as any;
+    const item = style.item as React.CSSProperties;
     const left = parseFloat(String(item.left).replace("px", "")) || 0;
     const bottom = parseFloat(String(item.bottom).replace("px", "")) || 0;
     const width =
@@ -334,8 +334,8 @@ export default function StampPreview({
       const scaleY = containerSize.height / heightPts;
       const newLeftPts = newLeftPx / scaleX;
       const newBottomPts = newBottomPx / scaleY;
-      onParameterChange("overrideX", newLeftPts as any);
-      onParameterChange("overrideY", newBottomPts as any);
+      onParameterChange("overrideX", newLeftPts);
+      onParameterChange("overrideY", newBottomPts);
     }
 
     if (drag.type === "resize") {
@@ -344,13 +344,13 @@ export default function StampPreview({
       const scaleY = containerSize.height / heightPts;
       const newHeightPx = Math.max(1, drag.initHeight + (y - drag.startY));
       const newHeightPts = newHeightPx / scaleY;
-      onParameterChange("fontSize", newHeightPts as any);
+      onParameterChange("fontSize", newHeightPts);
     }
 
     if (drag.type === "rotate") {
       const angle =
         Math.atan2(y - drag.centerY, x - drag.centerX) * (180 / Math.PI);
-      onParameterChange("rotation", angle as any);
+      onParameterChange("rotation", angle);
     }
   };
 
@@ -436,9 +436,9 @@ export default function StampPreview({
                   className={`${styles.gridTile} ${selected || hoverTile === idx ? styles.gridTileSelected : ""} ${hoverTile === idx ? styles.gridTileHovered : ""}`}
                   onClick={() => {
                     // Clear overrides to use grid positioning and set position
-                    onParameterChange("overrideX", -1 as any);
-                    onParameterChange("overrideY", -1 as any);
-                    onParameterChange("position", idx as any);
+                    onParameterChange("overrideX", -1);
+                    onParameterChange("overrideY", -1);
+                    onParameterChange("position", idx);
                   }}
                   onMouseEnter={() => setHoverTile(idx)}
                   onMouseLeave={() => setHoverTile(null)}
