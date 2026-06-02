@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 49 — B3 FileContext lifecycle: de-dup + test the revocation decision (verified; pushed)
+
+- **B3 largely DONE**: confirmed the lifecycle execution is already in a dedicated `FileLifecycleManager`
+  (26 tests). Extracted the remaining pure slice — the blob-URL-revocation *decision* that was **duplicated**
+  across `contexts/file/lifecycle.ts` and `types/fileContext.ts` — into a tested
+  `contexts/file/fileLifecycleUtils.ts` (`collectRevocableBlobUrls` ordered+de-duped, `isRevocableBlobUrl`
+  scheme guard; **16 tests** incl. null-safety, ordering, cross-field/intra-page de-dup, input
+  non-mutation). Both call sites now consume the pure helper; the `URL.revokeObjectURL` side effects stay
+  put. Behaviour-preserving; verified (core tsc 0, 112 contexts/file tests, eslint clean).
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -807,6 +817,13 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **B3. Extract memory/lifecycle management out of `FileContext`** into a dedicated, unit-tested
   service (blob URL revocation, PDF.js `.destroy()`, worker termination). This is the crash-risk
   hotspot for the 100 GB+ goal. *Effort:* M. *Risk:* med.
+  ✅ **Largely DONE (Wave 49)**: the lifecycle execution is **already** extracted into a dedicated
+  `FileLifecycleManager` (`contexts/file/lifecycle.ts`, 26 tests) — no PDF.js `.destroy()`/worker calls
+  remain in the contexts tree. Wave 49 extracted the remaining pure piece — the *decision* of which blob
+  URLs to revoke, which was **duplicated** in `lifecycle.ts` and `types/fileContext.ts` — into a tested
+  `fileLifecycleUtils.ts` (`collectRevocableBlobUrls`/`isRevocableBlobUrl`, **16 tests**), de-duplicating
+  both call sites; the actual `URL.revokeObjectURL` side effects stay in the manager. Verified: core tsc 0,
+  112 `contexts/file` tests green, eslint clean.
 - **B4. Decompose mega-components** — `PdfTextEditorView.tsx` (2,897), `pdfiumService.ts` (1,934),
   `AdminAdvancedSection.tsx` (1,790) into focused units; lazy-load per-tool UIs with `React.lazy`.
   *Effort:* M–L. *Risk:* low.

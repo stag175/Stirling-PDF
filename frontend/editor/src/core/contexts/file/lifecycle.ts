@@ -7,8 +7,8 @@ import {
   FileContextAction,
   FileContextState,
   StirlingFileStub,
-  ProcessedFilePage,
 } from "@app/types/fileContext";
+import { collectRevocableBlobUrls } from "@app/contexts/file/fileLifecycleUtils";
 
 const DEBUG = process.env.NODE_ENV === "development";
 
@@ -156,38 +156,16 @@ export class FileLifecycleManager {
     }
     this.fileGenerations.delete(fileId);
 
-    // Clean up blob URLs from file record if we have access to state
+    // Clean up blob URLs from file record if we have access to state.
+    // The pure decision of *which* URLs to revoke lives in
+    // collectRevocableBlobUrls; the side-effecting revocation stays here.
     if (stateRef) {
       const record = stateRef.current.files.byId[fileId];
-      if (record) {
-        // Clean up thumbnail blob URLs
-        if (record.thumbnailUrl && record.thumbnailUrl.startsWith("blob:")) {
-          try {
-            URL.revokeObjectURL(record.thumbnailUrl);
-          } catch {
-            // Ignore revocation errors
-          }
-        }
-
-        if (record.blobUrl && record.blobUrl.startsWith("blob:")) {
-          try {
-            URL.revokeObjectURL(record.blobUrl);
-          } catch {
-            // Ignore revocation errors
-          }
-        }
-
-        // Clean up processed file thumbnails
-        if (record.processedFile?.pages) {
-          record.processedFile.pages.forEach((page: ProcessedFilePage) => {
-            if (page.thumbnail && page.thumbnail.startsWith("blob:")) {
-              try {
-                URL.revokeObjectURL(page.thumbnail);
-              } catch {
-                // Ignore revocation errors
-              }
-            }
-          });
+      for (const url of collectRevocableBlobUrls(record)) {
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          // Ignore revocation errors
         }
       }
     }

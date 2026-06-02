@@ -5,6 +5,7 @@
 import { PageOperation } from "@app/types/pageEditor";
 import { FileId, BaseFileMetadata } from "@app/types/file";
 import { generateId } from "@app/utils/generateId";
+import { collectRevocableBlobUrls } from "@app/contexts/file/fileLifecycleUtils";
 
 // Re-export FileId for convenience
 export type { FileId };
@@ -194,32 +195,15 @@ export function createNewStirlingFileStub(
 }
 
 export function revokeFileResources(record: StirlingFileStub): void {
-  // Only revoke blob: URLs to prevent errors on other schemes
-  if (record.thumbnailUrl && record.thumbnailUrl.startsWith("blob:")) {
+  // The pure decision of which blob: URLs are eligible for revocation lives in
+  // collectRevocableBlobUrls (only blob: schemes, de-duplicated, in field
+  // order). The side-effecting revocation — and error swallowing — stays here.
+  for (const url of collectRevocableBlobUrls(record)) {
     try {
-      URL.revokeObjectURL(record.thumbnailUrl);
+      URL.revokeObjectURL(url);
     } catch (error) {
-      console.warn("Failed to revoke thumbnail URL:", error);
+      console.warn("Failed to revoke object URL:", error);
     }
-  }
-  if (record.blobUrl && record.blobUrl.startsWith("blob:")) {
-    try {
-      URL.revokeObjectURL(record.blobUrl);
-    } catch (error) {
-      console.warn("Failed to revoke blob URL:", error);
-    }
-  }
-  // Clean up processed file thumbnails
-  if (record.processedFile?.pages) {
-    record.processedFile.pages.forEach((page) => {
-      if (page.thumbnail && page.thumbnail.startsWith("blob:")) {
-        try {
-          URL.revokeObjectURL(page.thumbnail);
-        } catch (error) {
-          console.warn("Failed to revoke page thumbnail URL:", error);
-        }
-      }
-    });
   }
 }
 
