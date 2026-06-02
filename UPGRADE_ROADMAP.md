@@ -418,6 +418,22 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
     window), and WeasyPrint may fetch sub-resources from internal URLs during `--base-url` rendering. Fix needs
     connect-time IP pinning + an integration test simulating rebinding. Spawned as a separate task.
 
+### Wave 27 — G3 engine telemetry kill-switch tests + floor raise (privacy; verified; pushed)
+
+- **G3 (engine portion) DONE** (workstream G, observability/privacy — the first item in workstream G).
+  PostHog is wired across all three tiers; the engine's opt-out gate is `setup_posthog_tracking()`
+  (`engine/src/stirling/services/tracking.py`), which returns `None` — constructing **no** client and
+  registering **no** span processor (so nothing is ever captured/sent) — when `STIRLING_POSTHOG_ENABLED`
+  is false **or** `STIRLING_POSTHOG_API_KEY` is empty. That privacy contract was previously **untested**
+  (`tracking.py` was the engine's least-covered module at 29%). Added `engine/tests/test_tracking.py` (12
+  tests): pins the kill switch (None when disabled / no-key; builds a provider without any network when
+  enabled — `PostHogClient` patched) and covers the span→`$ai_generation`/`$ai_trace` translation, trace
+  dedup, and the pure helpers. Result: `tracking.py` **29% → 93%**, full engine suite **264 → 276 passed**,
+  overall engine coverage **78.30% → 81.06%** — so the I1 floor was **ratcheted 75 → 79**. Verified via the
+  engine venv: ruff clean, pyright 0/0/0, gate prints *"Required test coverage of 79.0% reached. Total
+  coverage: 81.06%"*. The cross-tier *single* kill switch + frontend/Java opt-out docs remain (need the
+  Java/frontend runtime to verify); the engine gate is real and locked.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -589,6 +605,10 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **G2. Structured logging + log correlation** (pairs with C7). *Effort:* S–M. *Risk:* low.
 - **G3. Telemetry consent clarity.** PostHog is wired across all three tiers; document the opt-out
   and provide a single privacy-first kill switch. *Effort:* S. *Risk:* low.
+  ⏳ **PARTIAL (Wave 27)**: the engine kill switch (`setup_posthog_tracking` → None when
+  `STIRLING_POSTHOG_ENABLED=false` or no API key) is now verified + regression-tested (`tracking.py`
+  29%→93%; engine floor ratcheted 75→79). Remaining: the unified cross-tier switch + frontend/Java opt-out
+  docs (need those runtimes to verify).
 
 ### Workstream H — DevOps / CI / build / release
 

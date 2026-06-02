@@ -94,8 +94,10 @@ branch = true
 show_missing = true
 skip_empty = true
 # Floor sits a few points below the measured baseline so the gate catches genuine
-# regressions without flaking on rounding. Ratchet upward as coverage improves.
-fail_under = 75
+# regressions without flaking on rounding. Ratchet upward as coverage improves
+# (75 at the I1/Wave 25 baseline of 78.3%; raised to 79 after the G3 tracking.py
+# kill-switch tests lifted the total to 81.1% — Wave 27).
+fail_under = 79
 # Conventional non-testable lines, added to coverage.py's defaults (which already
 # cover ``# pragma: no cover``). These never represent reachable runtime logic.
 exclude_also = [
