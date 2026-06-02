@@ -607,6 +607,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   left it (WASM-bound, not safely pure-extractable). The proven C1/C2 pure-extraction pattern, now applied
   to the frontend mega-components; further decomposition + `React.lazy` splitting remain.
 
+### Wave 41 — H4 release approval gate + F1 load harness (config/harness; validated; pushed)
+
+- **H4 DONE**: `environment: package-publish` job gate added to the two package-publish jobs
+  (`publish-aur`, `update-homebrew-and-scoop`). Required-reviewer enforcement is configured on the GitHub
+  Environment; the YAML is validated and the gate is a safe no-op until then (cannot break releases).
+- **F1 harness DONE**: `testing/load/api-load-test.js` — ready-to-run k6 concurrent-load script with
+  ramping VUs + failing latency/error thresholds + a heavy-endpoint template; syntax-validated. Execution
+  needs a running instance + load-gen host.
+- These are the implementable halves of two infra-tier items; the runtime activation (GitHub Environment
+  approval / an actual load run) happens on the respective infrastructure, transparently not verifiable here.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -824,6 +835,11 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 
 - **F1. Back the streaming work (C3) with load tests** at the 100 GB+ target and concurrent-request
   memory profiling. *Effort:* M. *Risk:* low.
+  ⏳ **Harness DONE (Wave 41)**: added `testing/load/api-load-test.js` — a ready-to-run k6
+  concurrent-load script (ramping VUs, p95/p99 latency + error-rate thresholds that fail the run, all
+  env-tunable) targeting `/api/v1/info/status`, with a commented multipart `merge` scenario template for
+  the heavy SISO path. JS/ESM syntax validated. Executing it needs a running instance + a load-gen host
+  (no rig here); the harness + thresholds are in place for the C3 streaming validation.
 - **F2. Async job execution review.** The `@AutoJobPostMapping` system + "cancel long-running AI
   task" feature is new; verify cancellation actually frees threads/temp files and is backpressured.
   *Effort:* M. *Risk:* med.
@@ -863,6 +879,11 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **H3. Unify Docker build matrix** (base / embedded / fat / ultra-lite / frontend / unoserver) into
   one cache-shared build. *Effort:* M. *Risk:* low.
 - **H4. Add a release approval gate** before AUR/package-manager auto-publish. *Effort:* S. *Risk:* low.
+  ✅ **DONE (Wave 41)**: added a job-level `environment: package-publish` gate to the `publish-aur`
+  (`aur-publish.yml`) and `update-homebrew-and-scoop` (`package-managers.yml`) jobs. Configure required
+  reviewers on that GitHub Environment (repo Settings → Environments) to require manual approval before
+  auto-publish. Safe no-op until protection rules are set, so it can't block existing releases. YAML
+  validated; the approval behaviour itself activates on GitHub (not runtime-verifiable here).
 
 ### Workstream I — Python AI engine & infra maturity
 

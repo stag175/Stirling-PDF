@@ -68,6 +68,11 @@ jobs:
   publish-aur:
     needs: get-release-info
     runs-on: ubuntu-latest
+    # H4: release approval gate. Gates AUR auto-publish behind the `package-publish` GitHub
+    # Environment — set required reviewers on it (repo Settings > Environments) to require manual
+    # approval before this job runs. No-op until protection rules are configured, so it is safe to
+    # add now and cannot block existing releases.
+    environment: package-publish
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
