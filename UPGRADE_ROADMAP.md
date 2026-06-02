@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 152 — B4 frontend coverage: saveOperationResults orchestration (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `operationResultsSaveService.test.ts` (7 tests) for the untested
+  `saveOperationResults(context)` orchestrator, mocking the `downloadService.downloadFromUrl` collaborator via
+  `vi.mock`. Pinned the full branch/side-effect contract: no `downloadUrl` → returns `null` and skips the
+  download entirely; otherwise calls `downloadFromUrl(url, filename, localPath)` and returns its result; the
+  `downloadFilename || "download"` fallback; the `downloadLocalPath || undefined` pass-through; `markSaved` is
+  invoked once per `outputFileId` with the resolved `savedPath`; and `markSaved` is **not** called when the
+  download produced no `savedPath` (browser-download path) nor when `outputFileIds` is null. Verified: **core
+  `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 7/7 green**.
+
 ### Wave 151 — B4 frontend coverage: localFileSaveService web-mode stub contract (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `localFileSaveService.test.ts` (4 tests) pinning the **web-mode core stub**
