@@ -696,6 +696,24 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 133 — C2 de-reflection: ClusterStorageGate field setters (backend proprietary; verified; pushed)
+
+- **C2 de-reflection (backend `proprietary`)**: `ClusterStorageGateTest` carried two reflective field setters
+  (`setClusterEnabled`, `setClusterArtifactStore`) used at 4 sites (incl. its `newGate` builder) to seed the
+  `@Value`-injected `clusterEnabled`/`clusterArtifactStore` fields for the cluster/artifact-store validation
+  matrix. Made both fields package-private (were `private`; `@Value` injection is unaffected on package-private
+  fields); the same-package test now seeds them directly (`gate.clusterEnabled = true; gate.clusterArtifactStore
+  = "s3";`). Deleted both reflective helpers (including a redundant `assertThat(f.getBoolean(gate))` self-check
+  that only proved reflection set the field) and the `java.lang.reflect.Field` import. The ~25-case validation
+  matrix and all license-gating assertions are unchanged. Behaviour-preserving. Verified: **gradle
+  `:proprietary:test --tests ClusterStorageGateTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL
+  is the project-wide threshold, not a test failure).
+- **Noted, not changed**: `ScheduledTasksTest` uses reflection (`getDeclaredMethod("performBackup")
+  .getAnnotation(Scheduled.class)`, class-level `getAnnotation(Conditional.class)`), but **legitimately** — it is
+  annotation introspection asserting the `@Scheduled(cron=…)` / `@Conditional(H2SQLCondition)` metadata on an
+  already-`public` method/class; a method's annotations cannot be read without a `Method`/`AnnotatedElement`
+  handle. Correctly left intact rather than dishonestly counted as a de-reflection.
+
 ### Wave 132 — C2 de-reflection: DatabaseConfig.getDriverClassName (backend proprietary; verified; pushed)
 
 - **C2 de-reflection (backend `proprietary`)**: `DatabaseConfigTest#getDriverClassName_returnsH2Driver`

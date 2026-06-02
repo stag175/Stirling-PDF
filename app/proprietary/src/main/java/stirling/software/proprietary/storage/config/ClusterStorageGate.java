@@ -29,11 +29,13 @@ public class ClusterStorageGate {
     private final ApplicationProperties applicationProperties;
     private final LicenseKeyChecker licenseKeyChecker;
 
+    // Package-private (not private) so ClusterStorageGateTest can seed these in the same package
+    // without reflection. @Value injection works the same on package-private fields.
     @Value("${cluster.enabled:false}")
-    private boolean clusterEnabled;
+    boolean clusterEnabled;
 
     @Value("${cluster.artifactStore:local}")
-    private String clusterArtifactStore;
+    String clusterArtifactStore;
 
     @PostConstruct
     void validate() {
