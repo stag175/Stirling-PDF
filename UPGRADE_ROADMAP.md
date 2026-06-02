@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 162 — B4 frontend coverage: StampPreviewUtils pure helpers (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `StampPreviewUtils.test.ts` (19 tests) for the untested pure helpers in the
+  add-stamp preview module. Headline coverage is `getFirstSelectedPage` — the page-selection parser — pinned
+  across 13 hand-computed cases: empty→1, single page, first CSV part, range→low bound (`3-5`→3, spaces allowed
+  `3 - 5`→3), whitespace trim, empty-part filtering, skipping invalid leading parts (`abc,6`→6), and the subtle
+  fall-through defaults to 1 (`0`→1 since 0 isn't `>0`; `-3`→1 since the range regex needs a leading digit;
+  `0-5`→1 since the range-low 0 fails `>0` and `"0-5"` isn't a plain int). Also covered `getFontFamily` (known
+  alphabets + roman/unknown fallback), `getAlphabetPreviewScale` (per-alphabet + 1.0 fallback), and
+  `getDefaultFontSizeForAlphabet` (per-alphabet incl. chinese=30 + 80 fallback). Verified: **core `tsc` 0 errors,
+  `eslint --max-warnings=0` clean, `vitest` 19/19 green**.
+
 ### Wave 161 — B4 frontend coverage: tour event dispatch helpers + event-name invariants (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `events.test.ts` (5 tests) for the untested `constants/events.ts` dispatch
