@@ -696,6 +696,21 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 135 — C2 de-reflection: ParticipantRateLimitInterceptor.requestCounts (backend proprietary; verified; pushed)
+
+- **C2 de-reflection (backend `proprietary`)**: `ParticipantRateLimitInterceptorTest` reached the private
+  `requestCounts` sliding-window map (per-IP `long[]{count, windowStartMs}`) through a reflective
+  `requestCounts()` helper (`getDeclaredField`/`setAccessible`/`get` + unchecked cast), used at 8 sites to
+  seed/inspect window state for the at-limit/over-limit/per-IP-isolation/expiry/active-window cases. Made the
+  field package-private (was `private final`; kept `final`); converted the helper to a direct field accessor
+  (`return interceptor.requestCounts;`) so all 8 call sites stay unchanged, then dropped the
+  `@SuppressWarnings("unchecked")`, the cast, the `throws Exception`, and the `java.lang.reflect.Field` import.
+  Also corrected the class-doc that still said the test "reaches into the private requestCounts map by
+  reflection" → now "package-private … directly (same package, no reflection)". The HTTP-429/Retry-After/window
+  assertions are unchanged. Behaviour-preserving. Verified: **gradle `:proprietary:test --tests
+  ParticipantRateLimitInterceptorTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the
+  project-wide threshold, not a test failure).
+
 ### Wave 134 — C2 de-reflection: CustomAuditEventRepository collaborator fields (backend proprietary; verified; pushed)
 
 - **C2 de-reflection (backend `proprietary`)**: `CustomAuditEventRepositoryTest#constructor_storesCollaborators`

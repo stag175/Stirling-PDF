@@ -21,7 +21,9 @@ public class ParticipantRateLimitInterceptor implements HandlerInterceptor {
     private static final long WINDOW_MS = 60_000L;
 
     // value: [requestCount, windowStartMs]
-    private final ConcurrentHashMap<String, long[]> requestCounts = new ConcurrentHashMap<>();
+    // Package-private (not private) so ParticipantRateLimitInterceptorTest can inspect/seed the
+    // window map directly instead of via reflection.
+    final ConcurrentHashMap<String, long[]> requestCounts = new ConcurrentHashMap<>();
 
     @Override
     public boolean preHandle(

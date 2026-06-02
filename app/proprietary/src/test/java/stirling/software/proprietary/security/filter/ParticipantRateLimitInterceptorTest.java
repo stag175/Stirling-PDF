@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,10 +38,10 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * <p>The window-start timestamps and {@code cleanupExpiredWindows()} cutoff both derive from {@code
  * System.currentTimeMillis()}, which cannot be injected. The eviction test therefore reaches into
- * the private {@code requestCounts} map by reflection and seeds entries with explicit window-start
- * timestamps (one far in the past, one "now") so the cutoff comparison is independent of wall-clock
- * jitter. ASSUMPTION TO VERIFY: the private field is named {@code requestCounts} and stores {@code
- * long[]{count, windowStartMs}} — confirmed against the source under test.
+ * the package-private {@code requestCounts} map directly (same package, no reflection) and seeds
+ * entries with explicit window-start timestamps (one far in the past, one "now") so the cutoff
+ * comparison is independent of wall-clock jitter. The field is named {@code requestCounts} and
+ * stores {@code long[]{count, windowStartMs}}.
  */
 @ExtendWith(MockitoExtension.class)
 class ParticipantRateLimitInterceptorTest {
@@ -66,11 +65,9 @@ class ParticipantRateLimitInterceptorTest {
         lenient().when(request.getRequestURI()).thenReturn("/api/v1/participant/token");
     }
 
-    @SuppressWarnings("unchecked")
-    private ConcurrentHashMap<String, long[]> requestCounts() throws Exception {
-        Field f = ParticipantRateLimitInterceptor.class.getDeclaredField("requestCounts");
-        f.setAccessible(true);
-        return (ConcurrentHashMap<String, long[]>) f.get(interceptor);
+    // requestCounts is package-private: return it directly (no reflection).
+    private ConcurrentHashMap<String, long[]> requestCounts() {
+        return interceptor.requestCounts;
     }
 
     @Test
@@ -97,7 +94,8 @@ class ParticipantRateLimitInterceptorTest {
     }
 
     @Test
-    @DisplayName("preHandle: the request beyond the limit is rejected with 429 + Retry-After + JSON")
+    @DisplayName(
+            "preHandle: the request beyond the limit is rejected with 429 + Retry-After + JSON")
     void preHandle_overLimit_rejectedWith429() throws Exception {
         // Burn through the allowed quota.
         for (int i = 1; i <= MAX_REQUESTS_PER_MINUTE; i++) {
@@ -149,8 +147,7 @@ class ParticipantRateLimitInterceptorTest {
         assertTrue(result, "request in a fresh window after expiry must be allowed");
         long[] entry = requestCounts().get(ip);
         assertEquals(1L, entry[0], "expired window resets the count to 1");
-        assertTrue(
-                entry[1] > staleStart, "window-start timestamp must be refreshed to ~now");
+        assertTrue(entry[1] > staleStart, "window-start timestamp must be refreshed to ~now");
         verify(response, never()).setStatus(anyInt());
     }
 
@@ -197,7 +194,8 @@ class ParticipantRateLimitInterceptorTest {
     }
 
     @Test
-    @DisplayName("getClientIp: the rate-limit key is request.getRemoteAddr(), not a spoofable header")
+    @DisplayName(
+            "getClientIp: the rate-limit key is request.getRemoteAddr(), not a spoofable header")
     void preHandle_usesRemoteAddrNotForwardedHeader() throws Exception {
         when(request.getRemoteAddr()).thenReturn("10.1.2.3");
 
