@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 153 — B4 frontend coverage: openFilesFromDisk orchestration (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `openFilesFromDisk.test.ts` (5 tests) for the untested
+  `openFilesFromDisk(options)` orchestrator, mocking only the native `fileDialogService.openFileDialog` while
+  keeping the real `pendingFilePathMappings` Map and the real (pure) `getDocumentFileDialogFilter`. Pinned: when
+  the dialog returns files → returns the `File[]` and records each `quickKey → path` in the path-mapping Map, and
+  does **not** invoke the fallback; when it returns none → returns `[]`, invokes `onFallbackOpen` once, and
+  records no mappings; no throw when there's no fallback callback; the `multiple ?? true` and
+  `filters ?? getDocumentFileDialogFilter()` defaults are applied when options are omitted; and an explicit
+  `multiple`/`filters` is passed straight through. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0`
+  clean, `vitest` 5/5 green**.
+
 ### Wave 152 — B4 frontend coverage: saveOperationResults orchestration (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `operationResultsSaveService.test.ts` (7 tests) for the untested
