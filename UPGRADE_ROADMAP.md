@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 92 — I-workstream engine reconstruction-prompt coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/test_reconstruction_prompt.py` (5 tests) for the
+  pure `_build_reconstruction_prompt` builder in the `pdf_to_markdown` agent, which assembles the LLM prompt
+  from a `PdfToMarkdownRequest`. Pins: `Files: Unknown files` when none given vs comma-joined names, the
+  `User request:` line, empty conversation-history → `None`, formatted history (`- user: hello`), the static
+  PAGE-LAYOUT instruction block, and the appended `_format_layout` output (`--- Page 1 ---`,
+  `**Title**@(0,100) fs=18`). Composes the already-tested `format_conversation_history` (W80) and
+  `_format_layout` (W87). Pure value-add, zero source change. Verified via the engine venv: **pytest 5/5
+  passed, ruff clean, pyright 0 errors**.
+
 ### Wave 91 — I-workstream engine label-normaliser + model-validation coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: two test files.
