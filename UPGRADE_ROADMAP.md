@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 79 — I-workstream engine page-text coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/agents/test_page_text.py` (12 tests) for the
+  untested `stirling.agents._page_text` helpers: `has_page_text` (empty list / no pages / blank-only → False;
+  any non-blank → True), `format_page_text` (default + custom empty marker, single-selection
+  `[File: …, Page N]\n<text>` formatting, missing page-number → `Page ?`, multi-section join with a blank
+  line), and `get_extracted_text_artifact` (None when absent, returns the artifact, returns the **first** when
+  several). Pure value-add, zero source change. Verified via the engine venv: **pytest 12/12 passed, ruff
+  clean, pyright 0 errors**.
+
 ### Wave 78 — I-workstream engine parsing coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: pivoted to the Python engine. The shared ledger parsing
