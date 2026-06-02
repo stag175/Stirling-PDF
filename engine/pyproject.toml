@@ -23,6 +23,7 @@ dev = [
     "anyio>=4.0.0",
     "datamodel-code-generator[ruff]>=0.26.0",
     "pytest>=8.0.0",
+    "pytest-cov>=7.0.0",
     "pyright>=1.1.408",
     "referencing>=0.35.0",
     "ruff>=0.14.10",
@@ -74,3 +75,32 @@ pythonpath = ["src", "tests"]
 # Use importlib import mode so test directories don't need __init__.py files
 # and duplicate basenames (e.g. multiple test_routes.py) collect cleanly.
 addopts = "--import-mode=importlib"
+
+# ---------------------------------------------------------------------------
+# Coverage (I1 — engine coverage visibility + regression gate).
+#
+# Unlike the historically-decorative JVM/frontend gates, the engine already has
+# real coverage (264 tests: ~83% statement / ~78% statement+branch at the time
+# this gate was added). These settings make that number VISIBLE on every run and
+# enforce a floor so new untested code can't silently erode it. The cov flags
+# live in the ``engine:test`` task (not in ``addopts``) so an ad-hoc ``pytest -k
+# one_test`` during development isn't failed by ``fail_under``.
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+# Floor sits a few points below the measured baseline so the gate catches genuine
+# regressions without flaking on rounding. Ratchet upward as coverage improves.
+fail_under = 75
+# Conventional non-testable lines, added to coverage.py's defaults (which already
+# cover ``# pragma: no cover``). These never represent reachable runtime logic.
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "@(abc\\.)?abstractmethod",
+]

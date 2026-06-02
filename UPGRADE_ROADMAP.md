@@ -373,6 +373,25 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   tests updated to assert the redacted form **and** that the raw PII no longer appears; added a focused
   `redactClaimValue` unit test. Behaviour unchanged outside the debug-only dump. Commit `ebbc964aa`.
 
+### Wave 25 — I1 engine coverage visibility + gate (Python engine; verified; pushed)
+
+- **I1 DONE** (workstream I, AI engine — the first item in the previously-untouched Python workstream).
+  The `engine/` FastAPI + pydantic-ai service already has **real, substantial** test coverage (264 tests,
+  ~83% statement / **78.3% statement+branch**) — the opposite of the historically-decorative JVM/frontend
+  gates — but that number was *invisible and unenforced*. Wired `pytest-cov` into the dev deps + `uv.lock`,
+  added `[tool.coverage.run]` (`source=src`, `branch=true`) and `[tool.coverage.report]`
+  (`show_missing`, `exclude_also` for `TYPE_CHECKING`/`__main__`/`NotImplementedError`/`abstractmethod`,
+  and **`fail_under=75`** — a few points below the measured baseline so it catches genuine regressions
+  without rounding flake). The `engine:test` task now runs `--cov=src --cov-branch --cov-report=term-missing
+  --cov-report=xml` (the `coverage.xml` feeds CI tooling); added an `engine:test:cov-html` convenience task;
+  gitignored coverage artifacts + `.venv`. **Verified locally on this box** (had to work around a uv
+  managed-Python "minor version link" bug on Windows by building the venv from the extracted CPython 3.13.13
+  directly): full `engine:check` green — pyright **0 errors/0 warnings**, ruff check clean, ruff format 115
+  files clean, `264 passed`, gate prints *"Required test coverage of 75.0% reached. Total coverage: 78.30%"*.
+  Proved the gate is **real, not decorative**: an ephemeral `--cov-fail-under=90` correctly exits non-zero
+  (*"FAIL Required test coverage of 90% not reached"*). No engine source touched — pure visibility +
+  enforcement wiring.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -551,7 +570,9 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 
 ### Workstream I — Python AI engine & infra maturity
 
-- **I1. Engine coverage visibility** — surface pytest-cov in CI (currently invisible). *Effort:* S. *Risk:* low.
+- **I1. Engine coverage visibility** — ✅ **DONE (Wave 25)**: `pytest-cov` wired into pyproject + `uv.lock`,
+  `[tool.coverage]` config with enforced `fail_under=75` (baseline 78.3% statement+branch), `engine:test`
+  emits `coverage.xml`, gate verified real. *Effort:* S. *Risk:* low.
 - **I2. Cluster backplane resilience tests** — exercise Valkey partition/failover, lock release, and
   rate-limit key expiry; the in-process impl is well-tested but the external path less so. *Effort:* M. *Risk:* med.
 - **I3. Document the engine contract & failure modes** (typed in/typed out, what happens when the
