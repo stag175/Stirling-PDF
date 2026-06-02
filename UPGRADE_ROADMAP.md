@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 78 — I-workstream engine parsing coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: pivoted to the Python engine. The shared ledger parsing
+  helpers `stirling.agents.ledger.validators._parsing` (`to_decimal`, `parse_csv`) were **untested** despite
+  being financial-parsing logic. Added `tests/ledger/test_parsing.py` (27 parametrized cases): `to_decimal`
+  strips currency symbols (£$€¥) + thousands separators, handles parenthesised negatives `(123.45)→-123.45`,
+  returns `None` for blank/dash/`n/a`/non-numeric, and returns a real `Decimal`; `parse_csv` parses rows,
+  drops blank lines and all-empty-cell rows, strips outer whitespace, and returns `[]` for empty input.
+  Pure value-add, zero source change. Verified via the engine venv: **pytest 27/27 passed, ruff clean, pyright
+  0 errors**.
+
 ### Wave 77 — B4 thumbnailScaleUtils pure-extraction (frontend; verified; pushed)
 
 - **B4 pure-extraction (frontend)**: resolved the Wave 76 deferral — `calculateScaleFromFileSize` lived in
