@@ -143,10 +143,9 @@ class KeyPersistenceServiceInterfaceTest {
                     .thenReturn(tempDir.toString());
             keyPersistenceService = new KeyPersistenceService(applicationProperties, cacheManager);
 
-            keyPersistenceService
-                    .getClass()
-                    .getDeclaredField("verifyingKeyCache")
-                    .setAccessible(true);
+            // Seed the verifying-key cache directly through the CacheManager (the previous
+            // reflective getDeclaredField("verifyingKeyCache").setAccessible(true) was dead code:
+            // its handle was discarded and the field never read or written).
             var cache = cacheManager.getCache("verifyingKeys");
             cache.put(keyId, signingKey);
 

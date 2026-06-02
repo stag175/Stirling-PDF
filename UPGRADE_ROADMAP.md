@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 131 — C2 de-reflection: remove dead reflection in KeyPersistenceServiceInterfaceTest (backend proprietary; verified; pushed)
+
+- **C2 de-reflection (backend `proprietary`, dead-code removal)**: `KeyPersistenceServiceInterfaceTest#testGetKeyPair`
+  contained a reflective block — `keyPersistenceService.getClass().getDeclaredField("verifyingKeyCache").setAccessible(true)`
+  — whose `Field` handle was **immediately discarded and never read or written**. The cache was actually seeded
+  through the public `CacheManager` (`cacheManager.getCache("verifyingKeys").put(keyId, signingKey)`) on the very
+  next lines, so the reflection had no effect beyond a brittle implicit "field still named verifyingKeyCache"
+  coupling. Deleted the dead block (replaced with a comment documenting why); the `CacheManager`-based seeding and
+  all `getKeyPair` assertions are untouched. **No production change** — pure test cleanup. Behaviour-preserving.
+  Verified: **gradle `:proprietary:test --tests KeyPersistenceServiceInterfaceTest` BUILD SUCCESSFUL** (single-class
+  run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 130 — C2 de-reflection: AttemptCounter field access (backend proprietary; verified; pushed)
 
 - **C2 de-reflection (backend `proprietary`)**: `AttemptCounterTest` carried three reflective field helpers
