@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 141 — I-workstream engine coverage: PdfCommentAgent._map_to_instructions (Python defence-in-depth; verified; pushed)
+
+- **Engine coverage (Python, defence-in-depth)**: added `tests/pdf_comment/test_map_to_instructions.py` (6 tests)
+  for the previously-untested pure static helper `PdfCommentAgent._map_to_instructions(chunks, llm_comments,
+  session_id)`. It translates the LLM's **ordinal-based** comments (`LlmCommentInstruction.chunk_index`) into the
+  Java-facing `PdfCommentInstruction` (anchored by the opaque `chunk_id`), and — as a defence-in-depth guard —
+  **drops any comment whose ordinal is out of range** (hallucinated/oversized index). `_build_prompt` was already
+  tested; this maps the other half. Pinned: in-range comments map to the right `chunk_id` with text preserved;
+  out-of-range ordinal dropped; mixed keep/drop preserves order; empty input → empty; `author`/`subject`
+  pass-through incl. `None` defaults; the boundary `index == len(chunks)` is out-of-range. Exercised directly on
+  the class (it's a `@staticmethod`, no agent/model setup). Verified: **pytest 6/6, ruff clean, pyright 0
+  errors**.
+
 ### Wave 140 — I-workstream engine coverage: contradiction.detector._escape_for_tag (Python security guard; verified; pushed)
 
 - **Engine coverage (Python, security-relevant)**: added `tests/contradiction/test_escape_for_tag.py` (9 tests)
