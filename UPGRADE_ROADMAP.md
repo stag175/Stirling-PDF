@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 173 — B4 frontend coverage: workbench type guards (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `workbench.test.ts` (5 tests) for the untested `types/workbench.ts` guards.
+  `getDefaultWorkbench()` is `"viewer"` (and is itself valid + base); `isValidWorkbench` accepts every
+  `BASE_WORKBENCH_TYPES` member and any `custom:`-prefixed view — **including the empty-suffix `custom:`** — while
+  rejecting a bare `custom` (no colon), unknown values, and empty; `isBaseWorkbench` is true for base types and
+  false for `custom:` views. The base-vs-custom distinction (`custom` invalid but `custom:` valid) is the subtle
+  boundary worth pinning. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 5/5 green**.
+
 ### Wave 172 — B4 frontend coverage: folder id parser + deterministic colour picker (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `folder.test.ts` (8 tests) for the two untested pure helpers in
