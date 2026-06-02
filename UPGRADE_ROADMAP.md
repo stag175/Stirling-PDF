@@ -696,6 +696,14 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 107 — B4 fileDialogUtils coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `fileDialogUtils.test.ts` (3 tests) for the pure,
+  import-free `getDocumentFileDialogFilter` — pinning the file-open dialog's accepted-extensions contract (one
+  "Documents" group; exactly `pdf/jpg/jpeg/png/gif/tiff/bmp/html/zip` in order; pdf present; no duplicates). A
+  regression here would silently change which files users can select. Pure value-add, zero source change.
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 3/3 green**.
+
 ### Wave 106 — B4 pixelSwizzleUtils pure-extraction (frontend; verified; pushed)
 
 - **B4 pure-extraction (frontend)**: lifted the RGBA→BGRA byte-swizzle out of `copyRgbaToBgraHeap` in the
