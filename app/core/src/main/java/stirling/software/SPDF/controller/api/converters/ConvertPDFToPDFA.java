@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -103,7 +102,6 @@ import stirling.software.common.util.WebResponseUtils;
 @RequiredArgsConstructor
 public class ConvertPDFToPDFA {
 
-    private static final Pattern NON_PRINTABLE_ASCII = Pattern.compile("[^\\x20-\\x7E]");
     private final RuntimePathConfig runtimePathConfig;
     private final stirling.software.SPDF.service.VeraPDFService veraPDFService;
     private final TempFileManager tempFileManager;
@@ -119,45 +117,6 @@ public class ConvertPDFToPDFA {
     private static final COSName COS_AF = COSName.getPDFName("AF"); // The Associated Files Array
     private static final COSName COS_UF = COSName.getPDFName("UF");
     private static final String AF_RELATIONSHIP_UNSPECIFIED = "Unspecified";
-
-    private static final Map<String, String> MIME_TYPE_MAP =
-            Map.ofEntries(
-                    Map.entry(".xml", "application/xml"),
-                    Map.entry(".json", "application/json"),
-                    Map.entry(".txt", "text/plain"),
-                    Map.entry(".csv", "text/csv"),
-                    Map.entry(".pdf", "application/pdf"),
-                    Map.entry(".png", "image/png"),
-                    Map.entry(".jpg", "image/jpeg"),
-                    Map.entry(".jpeg", "image/jpeg"),
-                    Map.entry(".gif", "image/gif"),
-                    Map.entry(".html", "text/html"),
-                    Map.entry(".htm", "text/html"),
-                    Map.entry(".zip", "application/zip"),
-                    Map.entry(".doc", "application/msword"),
-                    Map.entry(
-                            ".docx",
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
-                    Map.entry(".xls", "application/vnd.ms-excel"),
-                    Map.entry(
-                            ".xlsx",
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-                    Map.entry(".ppt", "application/vnd.ms-powerpoint"),
-                    Map.entry(
-                            ".pptx",
-                            "application/vnd.openxmlformats-officedocument.presentationml.presentation"),
-                    Map.entry(".svg", "image/svg+xml"),
-                    Map.entry(".webp", "image/webp"),
-                    Map.entry(".mp3", "audio/mpeg"),
-                    Map.entry(".mp4", "video/mp4"),
-                    Map.entry(".wav", "audio/wav"),
-                    Map.entry(".avi", "video/x-msvideo"),
-                    Map.entry(".tar", "application/x-tar"),
-                    Map.entry(".gz", "application/gzip"),
-                    Map.entry(".rar", "application/vnd.rar"),
-                    Map.entry(".7z", "application/x-7z-compressed"));
-
-    private static final String DEFAULT_MIME_TYPE = "application/octet-stream";
 
     private static void fixCidSetIssues(PDDocument document) {
         for (PDPage page : document.getPages()) {
@@ -741,7 +700,7 @@ public class ConvertPDFToPDFA {
                                     log.debug(
                                             "Added missing CharSet for Type1 font {} with {} glyphs",
                                             fontNameStr,
-                                            countGlyphs(glyphSet));
+                                            PdfaConversionUtils.countGlyphs(glyphSet));
                                 }
                             }
                         }
@@ -852,12 +811,6 @@ public class ConvertPDFToPDFA {
             }
             return processWithPDFBox(baseDoc, pdfaPart);
         }
-    }
-
-    private static int countGlyphs(String charSet) {
-        if (charSet == null || charSet.isEmpty()) return 0;
-        // CharSet format: /glyph1/glyph2/glyph3...
-        return (int) charSet.chars().filter(c -> c == '/').count();
     }
 
     private static void sanitizePdfA(COSBase base, int pdfaPart) {
@@ -2219,7 +2172,7 @@ public class ConvertPDFToPDFA {
                     new HashSet<>(keys)) { // Copy to avoid ConcurrentModificationException
                 String value = info.getCustomMetadataValue(key);
                 if (value != null) {
-                    String clean = NON_PRINTABLE_ASCII.matcher(value).replaceAll("");
+                    String clean = PdfaConversionUtils.stripNonPrintableAscii(value);
                     info.setCustomMetadataValue(key, clean);
                 }
             }
@@ -2367,25 +2320,11 @@ public class ConvertPDFToPDFA {
         if (embeddedFile != null) {
             String currentSubtype = embeddedFile.getSubtype();
             if (currentSubtype == null || currentSubtype.isEmpty()) {
-                String mimeType = detectMimeTypeFromFilename(fileName);
+                String mimeType = PdfaConversionUtils.detectMimeTypeFromFilename(fileName);
                 embeddedFile.setSubtype(mimeType);
                 log.debug("Set MIME type '{}' for embedded file: {}", mimeType, fileName);
             }
         }
-    }
-
-    private String detectMimeTypeFromFilename(String fileName) {
-        if (fileName == null || fileName.isEmpty()) {
-            return DEFAULT_MIME_TYPE;
-        }
-
-        String lowerName = fileName.toLowerCase(Locale.ROOT);
-
-        return MIME_TYPE_MAP.entrySet().stream()
-                .filter(entry -> lowerName.endsWith(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(DEFAULT_MIME_TYPE);
     }
 
     public byte[] convertPDDocumentToPDFA(PDDocument document, String outputFormat)

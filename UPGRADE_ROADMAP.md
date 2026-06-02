@@ -577,6 +577,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   removal plan (see the E1 entry). The upgrade itself is staged (needs an upstream-fact check + new
   PDF/A fixtures), not shipped blind.
 
+### Wave 38 — C2 pure-helper extraction from ConvertPDFToPDFA (verified; pushed)
+
+- **C2 started**: extracted three genuinely-pure helpers (`countGlyphs`, `stripNonPrintableAscii`, and
+  `detectMimeTypeFromFilename` + its MIME-type map) from the ~2,565-LoC `ConvertPDFToPDFA` controller into
+  a new, dependency-free `PdfaConversionUtils` (controller shrinks to 2,504 LoC; dropped the now-unused
+  `Pattern` import). These were previously testable only via reflection on the controller; now they have
+  **direct** unit tests (`PdfaConversionUtilsTest`, 4 tests). Behaviour-preserving (single-call-site
+  delegations). Verified via Gradle: `:stirling-pdf:test` BUILD SUCCESSFUL with both the new test and the
+  existing `ConvertPDFToPDFATest` green. The proven C1 pure-extraction pattern; the heavier
+  service-extraction of the PDF/A pipeline remains a larger follow-up.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -701,6 +712,12 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   graphics collaborators — currently untestable and unmaintainable. *Effort:* L. *Risk:* med.
 - **C2. Thin out fat controllers** (e.g. `ConvertPDFToPDFA` ≈2,565 LoC) — push logic into services,
   keep controllers as HTTP mappers. ~18% of files are controllers. *Effort:* M–L. *Risk:* low.
+  ⏳ **Started (Wave 38)**: extracted 3 pure helpers (`countGlyphs`, `stripNonPrintableAscii`,
+  `detectMimeTypeFromFilename` + the MIME map) out of `ConvertPDFToPDFA` into a tested
+  `PdfaConversionUtils` (controller 2,565→2,504 LoC), replacing reflection-based testing with direct
+  unit tests. Behaviour-preserving — verified: `:stirling-pdf:test` BUILD SUCCESSFUL with both the new
+  `PdfaConversionUtilsTest` and the existing `ConvertPDFToPDFATest` green. The larger
+  service-extraction (the PDF/A pipeline itself) remains.
 - **C3. Streaming I/O for large files.** Replace whole-file `Files.readAllBytes`/`readAllLines`
   in converters with `InputStream→OutputStream` streaming to make the 100 GB+ target real and cap
   memory under concurrency. *Effort:* L. *Risk:* med.
