@@ -147,7 +147,7 @@ class CustomOAuth2UserServiceTest {
         assertThat(combined)
                 .contains("OAuth2/OIDC login claims received")
                 .contains("Configured useAsUsername: email")
-                .contains("email = jane.doe@example.com");
+                .contains("email = j***(len=20)"); // D2: PII value redacted
     }
 
     // ---------------------------------------------------------------------
@@ -310,7 +310,7 @@ class CustomOAuth2UserServiceTest {
         assertThat(combined)
                 .as("unexpected-error dump should include the ID token claims")
                 .contains("OAuth2/OIDC login FAILED (unexpected error)")
-                .contains("email = boom@example.com");
+                .contains("email = b***(len=16)"); // D2: PII value redacted
     }
 
     @Test
@@ -456,12 +456,40 @@ class CustomOAuth2UserServiceTest {
                 .contains("ID token issued at :")
                 .contains("ID token expires at:")
                 .contains("-- UserInfo endpoint claims (1) --")
-                .contains("Value at 'email' : resolved@example.com");
+                .contains("Value at 'email' : r***(len=20)"); // D2: PII value redacted
         // Resolved value present => no NULL marker, no Hint line.
         assertThat(combined).doesNotContain("<NULL — this is why login fails>");
         assertThat(combined).doesNotContain("Hint:");
         // failure=false => INFO level.
         assertThat(appender.list).anyMatch(e -> e.getLevel() == Level.INFO);
+    }
+
+    // ---------------------------------------------------------------------
+    // D2: PII-safe claim-value redaction
+    // ---------------------------------------------------------------------
+
+    @Test
+    void redactClaimValue_masksPiiAndEmails_keepsStructuralClaims() {
+        // null -> placeholder, never the literal value.
+        assertThat(CustomOAuth2UserService.redactClaimValue("email", null)).isEqualTo("<null>");
+        // Sensitive keys masked to first char + length, with no PII content leaking.
+        assertThat(CustomOAuth2UserService.redactClaimValue("email", "jane.doe@example.com"))
+                .isEqualTo("j***(len=20)");
+        assertThat(CustomOAuth2UserService.redactClaimValue("given_name", "Jane"))
+                .isEqualTo("J***(len=4)");
+        assertThat(CustomOAuth2UserService.redactClaimValue("sub", "abc-123-def"))
+                .isEqualTo("a***(len=11)");
+        // Case-insensitive key matching.
+        assertThat(CustomOAuth2UserService.redactClaimValue("Email", "a@b.co"))
+                .isEqualTo("a***(len=6)");
+        // Any value that looks like an email is masked even under a non-listed key.
+        assertThat(CustomOAuth2UserService.redactClaimValue("custom_field", "x@y.z"))
+                .isEqualTo("x***(len=5)");
+        // Structural / non-PII claims are shown verbatim for diagnostics.
+        assertThat(CustomOAuth2UserService.redactClaimValue("iss", "https://sts.example.com"))
+                .isEqualTo("https://sts.example.com");
+        assertThat(CustomOAuth2UserService.redactClaimValue("email_verified", Boolean.TRUE))
+                .isEqualTo("true");
     }
 
     // ---------------------------------------------------------------------

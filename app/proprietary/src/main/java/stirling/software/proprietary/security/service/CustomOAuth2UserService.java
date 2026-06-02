@@ -196,7 +196,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
             sb.append("-- Value at '")
                     .append(usernameAttributeKey)
                     .append("' : ")
-                    .append(resolved == null ? "<NULL — this is why login fails>" : resolved)
+                    .append(
+                            resolved == null
+                                    ? "<NULL — this is why login fails>"
+                                    : redactClaimValue(usernameAttributeKey, resolved))
                     .append('\n');
 
             if (resolved == null) {
@@ -213,8 +216,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
         }
 
         sb.append(
-                "\nWARNING: this block contains PII. Set security.oauth2.debugLogging=false once"
-                        + " troubleshooting is complete.\n");
+                "\nNOTE: claim VALUES are redacted (first char + length) so PII is not written to"
+                        + " logs; claim keys and structural claims are shown for diagnostics. Set"
+                        + " security.oauth2.debugLogging=false once troubleshooting is complete.\n");
         sb.append("========== [/OAUTH2 DEBUG] ==========");
 
         if (failure) {
@@ -229,13 +233,71 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
             sb.append("  (no claims)\n");
             return;
         }
-        // Sort for stable, scannable output
+        // Sort for stable, scannable output. Claim VALUES are redacted (D2) so PII is never written
+        // to logs even with debugLogging on; the claim KEY is always shown for diagnostics.
         new TreeSet<>(claims.keySet())
                 .forEach(
                         key -> {
                             Object value = claims.get(key);
-                            sb.append("  ").append(key).append(" = ").append(value).append('\n');
+                            sb.append("  ")
+                                    .append(key)
+                                    .append(" = ")
+                                    .append(redactClaimValue(key, value))
+                                    .append('\n');
                         });
+    }
+
+    /**
+     * Claim keys whose VALUES are PII / personal identifiers and must be masked in the debug dump.
+     * Structural/operational claims (iss, aud, exp, iat, nbf, token_use, scope, email_verified, ...)
+     * are intentionally not listed so the operator can still see them for routing diagnostics.
+     * Matched case-insensitively.
+     */
+    private static final Set<String> SENSITIVE_CLAIM_KEYS =
+            Set.of(
+                    "email",
+                    "emails",
+                    "mail",
+                    "upn",
+                    "unique_name",
+                    "name",
+                    "given_name",
+                    "family_name",
+                    "middle_name",
+                    "nickname",
+                    "preferred_username",
+                    "phone_number",
+                    "phone",
+                    "address",
+                    "picture",
+                    "profile",
+                    "website",
+                    "birthdate",
+                    "gender",
+                    "sub",
+                    "oid");
+
+    /**
+     * Redacts a claim value for the debug dump (D2 — PII-safe OIDC diagnostics). Values of {@link
+     * #SENSITIVE_CLAIM_KEYS}, and any value that looks like an email address, are masked to
+     * "first-char + (len=N)" so an operator can confirm a value's presence/length without the PII
+     * itself reaching the logs; every other value is shown verbatim. Package-private for testing.
+     */
+    static String redactClaimValue(String key, Object value) {
+        if (value == null) {
+            return "<null>";
+        }
+        String s = String.valueOf(value);
+        boolean sensitive =
+                (key != null && SENSITIVE_CLAIM_KEYS.contains(key.toLowerCase(java.util.Locale.ROOT)))
+                        || s.contains("@");
+        if (!sensitive) {
+            return s;
+        }
+        if (s.isEmpty()) {
+            return "<empty>";
+        }
+        return s.charAt(0) + "***(len=" + s.length() + ")";
     }
 
     /**
