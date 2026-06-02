@@ -650,6 +650,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   PDFBox tests, no Docker. Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with all 5 RotationController
   tests (the 2 pre-existing + 3 new) green.
 
+### Wave 45 — C2/A3 page-ordering algorithms extracted + tested (verified; pushed)
+
+- **C2 + A3 continued**: extracted the **8 pure page-ordering/imposition algorithms** (`reverseOrder`,
+  `duplexSort`, `bookletSort`, `sideStitchBooklet`, `oddEvenSplit`, `removeFirst`, `removeLast`,
+  `removeFirstAndLast`) out of `RearrangePagesPDFController` (~70 lines off it) into a new
+  `PageOrderingUtils`, and added `PageOrderingUtilsTest` (8 tests with hand-computed expected outputs for
+  the off-by-one-prone booklet/duplex/side-stitch cases — previously **zero** coverage on this tricky
+  logic). Behaviour-preserving (`processSortTypes` now delegates to the util). Verified:
+  `:stirling-pdf:test` BUILD SUCCESSFUL with `PageOrderingUtilsTest` + the existing
+  `RearrangePagesPDFControllerTest` green. Highest-value C2 slice so far (real algorithm coverage, not just
+  a getter).
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license

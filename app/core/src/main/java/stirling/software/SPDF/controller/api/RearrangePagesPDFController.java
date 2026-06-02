@@ -84,85 +84,6 @@ public class RearrangePagesPDFController {
         }
     }
 
-    private List<Integer> removeFirst(int totalPages) {
-        if (totalPages <= 1) return new ArrayList<>();
-        List<Integer> newPageOrder = new ArrayList<>();
-        for (int i = 2; i <= totalPages; i++) {
-            newPageOrder.add(i - 1);
-        }
-        return newPageOrder;
-    }
-
-    private List<Integer> removeLast(int totalPages) {
-        if (totalPages <= 1) return new ArrayList<>();
-        List<Integer> newPageOrder = new ArrayList<>();
-        for (int i = 1; i < totalPages; i++) {
-            newPageOrder.add(i - 1);
-        }
-        return newPageOrder;
-    }
-
-    private List<Integer> removeFirstAndLast(int totalPages) {
-        if (totalPages <= 2) return new ArrayList<>();
-        List<Integer> newPageOrder = new ArrayList<>();
-        for (int i = 2; i < totalPages; i++) {
-            newPageOrder.add(i - 1);
-        }
-        return newPageOrder;
-    }
-
-    private List<Integer> reverseOrder(int totalPages) {
-        List<Integer> newPageOrder = new ArrayList<>();
-        for (int i = totalPages; i >= 1; i--) {
-            newPageOrder.add(i - 1);
-        }
-        return newPageOrder;
-    }
-
-    private List<Integer> duplexSort(int totalPages) {
-        List<Integer> newPageOrder = new ArrayList<>();
-        int half = (totalPages + 1) / 2; // This ensures proper behavior with odd numbers of pages
-        for (int i = 1; i <= half; i++) {
-            newPageOrder.add(i - 1);
-            if (i <= totalPages - half) { // Avoid going out of bounds
-                newPageOrder.add(totalPages - i);
-            }
-        }
-        return newPageOrder;
-    }
-
-    private List<Integer> bookletSort(int totalPages) {
-        List<Integer> newPageOrder = new ArrayList<>();
-        for (int i = 0; i < totalPages / 2; i++) {
-            newPageOrder.add(i);
-            newPageOrder.add(totalPages - i - 1);
-        }
-        return newPageOrder;
-    }
-
-    private List<Integer> sideStitchBooklet(int totalPages) {
-        List<Integer> newPageOrder = new ArrayList<>();
-        for (int i = 0; i < (totalPages + 3) / 4; i++) {
-            int begin = i * 4;
-            newPageOrder.add(Math.min(begin + 3, totalPages - 1));
-            newPageOrder.add(Math.min(begin, totalPages - 1));
-            newPageOrder.add(Math.min(begin + 1, totalPages - 1));
-            newPageOrder.add(Math.min(begin + 2, totalPages - 1));
-        }
-        return newPageOrder;
-    }
-
-    private List<Integer> oddEvenSplit(int totalPages) {
-        List<Integer> newPageOrder = new ArrayList<>();
-        for (int i = 1; i <= totalPages; i += 2) {
-            newPageOrder.add(i - 1);
-        }
-        for (int i = 2; i <= totalPages; i += 2) {
-            newPageOrder.add(i - 1);
-        }
-        return newPageOrder;
-    }
-
     private List<Integer> duplicate(int totalPages, String pageOrder) {
         List<Integer> newPageOrder = new ArrayList<>();
         int duplicateCount;
@@ -206,14 +127,14 @@ public class RearrangePagesPDFController {
         try {
             SortTypes mode = SortTypes.valueOf(sortTypes.toUpperCase(Locale.ROOT));
             return switch (mode) {
-                case REVERSE_ORDER -> reverseOrder(totalPages);
-                case DUPLEX_SORT -> duplexSort(totalPages);
-                case BOOKLET_SORT -> bookletSort(totalPages);
-                case SIDE_STITCH_BOOKLET_SORT -> sideStitchBooklet(totalPages);
-                case ODD_EVEN_SPLIT -> oddEvenSplit(totalPages);
-                case REMOVE_FIRST -> removeFirst(totalPages);
-                case REMOVE_LAST -> removeLast(totalPages);
-                case REMOVE_FIRST_AND_LAST -> removeFirstAndLast(totalPages);
+                case REVERSE_ORDER -> PageOrderingUtils.reverseOrder(totalPages);
+                case DUPLEX_SORT -> PageOrderingUtils.duplexSort(totalPages);
+                case BOOKLET_SORT -> PageOrderingUtils.bookletSort(totalPages);
+                case SIDE_STITCH_BOOKLET_SORT -> PageOrderingUtils.sideStitchBooklet(totalPages);
+                case ODD_EVEN_SPLIT -> PageOrderingUtils.oddEvenSplit(totalPages);
+                case REMOVE_FIRST -> PageOrderingUtils.removeFirst(totalPages);
+                case REMOVE_LAST -> PageOrderingUtils.removeLast(totalPages);
+                case REMOVE_FIRST_AND_LAST -> PageOrderingUtils.removeFirstAndLast(totalPages);
                 case DUPLICATE -> duplicate(totalPages, pageOrder);
                 default ->
                         throw ExceptionUtils.createIllegalArgumentException(
