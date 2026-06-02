@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 167 — I-workstream engine coverage: RagCapability result/instruction formatters (Python; verified; pushed)
+
+- **Engine coverage (Python)**: added `tests/test_rag_capability_format.py` (7 tests) for the two untested pure
+  static formatters on `RagCapability`. `_format_results` renders vector-search hits into the numbered,
+  metadata-annotated block the model reads; pinned: single result exact render, the `unknown`/`?` fallbacks for
+  missing `source`/`chunk_index`, 1-indexed numbering with `\n\n---\n\n` separators across multiple results, the
+  3-dp `relevance` score formatting (`0.12349`→`0.123`, `1.0`→`1.000`), and empty results → `""`.
+  `_static_instructions_text` builds the knowledge-base tool instructions; pinned that it lists the collections
+  (`collections: colA, colB`) and names the `search_knowledge` tool. Verified: **pytest 7/7, ruff clean, pyright
+  0 errors**.
+
 ### Wave 166 — I-workstream engine coverage: SqliteVecStore SQL-identifier guard + vector normalize (Python; verified; pushed)
 
 - **Engine coverage (Python, security + math)**: added `tests/test_sqlite_vec_store_helpers.py` (13 tests) for
