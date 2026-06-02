@@ -696,6 +696,26 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 137 — C2 de-reflection: KeygenLicenseVerifier nested class + 7 methods (backend proprietary; verified; pushed)
+
+- **C2 de-reflection (backend `proprietary`, largest backend yet; agent-assisted, independently verified)**:
+  `KeygenLicenseVerifierTest` (38 tests, ~533 lines) drove the EE license verifier almost entirely through
+  reflection — `Class.forName` + reflective constructor for the private nested `LicenseContext`, reflective
+  reads of its private fields, and a `findMethod`/`findMethodAccessible`/`invokeBooleanPrivate` dispatcher that
+  invoked private methods across ~40 call sites. Made package-private (access-modifier-only on production →
+  runtime behaviour identical): the nested `LicenseContext` class + its 3 fields (`isFloatingLicense`,
+  `maxMachines`, `isEnterpriseLicense`) and 7 methods (`isCertificateLicense`, `isJWTLicense`,
+  `verifyCertificateLicense`, `verifyEd25519Signature`, `processCertificateData`, `verifyJWTLicense`,
+  `processJWTLicensePayload`). The test now does `new KeygenLicenseVerifier.LicenseContext()`, reads
+  `ctx.isEnterpriseLicense`/`ctx.isFloatingLicense`/`ctx.maxMachines` directly, and calls the methods directly
+  (`verifier.processCertificateData(json, ctx)` etc.; null sites use `(String) null`). Deleted the
+  `LicenseContextHandle` wrapper and the `findMethod`/`findMethodAccessible`/`invokeBooleanPrivate` dispatcher,
+  plus the `java.lang.reflect.{Constructor,Method,Field}` imports; the cert/JWT/Ed25519/floating-license
+  assertions are unchanged. Delegated to a subagent with a precise spec, then **independently re-verified**:
+  confirmed zero `java.lang.reflect`/`getDeclared*`/`setAccessible`/`invoke`/`Class.forName` refs remain, the 11
+  source members are package-private, and **gradle `:proprietary:test --tests KeygenLicenseVerifierTest` BUILD
+  SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 136 — C2 partial de-reflection: CustomOAuth2UserService helpers (backend proprietary; verified; pushed)
 
 - **C2 de-reflection (backend `proprietary`, partial — methods only)**: `CustomOAuth2UserServiceTest`
