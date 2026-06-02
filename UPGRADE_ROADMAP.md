@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 126 — C2 de-reflection: ConvertWebsiteToPDF.convertURLToFileName (backend core; verified; pushed)
+
+- **C2 de-reflection (backend `core`)**: `ConvertWebsiteToPdfTest`'s two filename tests
+  (`convertURLToFileName_sanitizes_and_appends_pdf` and `…_truncates_to_50_chars_before_pdf_suffix`) reflectively
+  invoked the private `convertURLToFileName(String)` via `getDeclaredMethod`/`setAccessible`/`invoke` with a
+  `(String)` cast on the result. Made the method package-private (was `private`); both tests now call
+  `sut.convertURLToFileName(in)` directly — the return is already `String`, so the cast is gone and the tests no
+  longer declare `throws Exception`. Dropped the `java.lang.reflect.Method` import. The URL-sanitisation/50-char
+  truncation behaviour and the `PDF_FILENAME_PATTERN` assertions are unchanged. Behaviour-preserving. Verified:
+  **gradle `:stirling-pdf:test --tests ConvertWebsiteToPdfTest` BUILD SUCCESSFUL** (single-class run's JaCoCo
+  aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 125 — C2 de-reflection: ClusterConfig.validate (backend common, I2-adjacent; verified; pushed)
 
 - **C2 de-reflection (backend `common`)**: `ClusterConfigValidationTest` (4 cases — disabled passes, Valkey

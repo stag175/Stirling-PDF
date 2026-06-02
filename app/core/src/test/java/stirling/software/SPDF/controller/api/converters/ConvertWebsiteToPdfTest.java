@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -167,13 +166,9 @@ public class ConvertWebsiteToPdfTest {
     }
 
     @Test
-    void convertURLToFileName_sanitizes_and_appends_pdf() throws Exception {
-        Method m =
-                ConvertWebsiteToPDF.class.getDeclaredMethod("convertURLToFileName", String.class);
-        m.setAccessible(true);
-
+    void convertURLToFileName_sanitizes_and_appends_pdf() {
         String in = "https://ex-ample.com/path?q=1&x=y#frag";
-        String out = (String) m.invoke(sut, in);
+        String out = sut.convertURLToFileName(in);
 
         assertTrue(out.endsWith(".pdf"));
         // Only A–Z, a–z, 0–9, underscore and dot allowed
@@ -183,15 +178,11 @@ public class ConvertWebsiteToPdfTest {
     }
 
     @Test
-    void convertURLToFileName_truncates_to_50_chars_before_pdf_suffix() throws Exception {
-        Method m =
-                ConvertWebsiteToPDF.class.getDeclaredMethod("convertURLToFileName", String.class);
-        m.setAccessible(true);
-
+    void convertURLToFileName_truncates_to_50_chars_before_pdf_suffix() {
         // Very long URL -> triggers truncation
         String longUrl =
                 "https://very-very-long-domain.example.com/some/really/long/path/with?many=params&and=chars";
-        String out = (String) m.invoke(sut, longUrl);
+        String out = sut.convertURLToFileName(longUrl);
 
         assertTrue(out.endsWith(".pdf"));
         assertTrue(PDF_FILENAME_PATTERN.matcher(out).matches());
