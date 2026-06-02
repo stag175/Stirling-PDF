@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 156 — I-workstream engine coverage: tool→param registry completeness meta-test (Python; verified; pushed)
+
+- **Engine coverage (Python, architectural meta-test)**: added `tests/test_operations_completeness.py` (5 tests)
+  pinning the invariant that the `OPERATIONS` (`ToolEndpoint`→param model, 65 entries) and `AGENT_OPERATIONS`
+  (`AgentToolId`→param model) registries map **every** enum member with **no stray keys**, and that every value
+  is a model class. `ToolOperationStep.validate_tool_parameter_pairing` resolves the expected parameter type via
+  `OPERATIONS[self.tool]`, so a newly-added endpoint without a registry entry would KeyError at runtime — this
+  meta-test (analogous to the Java `AutoJobPostMappingWeightTest`) catches that gap at test time instead.
+  Verified empirically first (`set(OPERATIONS) == set(ToolEndpoint)`, both `AgentToolId` mapped) before
+  asserting. Verified: **pytest 5/5, ruff clean, pyright 0 errors**.
+
 ### Wave 155 — I-workstream engine coverage: ApiModel cross-boundary serialization contract (Python; verified; pushed)
 
 - **Engine coverage (Python, central contract)**: added `tests/test_api_model_config.py` (7 tests) for the
