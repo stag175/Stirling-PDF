@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 191 — B4 frontend coverage: staticStripeLinks email-prefill URL builder (frontend proprietary layer; verified; pushed)
+
+- **B4 coverage (frontend, proprietary layer)**: added `staticStripeLinks.test.ts` (4 tests) for
+  `buildStripeUrlWithEmail` in `proprietary/constants/staticStripeLinks.ts` — the helper that appends
+  a buyer's email to a Stripe hosted-checkout link as `?locked_prefilled_email=`. Pinned: the email is
+  `encodeURIComponent`-escaped (so `@`→`%40`, `+`→`%2B`, space→`%20`, and `&`/`=` are escaped and
+  cannot break out of the query param — an injection guard), the base URL is left untouched, and an
+  empty email yields an empty param value. Verified through the **proprietary** layer's toolchain:
+  **`tsc --project src/proprietary/tsconfig.json` 0 errors, `eslint --max-warnings=0` clean, `vitest`
+  4/4 green**.
+
 ### Wave 190 — B4 frontend coverage: desktop backendErrors error/guard (frontend desktop layer; verified; pushed)
 
 - **B4 coverage (frontend, desktop layer)**: added `backendErrors.test.ts` (7 tests) for
