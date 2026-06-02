@@ -8,7 +8,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -42,37 +41,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ConvertPDFToPDFATest {
 
     @TempDir Path tempDir;
-
-    @SuppressWarnings("unchecked")
-    private static <T> T invokePrivateMethod(String methodName, Object... args) throws Exception {
-        Class<?>[] paramTypes = new Class<?>[args.length];
-        for (int i = 0; i < args.length; i++) {
-            if (args[i] == null) {
-                paramTypes[i] = Object.class;
-            } else if (args[i] instanceof Integer) {
-                paramTypes[i] = int.class;
-            } else if (args[i] instanceof Boolean) {
-                paramTypes[i] = boolean.class;
-            } else {
-                paramTypes[i] = args[i].getClass();
-            }
-        }
-
-        try {
-            Method method = ConvertPDFToPDFA.class.getDeclaredMethod(methodName, paramTypes);
-            method.setAccessible(true);
-            return (T) method.invoke(null, args);
-        } catch (NoSuchMethodException e) {
-            for (Method method : ConvertPDFToPDFA.class.getDeclaredMethods()) {
-                if (method.getName().equals(methodName)
-                        && method.getParameterCount() == args.length) {
-                    method.setAccessible(true);
-                    return (T) method.invoke(null, args);
-                }
-            }
-            throw e;
-        }
-    }
 
     private PDDocument createSimplePdf() throws IOException {
         PDDocument document = new PDDocument();
@@ -166,7 +134,7 @@ class ConvertPDFToPDFATest {
         void shouldAddPdfA1IdentificationSchema() throws Exception {
             PDDocument document = createPdfWithMetadata("Test PDF", "Test Author", "Test Creator");
 
-            invokePrivateMethod("mergeAndAddXmpMetadata", document, 1);
+            ConvertPDFToPDFA.mergeAndAddXmpMetadata(document, 1);
 
             PDMetadata metadata = document.getDocumentCatalog().getMetadata();
             assertThat(metadata).isNotNull();
@@ -190,7 +158,7 @@ class ConvertPDFToPDFATest {
         void shouldAddPdfA2IdentificationSchema() throws Exception {
             PDDocument document = createSimplePdf();
 
-            invokePrivateMethod("mergeAndAddXmpMetadata", document, 2);
+            ConvertPDFToPDFA.mergeAndAddXmpMetadata(document, 2);
 
             PDMetadata metadata = document.getDocumentCatalog().getMetadata();
             try (InputStream is = metadata.createInputStream()) {
@@ -212,7 +180,7 @@ class ConvertPDFToPDFATest {
             PDDocument document =
                     createPdfWithMetadata("Test PDF", "Test Author", "Original Creator");
 
-            invokePrivateMethod("mergeAndAddXmpMetadata", document, 1);
+            ConvertPDFToPDFA.mergeAndAddXmpMetadata(document, 1);
 
             PDMetadata metadata = document.getDocumentCatalog().getMetadata();
             try (InputStream is = metadata.createInputStream()) {
@@ -232,7 +200,7 @@ class ConvertPDFToPDFATest {
         void shouldSetCreationAndModificationTimestamps() throws Exception {
             PDDocument document = createSimplePdf();
 
-            invokePrivateMethod("mergeAndAddXmpMetadata", document, 1);
+            ConvertPDFToPDFA.mergeAndAddXmpMetadata(document, 1);
 
             PDDocumentInformation info = document.getDocumentInformation();
             assertThat(info.getCreationDate()).isNotNull();
@@ -246,7 +214,7 @@ class ConvertPDFToPDFATest {
         void shouldHandleExistingXmpMetadata() throws Exception {
             PDDocument document = createPdfWithXmpMetadata(1);
 
-            invokePrivateMethod("mergeAndAddXmpMetadata", document, 2);
+            ConvertPDFToPDFA.mergeAndAddXmpMetadata(document, 2);
 
             PDMetadata metadata = document.getDocumentCatalog().getMetadata();
             try (InputStream is = metadata.createInputStream()) {
@@ -276,7 +244,7 @@ class ConvertPDFToPDFATest {
             assertThat(dict.containsKey(COSName.JAVA_SCRIPT)).isTrue();
             assertThat(dict.containsKey(COSName.getPDFName("JS"))).isTrue();
 
-            invokePrivateMethod("sanitizePdfA", dict, 1);
+            ConvertPDFToPDFA.sanitizePdfA(dict, 1);
 
             assertThat(dict.containsKey(COSName.JAVA_SCRIPT)).isFalse();
             assertThat(dict.containsKey(COSName.getPDFName("JS"))).isFalse();
@@ -290,7 +258,7 @@ class ConvertPDFToPDFATest {
 
             assertThat(dict.getBoolean(COSName.INTERPOLATE, false)).isTrue();
 
-            invokePrivateMethod("sanitizePdfA", dict, 1);
+            ConvertPDFToPDFA.sanitizePdfA(dict, 1);
 
             assertThat(dict.getBoolean(COSName.INTERPOLATE, true)).isFalse();
         }
@@ -303,7 +271,7 @@ class ConvertPDFToPDFATest {
 
             assertThat(dict.containsKey(COSName.SMASK)).isTrue();
 
-            invokePrivateMethod("sanitizePdfA", dict, 1);
+            ConvertPDFToPDFA.sanitizePdfA(dict, 1);
 
             assertThat(dict.containsKey(COSName.SMASK)).isFalse();
         }
@@ -318,7 +286,7 @@ class ConvertPDFToPDFATest {
 
             assertThat(dict.containsKey(COSName.GROUP)).isTrue();
 
-            invokePrivateMethod("sanitizePdfA", dict, 1);
+            ConvertPDFToPDFA.sanitizePdfA(dict, 1);
 
             assertThat(dict.containsKey(COSName.GROUP)).isFalse();
         }
@@ -335,7 +303,7 @@ class ConvertPDFToPDFATest {
             assertThat(dict.containsKey(COSName.URI)).isTrue();
             assertThat(dict.containsKey(COSName.EMBEDDED_FILES)).isTrue();
 
-            invokePrivateMethod("sanitizePdfA", dict, 1);
+            ConvertPDFToPDFA.sanitizePdfA(dict, 1);
 
             assertThat(dict.containsKey(COSName.URI)).isFalse();
             assertThat(dict.containsKey(COSName.EMBEDDED_FILES)).isFalse();
@@ -353,7 +321,7 @@ class ConvertPDFToPDFATest {
         void shouldDetectSMaskTransparency() throws Exception {
             PDDocument document = createPdfWithTransparency();
 
-            boolean hasTransparency = invokePrivateMethod("hasTransparentImages", document);
+            boolean hasTransparency = ConvertPDFToPDFA.hasTransparentImages(document);
 
             assertThat(hasTransparency).isTrue();
 
@@ -379,7 +347,7 @@ class ConvertPDFToPDFATest {
                 contentStream.drawImage(image, 100, 600, 100, 100);
             }
 
-            boolean hasTransparency = invokePrivateMethod("hasTransparentImages", document);
+            boolean hasTransparency = ConvertPDFToPDFA.hasTransparentImages(document);
 
             assertThat(hasTransparency).isFalse();
 
@@ -401,7 +369,7 @@ class ConvertPDFToPDFATest {
                 contentStream.drawImage(image, 100, 600);
             }
 
-            boolean hasTransparency = invokePrivateMethod("hasTransparentImages", document);
+            boolean hasTransparency = ConvertPDFToPDFA.hasTransparentImages(document);
 
             assertThat(hasTransparency).isTrue();
 
@@ -493,7 +461,7 @@ class ConvertPDFToPDFATest {
         @Test
         @DisplayName("Should build standard Type1 glyph set")
         void shouldBuildStandardType1GlyphSet() throws Exception {
-            String glyphSet = invokePrivateMethod("buildStandardType1GlyphSet");
+            String glyphSet = ConvertPDFToPDFA.buildStandardType1GlyphSet();
 
             assertThat(glyphSet).isNotBlank().contains("space", "A", "a", "zero", "period");
         }
@@ -510,7 +478,7 @@ class ConvertPDFToPDFATest {
 
             assertThat(Files.exists(testDir)).isTrue();
 
-            invokePrivateMethod("deleteQuietly", testDir);
+            ConvertPDFToPDFA.deleteQuietly(testDir);
 
             assertThat(Files.exists(testDir)).isFalse();
         }
@@ -518,7 +486,7 @@ class ConvertPDFToPDFATest {
         @Test
         @DisplayName("Should handle null path in deleteQuietly")
         void shouldHandleNullPathInDeleteQuietly() {
-            assertDoesNotThrow(() -> invokePrivateMethod("deleteQuietly", (Path) null));
+            assertDoesNotThrow(() -> ConvertPDFToPDFA.deleteQuietly((Path) null));
         }
 
         @Test
@@ -526,7 +494,7 @@ class ConvertPDFToPDFATest {
         void shouldHandleNonExistentPathInDeleteQuietly() {
             Path nonExistent = tempDir.resolve("non_existent_dir");
 
-            assertDoesNotThrow(() -> invokePrivateMethod("deleteQuietly", nonExistent));
+            assertDoesNotThrow(() -> ConvertPDFToPDFA.deleteQuietly(nonExistent));
         }
     }
 
@@ -541,7 +509,7 @@ class ConvertPDFToPDFATest {
 
             assertDoesNotThrow(
                     () -> {
-                        invokePrivateMethod("mergeAndAddXmpMetadata", document, 1);
+                        ConvertPDFToPDFA.mergeAndAddXmpMetadata(document, 1);
                         document.close();
                     });
         }
@@ -560,7 +528,7 @@ class ConvertPDFToPDFATest {
 
             assertDoesNotThrow(
                     () -> {
-                        invokePrivateMethod("sanitizePdfA", simpleDict, 1);
+                        ConvertPDFToPDFA.sanitizePdfA(simpleDict, 1);
                     });
 
             assertThat(simpleDict.containsKey(COSName.JAVA_SCRIPT)).isFalse();

@@ -296,7 +296,9 @@ public class ConvertPDFToPDFA {
         return message.toString();
     }
 
-    private static void deleteQuietly(Path directory) {
+    // Package-private (not private) so ConvertPDFToPDFATest can call it directly (not via
+    // reflection).
+    static void deleteQuietly(Path directory) {
         if (directory == null) {
             return;
         }
@@ -813,7 +815,9 @@ public class ConvertPDFToPDFA {
         }
     }
 
-    private static void sanitizePdfA(COSBase base, int pdfaPart) {
+    // Package-private (not private) so ConvertPDFToPDFATest can call it directly (not via
+    // reflection).
+    static void sanitizePdfA(COSBase base, int pdfaPart) {
         if (base instanceof COSDictionary dict) {
             if (pdfaPart == 3) {
                 COSName type = dict.getCOSName(COSName.TYPE);
@@ -911,7 +915,9 @@ public class ConvertPDFToPDFA {
         }
     }
 
-    private static String buildStandardType1GlyphSet() {
+    // Package-private (not private) so ConvertPDFToPDFATest can call it directly (not via
+    // reflection).
+    static String buildStandardType1GlyphSet() {
         Set<String> glyphNames = new LinkedHashSet<>();
 
         String[] standardGlyphs = {
@@ -1182,7 +1188,9 @@ public class ConvertPDFToPDFA {
                 && COSName.TRANSPARENCY.equals(gd.getCOSName(COSName.S));
     }
 
-    private static boolean hasTransparentImages(PDDocument doc) {
+    // Package-private (not private) so ConvertPDFToPDFATest can call it directly (not via
+    // reflection).
+    static boolean hasTransparentImages(PDDocument doc) {
         for (PDPage page : doc.getPages()) {
             PDResources res = page.getResources();
             if (res == null) continue;
@@ -1373,7 +1381,9 @@ public class ConvertPDFToPDFA {
     }
 
     /** Embbeds the XMP metadata required for PDF/A compliance. */
-    private static void mergeAndAddXmpMetadata(PDDocument document, int pdfaPart) throws Exception {
+    // Package-private (not private) so ConvertPDFToPDFATest can call it directly (not via
+    // reflection).
+    static void mergeAndAddXmpMetadata(PDDocument document, int pdfaPart) throws Exception {
         PDMetadata existingMetadata = document.getDocumentCatalog().getMetadata();
         XMPMetadata xmp;
 

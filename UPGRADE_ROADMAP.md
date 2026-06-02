@@ -696,6 +696,23 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 127 — C2 de-reflection: ConvertPDFToPDFA generic reflective dispatcher → 19 direct calls (backend core; verified; pushed)
+
+- **C2 de-reflection (backend `core`, largest yet)**: `ConvertPDFToPDFATest` used a generic
+  `invokePrivateMethod(String methodName, Object... args)` helper that inferred parameter types at runtime
+  (special-casing `int`/`boolean`/`null`), looked the method up via `getDeclaredMethod`, and — on
+  `NoSuchMethodException` — fell back to scanning **all** `getDeclaredMethods()` for a name + parameter-count
+  match (needed because args like a `COSDictionary` don't match the declared `COSBase` parameter). It drove **5
+  distinct private static methods across 19 call sites**: `mergeAndAddXmpMetadata(PDDocument,int)`,
+  `sanitizePdfA(COSBase,int)`, `hasTransparentImages(PDDocument)`, `buildStandardType1GlyphSet()`,
+  `deleteQuietly(Path)`. Made those 5 methods package-private (were `private static`) and replaced every call
+  site with a direct, compile-checked static call (`ConvertPDFToPDFA.sanitizePdfA(dict, 1)` etc.) — the compiler
+  now handles the `COSDictionary→COSBase` widening that previously forced the reflective fallback, the
+  boolean/String results need no unchecked cast, and the whole `invokePrivateMethod` helper + its
+  `@SuppressWarnings("unchecked")` + the `java.lang.reflect.Method` import were deleted. Same-package, so no new
+  import for the SUT. Behaviour-preserving. Verified: **gradle `:stirling-pdf:test --tests ConvertPDFToPDFATest`
+  BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 126 — C2 de-reflection: ConvertWebsiteToPDF.convertURLToFileName (backend core; verified; pushed)
 
 - **C2 de-reflection (backend `core`)**: `ConvertWebsiteToPdfTest`'s two filename tests
