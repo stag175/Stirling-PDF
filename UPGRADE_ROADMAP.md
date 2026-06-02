@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 160 — B4 frontend coverage: convert dropdown options ↔ matrix sync (frontend; verified; pushed)
+
+- **B4 coverage (frontend, cross-registry consistency)**: extended `convertConstants.test.ts` (+3 tests, 11
+  total) to pin that the convert dropdown option lists stay in sync with `CONVERSION_MATRIX`: every
+  `FROM_FORMAT_OPTIONS` value is a matrix **source** (a from-format the user can pick must have matrix targets —
+  reports orphans); every `TO_FORMAT_OPTIONS` value is reachable as a matrix **target** (in the union of all
+  target lists — reports unreachable); and FROM/TO option values are each unique. This closes the convert-registry
+  consistency suite: endpoints↔names id-sets, no dangling endpoint references, matrix↔endpoint routability, and
+  now dropdowns↔matrix — the four interlocking convert registries can no longer silently drift. Verified
+  empirically (all green). Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 11/11
+  green**.
+
 ### Wave 159 — B4 frontend coverage: CONVERSION_MATRIX routability (frontend; verified; pushed)
 
 - **B4 coverage (frontend, cross-registry consistency)**: extended `convertConstants.test.ts` (+3 tests, 8 total)

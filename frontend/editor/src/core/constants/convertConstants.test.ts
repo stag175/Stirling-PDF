@@ -5,6 +5,8 @@ import {
   CONVERSION_MATRIX,
   ENDPOINT_NAMES,
   EXTENSION_TO_ENDPOINT,
+  FROM_FORMAT_OPTIONS,
+  TO_FORMAT_OPTIONS,
 } from "@app/constants/convertConstants";
 
 // Cross-registry consistency guards. These three registries are maintained by hand and reference
@@ -87,5 +89,34 @@ describe("CONVERSION_MATRIX routability", () => {
       }
     }
     expect(dupes).toEqual([]);
+  });
+});
+
+// The dropdown option lists must stay in sync with the matrix: a "from" the user can pick must
+// have matrix targets, and a "to" must be reachable by at least one conversion.
+describe("FROM/TO_FORMAT_OPTIONS vs CONVERSION_MATRIX", () => {
+  it("every FROM_FORMAT_OPTIONS value is a CONVERSION_MATRIX source", () => {
+    const sources = new Set(Object.keys(CONVERSION_MATRIX));
+    const orphans = FROM_FORMAT_OPTIONS.map((o) => o.value).filter(
+      (v) => !sources.has(v),
+    );
+    expect(orphans).toEqual([]);
+  });
+
+  it("every TO_FORMAT_OPTIONS value is reachable as a matrix target", () => {
+    const reachable = new Set<string>(
+      Object.values(CONVERSION_MATRIX).flat(),
+    );
+    const unreachable = TO_FORMAT_OPTIONS.map((o) => o.value).filter(
+      (v) => !reachable.has(v),
+    );
+    expect(unreachable).toEqual([]);
+  });
+
+  it("FROM and TO option values are each unique", () => {
+    const fromValues = FROM_FORMAT_OPTIONS.map((o) => o.value);
+    const toValues = TO_FORMAT_OPTIONS.map((o) => o.value);
+    expect(new Set(fromValues).size).toBe(fromValues.length);
+    expect(new Set(toValues).size).toBe(toValues.length);
   });
 });
