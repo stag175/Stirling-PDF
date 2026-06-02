@@ -631,6 +631,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   conversions are trivial (a line-count), so C3's real work is staged behind F1 + integration tests rather
   than padded with a token change.
 
+### Wave 43 — A3 merge integration test (no Docker needed; verified; pushed)
+
+- **A3 started**: re-examined the "Docker-blocked" assumption — the stateless PDF endpoints A3 names
+  (merge, split) are in-memory PDFBox ops needing **no** container. Added `MergeControllerIntegrationTest`
+  (3 tests) that drives the **real** PDFBox cross-document page-merge logic (not mocked): combines pages
+  from 3 docs (2+3+1=6), preserves a single doc, and yields an empty doc for an empty list. This is the
+  **first full integration test in `:core`** (previously only reflection/DTO unit tests). Verified via
+  `:stirling-pdf:test` BUILD SUCCESSFUL. The Testcontainers half (DB-backed endpoints, and convert/OCR
+  needing native tools) genuinely needs Docker, which is absent here.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -708,6 +718,12 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   branches 78, functions 46) — see the FE coverage waves.
 - **A3. Backend integration tests with Testcontainers** for the top PDF endpoints (merge, split,
   convert, OCR, sign) — bridges the gap between unit tests and Cucumber e2e. *Effort:* M. *Risk:* low.
+  ⏳ **Started (Wave 43)**: the *stateless* PDF endpoints (merge, split) need **no Testcontainers/Docker** —
+  added `MergeControllerIntegrationTest` (3 tests) exercising the **real PDFBox** page-merge logic
+  end-to-end (multi-doc page combination, single-doc preservation, empty-list), verified via
+  `:stirling-pdf:test`. This was the first full integration test in `:core` (only reflection/DTO unit tests
+  existed). The container-backed half (DB-touching endpoints + real convert/OCR needing native tools) still
+  needs Docker.
 - **A4. Accessibility tests** (axe-core / jest-axe) — 399 aria/role usages, zero a11y assertions.
   Wire into CI as a regression gate. *Effort:* M. *Risk:* low.
   ⏳ **Foundation + growing coverage DONE (Waves 35–39)**: `jest-axe` (+ `@types/jest-axe`) added; **22
