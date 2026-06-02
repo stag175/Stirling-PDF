@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 176 — A1 coverage: CompressController.bytesToHexString unsigned-byte encoding (backend core; verified; pushed)
+
+- **A1 coverage (backend `core`)**: made `CompressController.bytesToHexString` package-private (was `private
+  static`; used at 5 sites for the image-dedup MD5 hashes, so I relaxed the modifier rather than extract+refactor
+  all call sites) and added `CompressControllerHexTest` (4 tests) pinning the lowercase, zero-padded hex encoder
+  — including the **signed-byte footgun**: `%02x` formats a negative Java byte as its unsigned 0..255 value
+  (`(byte)0xff`→`"ff"`, `0x80`→`"80"`, `0xab`→`"ab"`), not the sign-extended `"ffffffff"`. Also pinned empty→`""`,
+  low-byte zero-padding (`0x0f`→`"0f"`), and multi-byte concatenation with no separators (`{01,02,ab,ff}`→
+  `"0102abff"`). Behaviour-preserving (modifier-only source change). Verified: **gradle `:stirling-pdf:test
+  --tests CompressControllerHexTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the
+  project-wide threshold, not a test failure).
+
 ### Wave 175 — A1 pure-extraction: AutoSplitPdfController.isBlankImage → AutoSplitBlankImageUtils (backend core; verified; pushed)
 
 - **A1 pure-extraction (backend `core`)**: lifted the blank-image heuristic out of `AutoSplitPdfController` into a

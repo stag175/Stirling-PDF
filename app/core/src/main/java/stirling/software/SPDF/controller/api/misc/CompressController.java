@@ -477,7 +477,9 @@ public class CompressController {
         return null;
     }
 
-    private static String bytesToHexString(byte[] bytes) {
+    // Package-private (not private) so CompressControllerHexTest can pin the lowercase,
+    // zero-padded, unsigned-byte hex encoding used by the image-dedup hashes.
+    static String bytesToHexString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format(Locale.ROOT, "%02x", b));
