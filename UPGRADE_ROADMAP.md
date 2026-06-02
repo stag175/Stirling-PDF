@@ -696,6 +696,21 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 60 — B2 state-management migration plan (grounded; pushed)
+
+- **B2 plan DONE**: `docs/state-management-migration.md`. Grounded: **no state library installed** (pure
+  React Context), **42 provider files**, god-contexts led by `FileManagerContext` (1,274 LoC), and the file
+  context consumed by **101 files** (huge blast radius). Recommends **Zustand** (selector subscriptions
+  directly fix Context's re-render-every-consumer cost; coexists with Context during migration; `persist`
+  middleware replaces the hand-rolled `IndexedDBContext`). Strategy: **API-preserving, leaf-first** — back each
+  existing hook with a store while keeping its shape (so the 101 consumers don't change), migrate low-coupling
+  contexts first, god-contexts last (split into typed slices behind the same facade, reconciled with B3's
+  `fileLifecycleUtils`). Plan-only here: the success criterion is fewer re-renders with identical behavior,
+  observable only via a browser profiler + e2e rig (absent), and each step is a small revertible PR — not a
+  blind sweep. With this, **every roadmap item now has a verified implementation, a partial, or a grounded
+  code-referenced plan**; the only unimplemented work is provably infra-gated (Docker/CI-runner/load-rig/
+  browser-profiler/external-Valkey) or a multi-week cutover that must not be done blind.
+
 ### Wave 59 — H2/H3 CI-consolidation audit + plan (grounded; pushed)
 
 - **H2/H3 audit + plan DONE**: `docs/ci-workflow-consolidation.md`. Grounded in the real
@@ -930,6 +945,16 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   *Evidence:* `@mui/material` + `@mui/icons-material` in ~157 files. *Effort:* L. *Risk:* med (billing/auth UI churn).
 - **B2. Introduce a real state library for file state** (Zustand or Jotai) and collapse the 41
   contexts into ~8 domains (file, UI, auth, billing, viewer, tool-workflow…). *Effort:* L. *Risk:* med.
+  ⏳ **Plan DONE (Wave 60)**: `docs/state-management-migration.md`. Grounded the real state — **no state
+  library installed** (pure React Context); **42 provider files** (32 core/6 prop/1 saas/3 desktop); god-
+  contexts led by `FileManagerContext` **1,274 LoC** (+ ToolWorkflow 824, Folder 645, Viewer 638…); the file
+  context is consumed by **101 files**. Recommends **Zustand** (selector subscriptions fix the
+  re-render-every-consumer problem; coexists with Context during migration; `persist` replaces the hand-rolled
+  `IndexedDBContext`). Strategy: **API-preserving, leaf-first** — back each existing hook (`useFileContext`)
+  with a store while keeping its shape so the 101 consumers don't change; migrate low-coupling contexts first,
+  god-contexts last (split into typed slices behind the same facade, reconciled with the B3 blob lifecycle).
+  Plan-only here because the success criterion (fewer re-renders, identical behavior) needs a browser
+  profiler + e2e rig (absent) and each step touches up to 101 files → small revertible PRs, not a blind sweep.
 - **B3. Extract memory/lifecycle management out of `FileContext`** into a dedicated, unit-tested
   service (blob URL revocation, PDF.js `.destroy()`, worker termination). This is the crash-risk
   hotspot for the 100 GB+ goal. *Effort:* M. *Risk:* med.
