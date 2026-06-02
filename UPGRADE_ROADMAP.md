@@ -696,6 +696,22 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 63 — C2 BookletImpositionUtils pure-extraction (verified; pushed)
+
+- **C2 pure-extraction**: lifted the saddle-stitch booklet-imposition arithmetic (`padToMultipleOf4`,
+  `saddleStitchSides`, and the `Side` value type) out of `BookletImpositionController` into a pure
+  `BookletImpositionUtils` (with a public `Side` record), so the off-by-one-prone sheet/side page ordering is
+  unit-testable without PDFBox. Controller delegates (`Side` field access → record accessors; removed the now-
+  unused `ArrayList` import). Added `BookletImpositionUtilsTest` (11 tests, hand-traced): multiple-of-4
+  padding, single/two-sheet outer→inner pairing, `-1` blank padding for non-multiple-of-4 counts, FIRST/SECOND
+  duplex-pass selection, the short-edge back-side swap (+ that it's ignored when not double-sided), zero-page
+  edge case, and an each-real-page-placed-exactly-once invariant. Verified: `:stirling-pdf:test` BUILD
+  SUCCESSFUL with the new test (11) and existing `BookletImpositionControllerTest` green.
+- **E3 YAML validated**: parsed `provenance.yml` + the `aur-publish.yml`/`package-managers.yml` edits with
+  PyYAML — all three are syntactically valid and structurally well-formed (`name`/`on`/`permissions`/`jobs`
+  with the expected job names). Moves the E3 draft from asserted-valid to actually-validated (runtime
+  attestation behavior still needs a real release/runner).
+
 ### Wave 62 — I2 Valkey cluster-backplane design (grounded; pushed)
 
 - **I2 design DONE**: `docs/valkey-backplane-design.md`. Corrected my earlier offhand "no Valkey impl" into a

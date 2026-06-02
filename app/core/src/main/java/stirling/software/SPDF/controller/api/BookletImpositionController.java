@@ -2,7 +2,6 @@ package stirling.software.SPDF.controller.api;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.pdfbox.multipdf.LayerUtility;
@@ -99,64 +98,6 @@ public class BookletImpositionController {
         }
     }
 
-    private static int padToMultipleOf4(int n) {
-        return (n + 3) / 4 * 4;
-    }
-
-    private static class Side {
-        final int left, right;
-        final boolean isBack;
-
-        Side(int left, int right, boolean isBack) {
-            this.left = left;
-            this.right = right;
-            this.isBack = isBack;
-        }
-    }
-
-    private static List<Side> saddleStitchSides(
-            int totalPagesOriginal,
-            boolean doubleSided,
-            String duplexPass,
-            boolean flipOnShortEdge) {
-        int N = padToMultipleOf4(totalPagesOriginal);
-        List<Side> out = new ArrayList<>();
-        int sheets = N / 4;
-
-        for (int s = 0; s < sheets; s++) {
-            int a = N - 1 - (s * 2); // left, front
-            int b = (s * 2); // right, front
-            int c = (s * 2) + 1; // left, back
-            int d = N - 2 - (s * 2); // right, back
-
-            // clamp to -1 (blank) if >= totalPagesOriginal
-            a = (a < totalPagesOriginal) ? a : -1;
-            b = (b < totalPagesOriginal) ? b : -1;
-            c = (c < totalPagesOriginal) ? c : -1;
-            d = (d < totalPagesOriginal) ? d : -1;
-
-            // Handle duplex pass selection
-            boolean includeFront = "BOTH".equals(duplexPass) || "FIRST".equals(duplexPass);
-            boolean includeBack = "BOTH".equals(duplexPass) || "SECOND".equals(duplexPass);
-
-            if (includeFront) {
-                out.add(new Side(a, b, false)); // front side
-            }
-
-            if (includeBack) {
-                // For short-edge duplex, swap back-side left/right
-                // Note: flipOnShortEdge is ignored in manual duplex mode since users physically
-                // flip the stack
-                if (doubleSided && flipOnShortEdge) {
-                    out.add(new Side(d, c, true)); // swapped back side (automatic duplex only)
-                } else {
-                    out.add(new Side(c, d, true)); // normal back side
-                }
-            }
-        }
-        return out;
-    }
-
     private PDDocument createSaddleBooklet(
             PDDocument src,
             int totalPages,
@@ -181,9 +122,11 @@ public class BookletImpositionController {
         if (gutterSize < 0) gutterSize = 0;
         if (gutterSize >= pageSize.getWidth() / 2f) gutterSize = pageSize.getWidth() / 2f - 1f;
 
-        List<Side> sides = saddleStitchSides(totalPages, doubleSided, duplexPass, flipOnShortEdge);
+        List<BookletImpositionUtils.Side> sides =
+                BookletImpositionUtils.saddleStitchSides(
+                        totalPages, doubleSided, duplexPass, flipOnShortEdge);
 
-        for (Side side : sides) {
+        for (BookletImpositionUtils.Side side : sides) {
             PDPage out = new PDPage(pageSize);
             dst.addPage(out);
 
@@ -220,7 +163,7 @@ public class BookletImpositionController {
                         dst,
                         cs,
                         layerUtility,
-                        side.left,
+                        side.left(),
                         leftCellX,
                         0f,
                         leftCellW,
@@ -232,7 +175,7 @@ public class BookletImpositionController {
                         dst,
                         cs,
                         layerUtility,
-                        side.right,
+                        side.right(),
                         rightCellX,
                         0f,
                         rightCellW,
