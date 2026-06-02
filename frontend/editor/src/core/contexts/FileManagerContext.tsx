@@ -441,7 +441,7 @@ export const FileManagerProvider: React.FC<FileManagerProviderProps> = ({
             `/api/v1/storage/files/${fileToRemove.remoteStorageId}/shares/self`,
             {
               suppressErrorToast: true,
-            } as any,
+            },
           );
           await refreshRecentFiles();
           alert({
@@ -473,7 +473,7 @@ export const FileManagerProvider: React.FC<FileManagerProviderProps> = ({
         try {
           await apiClient.delete(
             `/api/v1/storage/files/${fileToRemove.remoteStorageId}`,
-            { suppressErrorToast: true } as any,
+            { suppressErrorToast: true },
           );
         } catch (error) {
           console.error("Failed to delete file from server:", error);
@@ -1000,7 +1000,7 @@ export const FileManagerProvider: React.FC<FileManagerProviderProps> = ({
             responseType: "blob",
             suppressErrorToast: true,
             skipAuthRedirect: true,
-          } as any,
+          },
         );
         const contentType =
           (response.headers &&

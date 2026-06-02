@@ -10,6 +10,7 @@
  * copy the result into the WASM heap with a single `HEAPU8.set()`.
  */
 import type { WrappedPdfiumModule } from "@embedpdf/pdfium";
+import { pdfiumMemoryBuffer } from "@app/services/pdfiumService";
 
 /** FPDF_ANNOT_LINK */
 export const FPDF_ANNOT_LINK = 4;
@@ -56,14 +57,11 @@ export function copyRgbaToBgraHeap(
       bgra[i + 2] = rgba[i]; // R
       bgra[i + 3] = rgba[i + 3]; // A
     }
-    new Uint8Array((m.pdfium.wasmExports as any).memory.buffer).set(
-      bgra,
-      bufferPtr,
-    );
+    new Uint8Array(pdfiumMemoryBuffer(m)).set(bgra, bufferPtr);
   } else {
     // Stride has padding — swizzle + copy row by row
     const rowBuf = new Uint8Array(rowBytes);
-    const heap = new Uint8Array((m.pdfium.wasmExports as any).memory.buffer);
+    const heap = new Uint8Array(pdfiumMemoryBuffer(m));
     for (let y = 0; y < height; y++) {
       const srcRowStart = y * rowBytes;
       for (let x = 0; x < rowBytes; x += 4) {

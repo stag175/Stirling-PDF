@@ -438,7 +438,7 @@ export default function MobileScannerPage() {
               let corners = null;
 
               // Run jscanify detection directly - convert canvas to Mat first
-              const mat = (window as any).cv.imread(detectionCanvas);
+              const mat = window.cv.imread(detectionCanvas);
               const contour = scannerRef.current.findPaperContour(mat);
               mat.delete();
 
@@ -676,7 +676,7 @@ export default function MobileScannerPage() {
           );
 
           // Run detection on low-res image
-          const mat = (window as any).cv.imread(detectionCanvas);
+          const mat = window.cv.imread(detectionCanvas);
           const contour = scannerRef.current.findPaperContour(mat);
 
           if (contour) {

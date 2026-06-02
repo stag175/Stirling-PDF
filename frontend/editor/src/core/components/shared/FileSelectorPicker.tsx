@@ -267,7 +267,7 @@ export function FileSelectorPicker({
               responseType: "blob",
               suppressErrorToast: true,
               skipAuthRedirect: true,
-            } as any,
+            },
           );
           const ct =
             res.headers?.["content-type"] ||
@@ -291,7 +291,7 @@ export function FileSelectorPicker({
               responseType: "blob",
               suppressErrorToast: true,
               skipAuthRedirect: true,
-            } as any,
+            },
           );
           const ct =
             res.headers?.["content-type"] ||

@@ -683,6 +683,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   ~71 casts now removed.** Verified: core tsc 0 errors, eslint clean, 236 related tests green (error/reducer/
   selector/lifecycle suites). The few remaining are intentional dynamic index signatures.
 
+### Wave 48 — B5 `as any` burn-down completed (208 casts / 99 files; verified; pushed)
+
+- **B5 cast burn-down effectively COMPLETE**: the agent re-counted (the roadmap's "71" was a worst-offenders
+  sample; real non-test count was **414**) and removed **208 more casts across 99 `core` files** — redundant
+  axios-config casts (covered by the existing `axios` module augmentation), `catch (e: unknown)` + narrowing
+  (~20 sites), declared globals, real `@cantoo/pdf-lib`/PDFium-heap/EmbedPDF-event types, branded
+  `FileId`/`StirlingFile`, a shared `CommentAnnotationObject` interface (replaced 14 casts), generic
+  `onParameterChange<K extends keyof…>` (which surfaced + fixed real latent NumberInput `string|number`
+  mismatches). **414→136**; the 136 remaining are documented-intentional (dynamic settings index signatures,
+  `(...args: any[])` constraints, untyped third-party SDKs). Verified centrally: **all 5 layer tscs 0 errors,
+  eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
+  behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -814,12 +827,15 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   `layerUtils.ts`, `StampPreview.tsx`). *Effort:* M. *Risk:* low.
   ⏳ **Substantial progress**: 3 strict flags enabled earlier (`noImplicitReturns`/`noFallthroughCasesInSwitch`/
   `noImplicitOverride`); `noUnusedLocals` evaluated + rejected (conflicts with the `_`-prefix convention,
-  documented). **Wave 36**: burned down the two worst files — **24 `as any`/`: any` casts removed** from
-  `layerUtils.ts` (14) and `StampPreview.tsx` (10). **Wave 47**: **30 more** removed across 7 core files
-  (error/http handlers, `fileContext`, `PdfiumFormProvider` via real `@cantoo/pdf-lib` types) using
-  `unknown`+narrowing and minimal local interfaces — **54 of ~71 casts now gone**. All type-only, verified
-  (core tsc 0, eslint clean, error/reducer tests green). Remaining `any` are mostly intentional dynamic
-  `[key: string]: any` index signatures; `noUncheckedIndexedAccess` (invasive) remains.
+  documented). Casts burned down across Waves 36/47/48: the roadmap's "71" was a worst-offenders sample —
+  the real non-test count was **414** (≈405 in `core`; the proprietary/saas/desktop/prototypes layers
+  already enforce `no-explicit-any: error` and were clean). Removed **24** (Wave 36: layerUtils/StampPreview)
+  + **30** (Wave 47: error/http/fileContext/PdfiumFormProvider) + **208** (Wave 48: 99 core files —
+  redundant axios-config casts, `catch(e: unknown)`+narrowing, declared globals, real `@cantoo/pdf-lib`/
+  PDFium/EmbedPDF types, branded `FileId`/`StirlingFile`, etc.). **Now 414→136**, and the remaining 136 are
+  documented-intentional (dynamic `[key:string]: any` settings bags, `(...args: any[])` HOF constraints,
+  untyped third-party SDKs — Google Picker/EmbedPDF internals). All type-only; verified: all 5 layer tscs 0,
+  eslint clean, **full FE suite 209 files / 4048 tests green**. `noUncheckedIndexedAccess` (invasive) remains.
 - **B6. Add circular-dep + bundle gates to CI** — `madge`/`dpdm` and `rollup-plugin-visualizer`
   are installed but not run in CI. *Effort:* S. *Risk:* low.
   ⏳ **Largely DONE**: the **circular-dependency gate is live** — `frontend:lint` runs

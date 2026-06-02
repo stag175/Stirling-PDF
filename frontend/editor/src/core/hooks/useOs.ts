@@ -9,6 +9,20 @@ export type OS =
   | "android"
   | "unknown";
 
+/**
+ * Minimal shape of the experimental User-Agent Client Hints API
+ * (`navigator.userAgentData`), which is not yet part of the DOM lib typings.
+ */
+interface HighEntropyValues {
+  platform?: string;
+  architecture?: string;
+  bitness?: string;
+  platformVersion?: string;
+}
+interface NavigatorUAData {
+  getHighEntropyValues?: (hints: string[]) => Promise<HighEntropyValues>;
+}
+
 function parseUA(ua: string): OS {
   const uaLower = ua.toLowerCase();
 
@@ -39,7 +53,8 @@ export function useOs(): OS {
       let detected: OS = parseUA(navigator.userAgent);
 
       // Try Client Hints for better platform + architecture
-      const uaData = (navigator as any).userAgentData;
+      const uaData = (navigator as Navigator & { userAgentData?: NavigatorUAData })
+        .userAgentData;
       if (uaData?.getHighEntropyValues) {
         try {
           const { platform, architecture, bitness } =

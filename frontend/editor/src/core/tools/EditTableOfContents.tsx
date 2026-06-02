@@ -10,7 +10,12 @@ import EditTableOfContentsWorkbenchView, {
 import EditTableOfContentsSettings from "@app/components/tools/editTableOfContents/EditTableOfContentsSettings";
 import { useEditTableOfContentsParameters } from "@app/hooks/tools/editTableOfContents/useEditTableOfContentsParameters";
 import { useEditTableOfContentsOperation } from "@app/hooks/tools/editTableOfContents/useEditTableOfContentsOperation";
-import { BaseToolProps, ToolComponent } from "@app/types/tool";
+import {
+  AutomationCapableTool,
+  BaseToolProps,
+  ToolComponent,
+} from "@app/types/tool";
+import type { StirlingFile } from "@app/types/fileContext";
 import { useBaseTool } from "@app/hooks/tools/shared/useBaseTool";
 import apiClient from "@app/services/apiClient";
 import {
@@ -117,7 +122,7 @@ const EditTableOfContents = (props: BaseToolProps) => {
         const payload = await extractBookmarks(file);
         const bookmarks = hydrateBookmarkPayload(payload);
         setBookmarks(bookmarks);
-        setLastLoadedFileId((file as any)?.fileId ?? file.name);
+        setLastLoadedFileId((file as Partial<StirlingFile>)?.fileId ?? file.name);
 
         if (showToast) {
           alert({
@@ -169,7 +174,7 @@ const EditTableOfContents = (props: BaseToolProps) => {
       return;
     }
 
-    const fileId = (selectedFile as any)?.fileId ?? selectedFile.name;
+    const fileId = selectedFile?.fileId ?? selectedFile.name;
     if (fileId === lastLoadedFileId) {
       return;
     }
@@ -471,6 +476,7 @@ const EditTableOfContents = (props: BaseToolProps) => {
   });
 };
 
-(EditTableOfContents as any).tool = () => useEditTableOfContentsOperation;
+(EditTableOfContents as unknown as AutomationCapableTool).tool = () =>
+  useEditTableOfContentsOperation;
 
 export default EditTableOfContents as ToolComponent;

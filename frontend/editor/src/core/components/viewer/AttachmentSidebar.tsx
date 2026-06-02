@@ -166,11 +166,10 @@ export const AttachmentSidebar = ({
         try {
           const result = await attachmentActions.getAttachments();
           return Array.isArray(result) ? result : [];
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const errMessage = (error as { message?: unknown })?.message;
           const message =
-            typeof error?.message === "string"
-              ? error.message.toLowerCase()
-              : "";
+            typeof errMessage === "string" ? errMessage.toLowerCase() : "";
           const notReady =
             message.includes("document") &&
             message.includes("not") &&
@@ -231,7 +230,7 @@ export const AttachmentSidebar = ({
 
   const handleDownload = (
     attachment: PdfAttachmentObject,
-    event: React.MouseEvent,
+    event: React.MouseEvent | React.KeyboardEvent,
   ) => {
     event.stopPropagation();
     attachmentActions.downloadAttachment(attachment);
@@ -269,7 +268,7 @@ export const AttachmentSidebar = ({
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
-              handleDownload(attachment, event as any);
+              handleDownload(attachment, event);
             }
           }}
         >

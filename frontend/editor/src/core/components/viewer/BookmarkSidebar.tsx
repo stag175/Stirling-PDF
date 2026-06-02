@@ -192,11 +192,10 @@ export const BookmarkSidebar = ({
         try {
           const result = await bookmarkActions.fetchBookmarks();
           return Array.isArray(result) ? result : [];
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const errMessage = (error as { message?: unknown })?.message;
           const message =
-            typeof error?.message === "string"
-              ? error.message.toLowerCase()
-              : "";
+            typeof errMessage === "string" ? errMessage.toLowerCase() : "";
           const notReady =
             message.includes("document") &&
             message.includes("not") &&
@@ -322,7 +321,7 @@ export const BookmarkSidebar = ({
 
   const handleBookmarkClick = (
     bookmark: PdfBookmarkObject,
-    event: React.MouseEvent,
+    event: React.MouseEvent | React.KeyboardEvent,
   ) => {
     const target = bookmark.target;
     if (target?.type === "action") {
@@ -406,7 +405,7 @@ export const BookmarkSidebar = ({
                 ? (event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
-                      handleBookmarkClick(node, event as any);
+                      handleBookmarkClick(node, event);
                     }
                   }
                 : undefined

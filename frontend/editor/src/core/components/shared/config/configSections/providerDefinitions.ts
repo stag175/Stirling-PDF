@@ -8,7 +8,7 @@ export interface ProviderField {
   label: string;
   description: string;
   placeholder?: string;
-  defaultValue?: any;
+  defaultValue?: string | number | boolean | string[];
 }
 
 export interface Provider {

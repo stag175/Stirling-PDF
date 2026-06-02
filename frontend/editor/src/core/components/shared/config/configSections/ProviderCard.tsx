@@ -70,7 +70,7 @@ export default function ProviderCard({
     setExpanded(!expanded);
   };
 
-  const handleFieldChange = (key: string, value: any) => {
+  const handleFieldChange = (key: string, value: unknown) => {
     if (disabled) return; // Block changes when disabled
     const updated = { ...localSettings, [key]: value };
     setLocalSettings(updated);

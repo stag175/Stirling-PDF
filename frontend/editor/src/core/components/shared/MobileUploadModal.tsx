@@ -19,7 +19,7 @@ interface MobileUploadModalProps {
 function generateSessionId(): string {
   // Use Web Crypto API for cryptographically secure random values
   const cryptoObj =
-    typeof crypto !== "undefined" ? crypto : (window as any).crypto;
+    typeof crypto !== "undefined" ? crypto : window.crypto;
 
   if (cryptoObj && typeof cryptoObj.getRandomValues === "function") {
     const bytes = new Uint8Array(16);
@@ -142,7 +142,7 @@ export default function MobileUploadModal({
 
       // Download only files we haven't processed yet
       const newFiles = files.filter(
-        (f: any) => !processedFiles.current.has(f.filename),
+        (f: { filename: string }) => !processedFiles.current.has(f.filename),
       );
 
       if (newFiles.length > 0) {

@@ -64,6 +64,9 @@ export async function flattenSignatures(
 
   try {
     // Step 1: Extract all annotations from EmbedPDF before export
+    // Annotation objects come from the viewer's `getPageAnnotations` (typed
+    // `Promise<any[]>`) and are probed for many version/stamp-specific fields
+    // (rect/bounds/imageSrc/appearance/...) not on a single published type.
     const allAnnotations: Array<{ pageIndex: number; annotations: any[] }> = [];
 
     if (signatureApiRef?.current) {

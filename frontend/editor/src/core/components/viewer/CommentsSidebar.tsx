@@ -48,8 +48,31 @@ function isStandaloneCommentType(type: number | undefined): boolean {
 const ANNOTATE_PANEL_ID = "annotate" as const;
 const TEXT_COMMENT_TOOL_ID = "textComment" as const;
 
+/**
+ * The subset of a PDF annotation object the comments panel reads. EmbedPDF's
+ * annotation objects vary by subtype/version and `customData` is app-defined,
+ * so we model exactly the fields probed here rather than reach in via `any`.
+ */
+interface CommentAnnotationObject {
+  id?: string;
+  type?: number;
+  contents?: string;
+  author?: string;
+  inReplyToId?: string;
+  creationDate?: string | number | Date;
+  modifiedDate?: string | number | Date;
+  M?: string | number | Date;
+  rect?: unknown;
+  customData?: {
+    toolId?: string;
+    annotationToolId?: string;
+    isComment?: boolean;
+    modifiedDate?: string | number | Date;
+  };
+}
+
 /** Format annotation date for display (e.g. "Mar 11, 6:05 PM"). */
-function formatCommentDate(obj: any): string {
+function formatCommentDate(obj: CommentAnnotationObject | null | undefined): string {
   const raw =
     obj?.modifiedDate ??
     obj?.creationDate ??
@@ -73,8 +96,8 @@ interface CommentsSidebarProps {
 }
 
 function getCommentDisplayContent(entry: {
-  annotation: { object: any };
-  replies: Array<{ object: any }>;
+  annotation: { object: CommentAnnotationObject };
+  replies: Array<{ object: CommentAnnotationObject }>;
 }): string {
   const main = entry.annotation?.object?.contents;
   if (main != null && String(main).trim()) return String(main).trim();
@@ -87,7 +110,10 @@ function getCommentDisplayContent(entry: {
 /** Placeholder authors we never show; use current user's name from context instead. */
 const PLACEHOLDER_AUTHORS = new Set(["Guest", "Digital Signature", ""]);
 
-function getAuthorName(obj: any, currentDisplayName: string): string {
+function getAuthorName(
+  obj: CommentAnnotationObject | null | undefined,
+  currentDisplayName: string,
+): string {
   const stored = (obj?.author ?? "Guest").trim() || "Guest";
   if (PLACEHOLDER_AUTHORS.has(stored)) return currentDisplayName || "Guest";
   return stored;
@@ -95,7 +121,7 @@ function getAuthorName(obj: any, currentDisplayName: string): string {
 
 /** Replies store an explicit author; only allow edit when it matches the current comment author name. */
 function isReplyAuthoredByCurrentUser(
-  obj: any,
+  obj: CommentAnnotationObject | null | undefined,
   currentDisplayName: string,
 ): boolean {
   const stored = (obj?.author ?? "").trim() || "Guest";
@@ -152,7 +178,9 @@ function getIconByType(type: number | undefined): string {
   return "comment";
 }
 
-function isCommentAnnotation(ann: any): boolean {
+function isCommentAnnotation(
+  ann: CommentAnnotationObject | null | undefined,
+): boolean {
   const toolId = ann?.customData?.toolId ?? ann?.customData?.annotationToolId;
   if (
     toolId === "textComment" ||
@@ -179,12 +207,14 @@ function isCommentAnnotation(ann: any): boolean {
   return false;
 }
 
-function getAnnotationToolId(ann: any): string {
+function getAnnotationToolId(
+  ann: CommentAnnotationObject | null | undefined,
+): string {
   return ann?.customData?.toolId ?? ann?.customData?.annotationToolId ?? "";
 }
 
 function getAnnotationTypeLabel(
-  ann: any,
+  ann: CommentAnnotationObject | null | undefined,
   t: (key: string, fallback: string) => string,
 ): string {
   const toolId = getAnnotationToolId(ann);
@@ -216,7 +246,7 @@ function getAnnotationTypeLabel(
   return t("viewer.comments.typeComment", "Comment");
 }
 
-function AnnotationTypeIcon({ ann }: { ann: any }) {
+function AnnotationTypeIcon({ ann }: { ann: CommentAnnotationObject }) {
   const toolId = getAnnotationToolId(ann);
   const iconName = TOOL_ICON_MAP[toolId] ?? getIconByType(ann?.type);
   return (
@@ -308,7 +338,7 @@ export function CommentsSidebar({
   ]);
 
   const handleLocateAnnotation = useCallback(
-    (pageIndex: number, ann: any) => {
+    (pageIndex: number, ann: CommentAnnotationObject) => {
       scrollActions?.scrollToPage(pageIndex + 1, "smooth");
       setTimeout(() => {
         const pageEl = document.querySelector<HTMLElement>(
@@ -412,10 +442,10 @@ export function CommentsSidebar({
   const [deleteModal, setDeleteModal] = useState<{
     pageIndex: number;
     id: string;
-    ann: any;
+    ann: CommentAnnotationObject;
   } | null>(null);
 
-  const isLinkedAnnotation = (ann: any) => {
+  const isLinkedAnnotation = (ann: CommentAnnotationObject) => {
     const type = ann?.type;
     if (isStandaloneCommentType(type)) return false;
     if (ann?.inReplyToId) return false;
@@ -426,7 +456,7 @@ export function CommentsSidebar({
   };
 
   const handleDeleteClick = useCallback(
-    (pageIndex: number, annotationId: string, ann: any) => {
+    (pageIndex: number, annotationId: string, ann: CommentAnnotationObject) => {
       if (isLinkedAnnotation(ann)) {
         setDeleteModal({ pageIndex, id: annotationId, ann });
       } else {
@@ -474,7 +504,11 @@ export function CommentsSidebar({
   );
 
   const handleSendReply = useCallback(
-    (pageIndex: number, parentId: string, parentRect: any) => {
+    (
+      pageIndex: number,
+      parentId: string,
+      parentRect: PdfTextAnnoObject["rect"] | undefined,
+    ) => {
       const key = `${pageIndex}_${parentId}_reply`;
       const text = replyDrafts[key]?.trim();
       if (!text || !provides?.createAnnotation) return;

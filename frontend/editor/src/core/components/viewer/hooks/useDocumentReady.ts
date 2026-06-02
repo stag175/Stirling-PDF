@@ -25,13 +25,12 @@ export function useDocumentReady() {
 
     let mounted = true;
 
-    const unsubOpen = documentManagerCapability.onDocumentOpened?.(
-      (event: any) => {
-        if (mounted && (event?.documentId || event?.id)) {
-          setDocumentReady(true);
-        }
-      },
-    );
+    const unsubOpen = documentManagerCapability.onDocumentOpened?.((event) => {
+      const e = event as { documentId?: string; id?: string };
+      if (mounted && (e?.documentId || e?.id)) {
+        setDocumentReady(true);
+      }
+    });
 
     const unsubClose = documentManagerCapability.onDocumentClosed?.(() => {
       if (!mounted) return;

@@ -415,6 +415,9 @@ export class EnhancedPDFProcessingService {
    * Render a page thumbnail with specified quality
    */
   private async renderPageThumbnail(
+    // Typed `any`: the `page.render(...)` below predates the current PDF.js
+    // `RenderParameters` (now requires a `canvas`); typing `PDFPageProxy`
+    // precisely surfaces that latent mismatch — out of scope for cast cleanup.
     page: any,
     quality: "low" | "medium" | "high",
   ): Promise<string> {

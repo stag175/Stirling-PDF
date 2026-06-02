@@ -11,11 +11,8 @@
  */
 export function getApiBaseUrl(): string {
   // Runtime override to fix hardcoded localhost in builds
-  if (
-    typeof window !== "undefined" &&
-    (window as any).STIRLING_PDF_API_BASE_URL
-  ) {
-    return (window as any).STIRLING_PDF_API_BASE_URL;
+  if (typeof window !== "undefined" && window.STIRLING_PDF_API_BASE_URL) {
+    return window.STIRLING_PDF_API_BASE_URL;
   }
 
   return import.meta.env.VITE_API_BASE_URL;

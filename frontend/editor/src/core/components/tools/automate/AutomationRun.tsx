@@ -46,7 +46,7 @@ export default function AutomationRun({
   // Initialize execution steps from automation
   useEffect(() => {
     if (automation?.operations) {
-      const steps = automation.operations.map((op: any, index: number) => {
+      const steps = automation.operations.map((op, index: number) => {
         const tool = toolRegistry[op.operation as keyof typeof toolRegistry];
         return {
           id: `${op.operation}-${index}`,
@@ -131,7 +131,7 @@ export default function AutomationRun({
       // Mark all as completed and reset current step
       setCurrentStepIndex(-1);
       console.log(`✅ Automation completed successfully`);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Automation execution failed:", error);
       setCurrentStepIndex(-1);
     }

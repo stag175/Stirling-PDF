@@ -21,9 +21,9 @@ interface ToolConfigurationModalProps {
     id: string;
     operation: string;
     name: string;
-    parameters?: any;
+    parameters?: Record<string, unknown>;
   };
-  onSave: (parameters: any) => void;
+  onSave: (parameters: Record<string, unknown>) => void;
   onCancel: () => void;
   toolRegistry: Partial<ToolRegistry>;
 }
@@ -37,7 +37,7 @@ export default function ToolConfigurationModal({
 }: ToolConfigurationModalProps) {
   const { t } = useTranslation();
 
-  const [parameters, setParameters] = useState<any>({});
+  const [parameters, setParameters] = useState<Record<string, unknown>>({});
 
   // Get tool info from registry
   const toolInfo = toolRegistry[tool.operation as ToolId];
@@ -81,8 +81,8 @@ export default function ToolConfigurationModal({
       return (
         <SettingsComponent
           parameters={parameters}
-          onParameterChange={(key: string, value: any) => {
-            setParameters((prev: any) => ({ ...prev, [key]: value }));
+          onParameterChange={(key: string, value: unknown) => {
+            setParameters((prev) => ({ ...prev, [key]: value }));
           }}
           getAvailableToExtensions={getAvailableToExtensions}
           selectedFiles={[]}
@@ -94,8 +94,8 @@ export default function ToolConfigurationModal({
     return (
       <SettingsComponent
         parameters={parameters}
-        onParameterChange={(key: string, value: any) => {
-          setParameters((prev: any) => ({ ...prev, [key]: value }));
+        onParameterChange={(key: string, value: unknown) => {
+          setParameters((prev) => ({ ...prev, [key]: value }));
         }}
         disabled={false}
       />

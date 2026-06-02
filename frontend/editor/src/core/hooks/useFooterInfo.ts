@@ -27,7 +27,7 @@ export function useFooterInfo() {
           "/api/v1/ui-data/footer-info",
           {
             suppressErrorToast: true,
-          } as any,
+          },
         );
         setFooterInfo(response.data);
         setError(null);

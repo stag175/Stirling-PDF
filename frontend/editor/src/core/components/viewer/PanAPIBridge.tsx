@@ -54,11 +54,11 @@ function PanAPIBridgeInner({ documentId }: { documentId: string }) {
           },
           makePanDefault: () => {
             // v2.5.0: makePanDefault may not exist, enable pan as fallback
-            if (
-              "makePanDefault" in currentPan &&
-              typeof (currentPan as any).makePanDefault === "function"
-            ) {
-              (currentPan as any).makePanDefault();
+            const maybeMakeDefault = (
+              currentPan as { makePanDefault?: () => void }
+            ).makePanDefault;
+            if (typeof maybeMakeDefault === "function") {
+              maybeMakeDefault();
             } else {
               currentPan.enablePan();
             }

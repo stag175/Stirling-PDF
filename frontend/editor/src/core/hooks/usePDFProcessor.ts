@@ -46,6 +46,9 @@ export function usePDFProcessor() {
   // Internal function to generate thumbnail from already-opened PDF
   const generateThumbnailFromPDF = useCallback(
     async (
+      // Typed as `any` because the local PDF.js render call predates the
+      // current `RenderParameters` (which now requires a `canvas`); typing the
+      // proxy precisely surfaces that latent mismatch — out of scope here.
       pdf: any,
       pageNumber: number,
       scale: number = 0.5,

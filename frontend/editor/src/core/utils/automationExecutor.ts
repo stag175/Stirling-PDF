@@ -6,12 +6,19 @@ import { AutomationFileProcessor } from "@app/utils/automationFileProcessor";
 import { ToolType } from "@app/hooks/tools/shared/useToolOperation";
 import { processResponse } from "@app/utils/toolResponseProcessor";
 
+/** Minimal shape of an automation this executor reads (a structural subset of
+ * `AutomationConfig` — `id`/timestamps are not needed to run a sequence). */
+interface ExecutableAutomation {
+  name?: string;
+  operations?: Array<{ operation: string; parameters?: unknown }>;
+}
+
 /**
  * Process multi-file tool response (handles ZIP or single PDF responses)
  */
 const processMultiFileResponse = async (
   responseData: Blob,
-  responseHeaders: any,
+  responseHeaders: Record<string, unknown> | undefined,
   files: File[],
   filePrefix: string,
   preserveBackendFilename?: boolean,
@@ -198,10 +205,11 @@ export const executeToolOperationWithPrefix = async (
         filePrefix,
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: unknown }; message?: unknown };
     console.error(`❌ ${operationName} failed:`, error);
     throw new Error(
-      `${operationName} operation failed: ${error.response?.data || error.message}`,
+      `${operationName} operation failed: ${err.response?.data || err.message}`,
       {
         cause: error,
       },
@@ -213,7 +221,7 @@ export const executeToolOperationWithPrefix = async (
  * Execute an entire automation sequence
  */
 export const executeAutomationSequence = async (
-  automation: any,
+  automation: ExecutableAutomation,
   initialFiles: File[],
   toolRegistry: ToolRegistry,
   onStepStart?: (stepIndex: number, operationName: string) => void,
@@ -256,9 +264,9 @@ export const executeAutomationSequence = async (
       );
       currentFiles = resultFiles;
       onStepComplete?.(i, resultFiles);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`❌ Step ${i + 1} failed:`, error);
-      onStepError?.(i, error.message);
+      onStepError?.(i, (error as { message?: string }).message ?? String(error));
       throw error;
     }
   }

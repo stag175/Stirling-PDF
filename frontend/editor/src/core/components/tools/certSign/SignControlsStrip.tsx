@@ -362,7 +362,7 @@ export default function SignControlsStrip({
       const isTypingTarget =
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA" ||
-        (target as any)?.isContentEditable;
+        target?.isContentEditable;
       if (isTypingTarget) return;
 
       if (event.key === "Escape") {

@@ -33,8 +33,13 @@ export function DocumentReadyWrapper({
     // Subscribe to document changes
     const docManagerApi = plugin.provides?.();
     if (docManagerApi?.onDocumentOpened) {
-      const unsubscribe = docManagerApi.onDocumentOpened((event: any) => {
-        const docId = event?.documentId || event?.id || event?.document?.id;
+      const unsubscribe = docManagerApi.onDocumentOpened((event) => {
+        const e = event as {
+          documentId?: string;
+          id?: string;
+          document?: { id?: string };
+        };
+        const docId = e?.documentId || e?.id || e?.document?.id;
         if (docId) {
           setActiveDocumentId(docId);
         }

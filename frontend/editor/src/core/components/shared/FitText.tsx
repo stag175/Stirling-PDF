@@ -29,7 +29,7 @@ const FitText: React.FC<FitTextProps> = ({
   const ref = useRef<HTMLElement | null>(null);
 
   // Hook runs after mount and on size/text changes; uses observers internally
-  useAdjustFontSizeToFit(ref as any, {
+  useAdjustFontSizeToFit(ref, {
     maxFontSizePx: fontSize,
     minFontScale: minimumFontScale,
     maxLines: lines,
@@ -38,6 +38,9 @@ const FitText: React.FC<FitTextProps> = ({
 
   // Memoize the HTML tag to render (span/div) from the `as` prop so
   // React doesn't create a new component function on each render.
+  // Dynamic intrinsic tag ("span" | "div"). Kept `any` because JSX resolves the
+  // `ref` prop against a concrete element type, which conflicts with the generic
+  // `HTMLElement` ref this component uses.
   const ElementTag: any = useMemo(() => as, [as]);
 
   // For the / character, insert zero-width soft breaks to prefer wrapping at them

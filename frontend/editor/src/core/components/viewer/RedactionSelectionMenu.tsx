@@ -13,7 +13,7 @@ import { useActiveDocumentId } from "@app/components/viewer/useActiveDocumentId"
 
 export type { RedactionSelectionMenuProps };
 
-export function RedactionSelectionMenu(props: any) {
+export function RedactionSelectionMenu(props: RedactionSelectionMenuProps) {
   const activeDocumentId = useActiveDocumentId();
 
   // Don't render until we have a valid document ID
@@ -32,11 +32,19 @@ function RedactionSelectionMenuInner({
   selected,
   menuWrapperProps,
 }: RedactionSelectionMenuProps & { documentId: string }) {
-  const item =
+  // `item` is either a redaction item (has `id`) or, when the menu is opened
+  // for an annotation, the annotation object (which additionally carries a
+  // numeric `type`). The annotation variant is not part of the redaction-only
+  // `context` type, so we narrow it explicitly.
+  const item: { id: string; type?: number } | null =
     context?.type === "redaction"
       ? context.item
       : context?.type === "annotation"
-        ? (context as any).annotation?.object
+        ? (
+            context as {
+              annotation?: { object?: { id: string; type?: number } };
+            }
+          ).annotation?.object ?? null
         : null;
 
   const isRedaction =

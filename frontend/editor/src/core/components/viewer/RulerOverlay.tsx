@@ -670,7 +670,7 @@ export const RulerOverlay = React.forwardRef<
 
   const [zoom, setZoom] = useState<number>(() => {
     try {
-      return ((viewer.getZoomState() as any)?.zoomPercent ?? 140) / 100;
+      return (viewer.getZoomState()?.zoomPercent ?? 140) / 100;
     } catch {
       return 1.4;
     }

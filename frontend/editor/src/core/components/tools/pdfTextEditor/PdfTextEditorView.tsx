@@ -2795,11 +2795,12 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
                                         }
                                       }
                                     } else if (
-                                      (document as any).caretPositionFromPoint
+                                      document.caretPositionFromPoint
                                     ) {
-                                      const pos = (
-                                        document as any
-                                      ).caretPositionFromPoint(clickX, clickY);
+                                      const pos = document.caretPositionFromPoint(
+                                        clickX,
+                                        clickY,
+                                      );
                                       if (pos) {
                                         const range = document.createRange();
                                         range.setStart(

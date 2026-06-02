@@ -28,8 +28,8 @@ export function SelectionAPIBridge() {
       api: buildApi(),
     });
 
-    const unsubChange = selection.onSelectionChange((event: any) => {
-      const hasText = !!event?.selection;
+    const unsubChange = selection.onSelectionChange((event) => {
+      const hasText = !!(event as { selection?: unknown } | null)?.selection;
       hasSelectionRef.current = hasText;
 
       registerBridge("selection", {

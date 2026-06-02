@@ -18,6 +18,12 @@ export interface AutomationProcessingResult {
   errors: string[];
 }
 
+/** Extract a human-readable message from an axios-style error of unknown type. */
+function describeAutomationError(error: unknown): string {
+  const err = error as { response?: { data?: unknown }; message?: unknown };
+  return `${err?.response?.data || err?.message}`;
+}
+
 export class AutomationFileProcessor {
   /**
    * Check if a blob is a ZIP file by examining its header
@@ -133,13 +139,11 @@ export class AutomationFileProcessor {
         files: [resultFile],
         errors: [],
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         files: [],
-        errors: [
-          `Automation step failed: ${error.response?.data || error.message}`,
-        ],
+        errors: [`Automation step failed: ${describeAutomationError(error)}`],
       };
     }
   }
@@ -170,13 +174,11 @@ export class AutomationFileProcessor {
 
       // Multi-file responses are typically ZIP files
       return await this.extractAutomationZipFiles(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         files: [],
-        errors: [
-          `Automation step failed: ${error.response?.data || error.message}`,
-        ],
+        errors: [`Automation step failed: ${describeAutomationError(error)}`],
       };
     }
   }

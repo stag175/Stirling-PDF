@@ -285,13 +285,17 @@ const FormFill = (_props: BaseToolProps) => {
         detail: { blob: filledBlob },
       });
       window.dispatchEvent(event);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const axiosErr = err as {
+        response?: { status?: number };
+        message?: string;
+      };
       const message =
-        err?.response?.status === 413
+        axiosErr?.response?.status === 413
           ? "File too large. Try reducing the PDF size first."
-          : err?.response?.status === 400
+          : axiosErr?.response?.status === 400
             ? "Invalid form data. Please check all fields."
-            : err?.message || "Failed to save filled form";
+            : axiosErr?.message || "Failed to save filled form";
       setSaveError(message);
       console.error("[FormFill] Save failed:", err);
     } finally {
