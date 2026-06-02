@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 101 — C2/E1 VeraPDFService de-reflection (backend; verified; pushed)
+
+- **C2 de-reflection (backend; E1 veraPDF workstream)**: `VeraPDFServiceTest` exercised **5 static helpers**
+  (`formatStandardDisplay`, `getStandardName`, `createNoPdfaDeclarationResult`, `buildErrorResult`,
+  `createValidationIssue`) **via reflection across 10 invoke sites**. Made all 5 package-private static and
+  converted every site to a direct compile-checked call (e.g. `VeraPDFService.formatStandardDisplay("PDF/A-1b",
+  0, true, false)`), removing the per-test reflection plumbing and the unused `java.lang.reflect.Method`
+  import. Same assertions (PDF/A standard-display formatting, error-result construction, validation-issue
+  mapping). Behaviour-preserving (visibility-only source change). Verified: `:stirling-pdf:test` BUILD
+  SUCCESSFUL with `VeraPDFServiceTest` green — the largest de-reflection so far.
+
 ### Wave 100 — C2 PdfJsonFallbackFontService de-reflection (backend; verified; pushed)
 
 - **C2 de-reflection (backend)**: `PdfJsonFallbackFontServiceTest` invoked three helpers

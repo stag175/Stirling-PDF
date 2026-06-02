@@ -95,8 +95,9 @@ public class VeraPDFService {
         return verificationResult;
     }
 
-    private static PDFVerificationResult.ValidationIssue createValidationIssue(
-            TestAssertion assertion) {
+    // Package-private (not private) so tests call these result/display builders directly (was
+    // reflection).
+    static PDFVerificationResult.ValidationIssue createValidationIssue(TestAssertion assertion) {
         PDFVerificationResult.ValidationIssue issue = new PDFVerificationResult.ValidationIssue();
 
         if (assertion.getRuleId() != null) {
@@ -120,7 +121,7 @@ public class VeraPDFService {
         return issue;
     }
 
-    private static PDFVerificationResult createNoPdfaDeclarationResult() {
+    static PDFVerificationResult createNoPdfaDeclarationResult() {
         PDFVerificationResult result = new PDFVerificationResult();
         result.setStandard(NOT_PDFA_STANDARD_ID);
         result.setStandardName(NOT_PDFA_STANDARD_NAME);
@@ -136,7 +137,7 @@ public class VeraPDFService {
         return result;
     }
 
-    private static PDFVerificationResult buildErrorResult(
+    static PDFVerificationResult buildErrorResult(
             PDFAFlavour declaredFlavour, PDFAFlavour validationFlavour, String errorMessage) {
 
         PDFVerificationResult errorResult = new PDFVerificationResult();
@@ -325,7 +326,7 @@ public class VeraPDFService {
         return PDFFlavours.isFlavourFamily(flavour, PDFAFlavour.SpecificationFamily.PDF_A);
     }
 
-    private static String formatStandardDisplay(
+    static String formatStandardDisplay(
             String baseName,
             int errorCount,
             boolean declaredPdfa,
@@ -346,7 +347,7 @@ public class VeraPDFService {
         return baseName + " compliant";
     }
 
-    private static String getStandardName(PDFAFlavour flavour) {
+    static String getStandardName(PDFAFlavour flavour) {
         String id = flavour.getId();
         String part = flavour.getPart().toString();
         String level = flavour.getLevel().toString();
