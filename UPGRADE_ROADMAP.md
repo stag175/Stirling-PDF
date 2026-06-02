@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 73 — B4 pdfTextEditorUtils coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: `pdfTextEditorUtils.ts` is a 1,561-line **untested** utils
+  module (only its sibling `pdfTextEditorFontUtils` had tests). Added `pdfTextEditorUtils.test.ts` (10 tests)
+  pinning three already-pure exported functions: `valueOr` (null/undefined/NaN→fallback, 0/negatives kept),
+  `getImageBounds` (the error-prone `left ?? x` / `width` vs `right-left` / `bottom ?? y` / `top` fallback
+  chains — explicit bounds, x/y+size derivation, right/top derivation, width/height derivation, empty→zero),
+  and `pageDimensions` (US-Letter 612×792 defaults for null/undefined/null-field pages, explicit dims kept).
+  Pure value-add (zero source change → zero regression risk). Verified: **core `tsc` 0 errors, `eslint
+  --max-warnings=0` clean, `vitest` 10/10 green**.
+
 ### Wave 72 — B4 adjustPixelUtils pure-extraction (frontend; verified; pushed)
 
 - **B4 pure-extraction (frontend)**: lifted the per-pixel colour-adjustment maths out of the canvas-bound
