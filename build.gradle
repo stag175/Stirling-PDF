@@ -164,8 +164,8 @@ def perModuleCoverageFloors = [
     // `:saas` is intentionally absent — it can't be built/tested here (Stripe/Supabase),
     // so it stays at defaultCoverageFloor and the CI build is never broken.
     ':common'      : [INSTRUCTION: 0.42, LINE: 0.40, BRANCH: 0.35], // measured 43.83/41.30/36.96
-    ':stirling-pdf': [INSTRUCTION: 0.37, LINE: 0.36, BRANCH: 0.30], // measured 37.53/36.96/30.73
-    ':proprietary' : [INSTRUCTION: 0.46, LINE: 0.45, BRANCH: 0.42], // measured 46.56/45.64/42.83
+    ':stirling-pdf': [INSTRUCTION: 0.39, LINE: 0.38, BRANCH: 0.32], // measured 39.20/38.42/32.13
+    ':proprietary' : [INSTRUCTION: 0.46, LINE: 0.45, BRANCH: 0.43], // measured 46.84/45.97/43.13
 ]
 
 subprojects {
