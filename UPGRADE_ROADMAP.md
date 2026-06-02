@@ -673,6 +673,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint clean. (Recovered cleanly after an earlier `git restore` — done to clean backend spotless churn —
   accidentally reverted the first attempt; this pass committed frontend-only with no backend run in between.)
 
+### Wave 47 — B5 `as any` burn-down round 2 (verified; pushed)
+
+- **B5 continued**: removed **30 more `as any`/`: any` casts** across 7 `core` files
+  (`errorUtils`/`httpErrorUtils`/`httpErrorHandler`/`specialErrorToasts`/`toolErrorHandler`,
+  `types/fileContext`, `tools/formFill/providers/PdfiumFormProvider`) — replacing them with
+  `unknown`+narrowing, minimal local interfaces, and real `@cantoo/pdf-lib` types
+  (`PDFDict`/`PDFAcroTerminal`/`PDFWidgetAnnotation`/`PDFNumber`). Type-only, behaviour-preserving. **54 of
+  ~71 casts now removed.** Verified: core tsc 0 errors, eslint clean, 236 related tests green (error/reducer/
+  selector/lifecycle suites). The few remaining are intentional dynamic index signatures.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -805,8 +815,11 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   ⏳ **Substantial progress**: 3 strict flags enabled earlier (`noImplicitReturns`/`noFallthroughCasesInSwitch`/
   `noImplicitOverride`); `noUnusedLocals` evaluated + rejected (conflicts with the `_`-prefix convention,
   documented). **Wave 36**: burned down the two worst files — **24 `as any`/`: any` casts removed** from
-  `layerUtils.ts` (14, via real pdf-lib + OCG types) and `StampPreview.tsx` (10), type-only, verified (core
-  tsc 0 errors, 25 tests pass, eslint clean). `noUncheckedIndexedAccess` (genuinely invasive) remains.
+  `layerUtils.ts` (14) and `StampPreview.tsx` (10). **Wave 47**: **30 more** removed across 7 core files
+  (error/http handlers, `fileContext`, `PdfiumFormProvider` via real `@cantoo/pdf-lib` types) using
+  `unknown`+narrowing and minimal local interfaces — **54 of ~71 casts now gone**. All type-only, verified
+  (core tsc 0, eslint clean, error/reducer tests green). Remaining `any` are mostly intentional dynamic
+  `[key: string]: any` index signatures; `noUncheckedIndexedAccess` (invasive) remains.
 - **B6. Add circular-dep + bundle gates to CI** — `madge`/`dpdm` and `rollup-plugin-visualizer`
   are installed but not run in CI. *Effort:* S. *Risk:* low.
   ⏳ **Largely DONE**: the **circular-dependency gate is live** — `frontend:lint` runs

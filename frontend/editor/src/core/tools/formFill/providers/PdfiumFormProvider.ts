@@ -31,6 +31,14 @@ import {
   saveRawDocument,
   type PdfiumFormField,
 } from "@app/services/pdfiumService";
+import type {
+  PDFDict,
+  PDFAcroTerminal,
+  PDFWidgetAnnotation,
+} from "@cantoo/pdf-lib";
+
+/** PdfiumFormField with the alternate-name tooltip enrichment slot. */
+type EnrichableField = PdfiumFormField & { _tooltip?: string | null };
 
 /**
  * Map PDFium form field type enum to our FormFieldType string.
@@ -187,7 +195,9 @@ export class PdfiumFormProvider implements IFormDataProvider {
         if (!formEnvPtr) return;
 
         const pageCount = m.FPDF_GetPageCount(docPtr);
-        const nameToField = new Map(fields.map((f) => [f.name, f]));
+        const nameToField = new Map<string, EnrichableField>(
+          fields.map((f) => [f.name, f]),
+        );
         const enriched = new Set<string>();
 
         for (
@@ -238,7 +248,8 @@ export class PdfiumFormProvider implements IFormDataProvider {
                 );
                 const altName = readUtf16(m, altBuf, altLen);
                 m.pdfium.wasmExports.free(altBuf);
-                (nameToField.get(name) as any)._tooltip = altName || null;
+                const enrichTarget = nameToField.get(name);
+                if (enrichTarget) enrichTarget._tooltip = altName || null;
               }
               enriched.add(name);
             }
@@ -312,7 +323,7 @@ export class PdfiumFormProvider implements IFormDataProvider {
           )
             continue;
 
-          const acroDict = (field.acroField as any).dict;
+          const acroDict = field.acroField.dict;
           const optRaw = acroDict.lookup(PDFName.of("Opt"));
           if (!(optRaw instanceof PDFArray)) continue;
 
@@ -374,7 +385,7 @@ export class PdfiumFormProvider implements IFormDataProvider {
     if (buttons.length === 0) return result;
 
     try {
-      const { PDFDocument, PDFName, PDFString, PDFHexString, PDFDict } =
+      const { PDFDocument, PDFName, PDFString, PDFHexString, PDFDict, PDFNumber } =
         await import("@cantoo/pdf-lib");
 
       const doc = await PDFDocument.load(data, {
@@ -387,7 +398,7 @@ export class PdfiumFormProvider implements IFormDataProvider {
         if (obj instanceof PDFString || obj instanceof PDFHexString)
           return obj.decodeText();
         if (obj instanceof PDFName)
-          return (obj as any).asString?.() ?? obj.toString().replace(/^\//, "");
+          return obj.asString?.() ?? obj.toString().replace(/^\//, "");
         return null;
       };
 
@@ -396,15 +407,14 @@ export class PdfiumFormProvider implements IFormDataProvider {
         const sObj = aObj.lookup(PDFName.of("S"));
         if (!(sObj instanceof PDFName)) return null;
         const actionType: string =
-          (sObj as any).asString?.() ?? sObj.toString().replace(/^\//, "");
+          sObj.asString?.() ?? sObj.toString().replace(/^\//, "");
 
         switch (actionType) {
           case "Named": {
             const nObj = aObj.lookup(PDFName.of("N"));
             const name =
               nObj instanceof PDFName
-                ? ((nObj as any).asString?.() ??
-                  nObj.toString().replace(/^\//, ""))
+                ? (nObj.asString?.() ?? nObj.toString().replace(/^\//, ""))
                 : "";
             return { type: "named", namedAction: name };
           }
@@ -422,10 +432,7 @@ export class PdfiumFormProvider implements IFormDataProvider {
               url = decodeText(fObj) ?? fObj.toString();
             }
             const flagsObj = aObj.lookup(PDFName.of("Flags"));
-            const flags =
-              typeof (flagsObj as any)?.asNumber === "function"
-                ? (flagsObj as any).asNumber()
-                : 0;
+            const flags = flagsObj instanceof PDFNumber ? flagsObj.asNumber() : 0;
             return { type: "submitForm", url, submitFlags: flags };
           }
           case "ResetForm":
@@ -439,7 +446,7 @@ export class PdfiumFormProvider implements IFormDataProvider {
         }
       };
 
-      const getMkCaption = (dict: any): string | null => {
+      const getMkCaption = (dict: PDFDict): string | null => {
         try {
           const mkObj = dict.lookup(PDFName.of("MK"));
           if (!(mkObj instanceof PDFDict)) return null;
@@ -450,7 +457,7 @@ export class PdfiumFormProvider implements IFormDataProvider {
         }
       };
 
-      const getActionFromDict = (dict: any): ButtonAction | null => {
+      const getActionFromDict = (dict: PDFDict): ButtonAction | null => {
         try {
           return parseActionDict(dict.lookup(PDFName.of("A")));
         } catch {
@@ -465,13 +472,13 @@ export class PdfiumFormProvider implements IFormDataProvider {
         if (!buttonNames.has(name)) continue;
 
         try {
-          const acroField = (field as any).acroField;
+          const acroField: PDFAcroTerminal = field.acroField;
           if (!acroField?.dict) continue;
 
           const info: { label?: string; action?: ButtonAction } = {};
 
           // Try widget dicts first (each widget can have its own /MK and /A)
-          const widgets: any[] = (acroField as any).getWidgets?.() ?? [];
+          const widgets: PDFWidgetAnnotation[] = acroField.getWidgets?.() ?? [];
           for (const widget of widgets) {
             if (!info.label) {
               const label = getMkCaption(widget.dict);

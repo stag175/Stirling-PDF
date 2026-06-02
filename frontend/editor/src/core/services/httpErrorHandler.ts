@@ -45,11 +45,25 @@ function stashPostLoginRedirect(path: string): void {
   }
 }
 
+/** Minimal view of the axios-style error shape this handler reads from. */
+interface HttpErrorLike {
+  config?: {
+    skipAuthRedirect?: boolean;
+    suppressErrorToast?: boolean;
+    url?: string;
+  };
+  response?: {
+    status?: number;
+    data?: unknown;
+  };
+}
+
 /**
  * Handles HTTP errors with toast notifications and file error broadcasting
  * Returns true if the error should be suppressed (deduplicated), false otherwise
  */
-export async function handleHttpError(error: any): Promise<boolean> {
+export async function handleHttpError(rawError: unknown): Promise<boolean> {
+  const error = (rawError ?? {}) as HttpErrorLike;
   const skipAuthRedirect = error?.config?.skipAuthRedirect === true;
   // Check if this error should skip the global toast (component will handle it)
   if (error?.config?.suppressErrorToast === true) {
@@ -97,7 +111,7 @@ export async function handleHttpError(error: any): Promise<boolean> {
   const { title, body } = extractAxiosErrorMessage(error);
 
   // Normalize response data ONCE, reuse for both ID extraction and special-toast matching
-  const raw = error?.response?.data as any;
+  const raw = error?.response?.data;
   let normalized: unknown = raw;
   try {
     normalized = await normalizeAxiosErrorData(raw);
