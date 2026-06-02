@@ -49,7 +49,8 @@ public class ExternalAppDepConfig {
      * Map of command(binary) -> affected groups (e.g. "gs" -> ["Ghostscript"]). Immutable to avoid
      * accidental mutations.
      */
-    private final Map<String, List<String>> commandToGroupMapping;
+    // Package-private (not private) so ExternalAppDepConfigTest can read the mapping directly.
+    final Map<String, List<String>> commandToGroupMapping;
 
     private final ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
 
@@ -189,7 +190,8 @@ public class ExternalAppDepConfig {
         }
     }
 
-    private boolean isWeasyprint(String command) {
+    // Package-private (not private) so ExternalAppDepConfigTest can call it directly.
+    boolean isWeasyprint(String command) {
         return Objects.equals(command, weasyprintPath)
                 || command.toLowerCase(Locale.ROOT).contains("weasyprint");
     }
@@ -198,19 +200,22 @@ public class ExternalAppDepConfig {
         return command.toLowerCase(Locale.ROOT).contains("qpdf");
     }
 
-    private List<String> getAffectedFeatures(String group) {
+    // Package-private (not private) so ExternalAppDepConfigTest can call it directly.
+    List<String> getAffectedFeatures(String group) {
         List<String> endpoints = new ArrayList<>(endpointConfiguration.getEndpointsForGroup(group));
         return endpoints.stream().map(this::formatEndpointAsFeature).toList();
     }
 
-    private String formatEndpointAsFeature(String endpoint) {
+    // Package-private (not private) so ExternalAppDepConfigTest can call it directly.
+    String formatEndpointAsFeature(String endpoint) {
         String feature = endpoint.replace("-", " ").replace("pdf", "PDF").replace("img", "image");
         return Arrays.stream(RegexPatternUtils.getInstance().getWordSplitPattern().split(feature))
                 .map(this::capitalizeWord)
                 .collect(Collectors.joining(" "));
     }
 
-    private String capitalizeWord(String word) {
+    // Package-private (not private) so ExternalAppDepConfigTest can call it directly.
+    String capitalizeWord(String word) {
         if (word == null || word.isEmpty()) return word;
         if ("pdf".equalsIgnoreCase(word)) return "PDF";
         return word.substring(0, 1).toUpperCase(Locale.ROOT)

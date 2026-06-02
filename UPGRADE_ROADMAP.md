@@ -696,6 +696,24 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 128 — C2 de-reflection: ExternalAppDepConfig dispatcher + field getter (backend core; verified; pushed)
+
+- **C2 de-reflection (backend `core`)**: `ExternalAppDepConfigTest` carried its own generic reflective machinery
+  — `invokePrivateMethod` + `findMatchingMethod` + `isParameterCompatible` + a primitive→wrapper `getWrapperType`
+  table (≈70 lines) — plus a reflective `getCommandToGroupMapping` field reader. Made the 4 target private
+  methods package-private (`isWeasyprint`, `getAffectedFeatures`, `formatEndpointAsFeature`, `capitalizeWord`)
+  and the `commandToGroupMapping` field package-private (kept `final`); replaced the 8 call sites with direct
+  compile-checked calls (`config.capitalizeWord("pdf")`, `config.isWeasyprint(cmd)`, …) and the field read with
+  `config.commandToGroupMapping`. Deleted all 5 reflective helper methods, both `@SuppressWarnings("unchecked")`
+  and the unchecked casts they covered, and the `java.lang.reflect.Field`/`Method` imports. Same package, so no
+  new SUT import. Behaviour-preserving. Verified: **gradle `:stirling-pdf:test --tests ExternalAppDepConfigTest`
+  BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test
+  failure).
+- **Noted, not changed**: `AutoJobPostMappingWeightTest` also uses `java.lang.reflect`, but legitimately — it is
+  a classpath-scanning **architectural meta-test** that asserts every `@AutoJobPostMapping` method declares an
+  explicit `resourceWeight`. Reflection there is the test's purpose (not a private-SUT workaround), so it is
+  correctly left intact rather than dishonestly counted as a de-reflection.
+
 ### Wave 127 — C2 de-reflection: ConvertPDFToPDFA generic reflective dispatcher → 19 direct calls (backend core; verified; pushed)
 
 - **C2 de-reflection (backend `core`, largest yet)**: `ConvertPDFToPDFATest` used a generic
