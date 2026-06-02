@@ -2,15 +2,12 @@ package stirling.software.SPDF.controller.api.misc;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.regex.Pattern;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,67 +42,24 @@ class StampControllerTest {
 
     @InjectMocks private StampController stampController;
 
-    private Method processStampTextMethod;
-    private Method processCustomDateFormatMethod;
-    private Method calculateImagePositionYMethod;
-
-    @BeforeEach
-    void setUp() throws NoSuchMethodException {
-        processStampTextMethod =
-                StampController.class.getDeclaredMethod(
-                        "processStampText",
-                        String.class,
-                        int.class,
-                        int.class,
-                        String.class,
-                        PDDocument.class);
-        processStampTextMethod.setAccessible(true);
-
-        processCustomDateFormatMethod =
-                StampController.class.getDeclaredMethod(
-                        "processCustomDateFormat", String.class, LocalDateTime.class);
-        processCustomDateFormatMethod.setAccessible(true);
-
-        calculateImagePositionYMethod =
-                StampController.class.getDeclaredMethod(
-                        "calculateImagePositionY",
-                        PDRectangle.class,
-                        int.class,
-                        float.class,
-                        float.class);
-        calculateImagePositionYMethod.setAccessible(true);
-    }
-
+    // Direct compile-checked calls to the package-private controller helpers (was reflection).
     private float invokeCalculateImagePositionY(
-            PDRectangle pageSize, int position, float imageHeight, float margin) throws Exception {
-        try {
-            return (float)
-                    calculateImagePositionYMethod.invoke(
-                            stampController, pageSize, position, imageHeight, margin);
-        } catch (InvocationTargetException e) {
-            throw (Exception) e.getCause();
-        }
+            PDRectangle pageSize, int position, float imageHeight, float margin) {
+        return stampController.calculateImagePositionY(pageSize, position, imageHeight, margin);
     }
 
     private String invokeProcessStampText(
-            String stampText, int pageNumber, int totalPages, String filename, PDDocument document)
-            throws Exception {
-        try {
-            return (String)
-                    processStampTextMethod.invoke(
-                            stampController, stampText, pageNumber, totalPages, filename, document);
-        } catch (InvocationTargetException e) {
-            throw (Exception) e.getCause();
-        }
+            String stampText,
+            int pageNumber,
+            int totalPages,
+            String filename,
+            PDDocument document) {
+        return stampController.processStampText(
+                stampText, pageNumber, totalPages, filename, document);
     }
 
-    private String invokeProcessCustomDateFormat(String format, LocalDateTime now)
-            throws Exception {
-        try {
-            return (String) processCustomDateFormatMethod.invoke(stampController, format, now);
-        } catch (InvocationTargetException e) {
-            throw (Exception) e.getCause();
-        }
+    private String invokeProcessCustomDateFormat(String format, LocalDateTime now) {
+        return stampController.processCustomDateFormat(format, now);
     }
 
     @Nested

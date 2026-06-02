@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 96 — C2 StampController de-reflection (backend; verified; pushed)
+
+- **C2 de-reflection (backend)**: `StampControllerTest` exercised three helpers
+  (`processStampText`, `processCustomDateFormat`, `calculateImagePositionY`) **via reflection**
+  (`getDeclaredMethod`/`setAccessible`/`invoke` + `InvocationTargetException` unwrapping). Made the three
+  package-private and rewrote the test's invoke-wrappers as direct **compile-checked** calls — deleting the
+  reflection field/`setUp` plumbing and the now-unused `Method`/`InvocationTargetException`/`BeforeEach`
+  imports. Same behaviour and identical assertions (stamp-text variable substitution, custom date formats,
+  image Y-position anchoring), now refactor-safe and reflection-free. Behaviour-preserving (visibility-only
+  source change). Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with `StampControllerTest` green.
+
 ### Wave 95 — C2 FormFillController.buildBaseName de-reflection (backend; verified; pushed)
 
 - **C2 de-reflection (backend)**: `FormFillControllerTest` tested `buildBaseName` **via reflection**
