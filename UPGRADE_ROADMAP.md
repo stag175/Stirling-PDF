@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 187 — A1 coverage: AiWorkflowService tool timeout/failure messages (backend proprietary; verified; pushed)
+
+- **A1 coverage (backend `proprietary`)**: made `AiWorkflowService.toolTimeoutMessage(String,
+  InternalApiTimeoutException)` and `toolFailureMessage(String, Throwable)` package-private (were `private
+  static`) and added `AiWorkflowServiceMessagesTest` (3 tests) pinning the operator-facing wording surfaced when a
+  workflow step times out or errors. `toolTimeoutMessage` names the endpoint and the timeout in seconds (from
+  `e.getReadTimeout().toSeconds()`, e.g. `45 seconds`) and says "did not respond within … aborted".
+  `toolFailureMessage` uses the cause's message when present (`The /api/v1/y tool failed: boom`) and **falls back
+  to the exception's simple class name** when the message is null (`… failed: RuntimeException` /
+  `IllegalStateException`). Behaviour-preserving (modifier-only source change). Verified: **gradle
+  `:proprietary:test --tests AiWorkflowServiceMessagesTest` BUILD SUCCESSFUL** (single-class run's JaCoCo
+  aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 186 — A1 coverage: S3FileStore.normalizePrefix key-prefix normalisation (backend proprietary; verified; pushed)
 
 - **A1 coverage (backend `proprietary`)**: made `S3FileStore.normalizePrefix(String)` package-private (was
