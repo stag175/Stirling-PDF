@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 55 — C6 DB-migration consolidation plan (grounded; pushed)
+
+- **C6 plan DONE**: `docs/db-migration-consolidation.md` — grounded the real state (non-saas
+  `ddl-auto=update` on a **file-based H2 DB with live user data**, no migrations; saas = Hibernate base +
+  Flyway `baseline-on-migrate` deltas V2–V9). Key finding: even saas is a *hybrid*, not pure-Flyway, so the
+  safe consolidation is to extend that hybrid (`baseline-on-migrate` adoption of existing user schemas +
+  incremental versioned migrations + retiring `ddl-auto` to `validate`), with a 5-step plan each gated on
+  booting against copied-populated + fresh DBs (H2 & Postgres). The cutover risks corrupting live user H2
+  DBs, so it's runtime/DB-gated — staged, not done blind. (Same posture as the E1 veraPDF plan: the
+  high-risk implementation needs infra to verify; the responsible safe-here deliverable is the grounded plan.)
+
 ### Wave 54 — E3 build-provenance workflow (config-complete; YAML-validated; pushed)
 
 - **E3 config DONE (runtime-pending)**: added `.github/workflows/provenance.yml` — an **additive**,
@@ -933,6 +944,14 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   for hot reads (users, roles, settings); profile JPA N+1s. *Effort:* M. *Risk:* low.
 - **C6. Centralize DB migrations.** Flyway exists only in `saas`; bring core schema under one
   migration strategy (see `DATABASE.md`). *Effort:* M. *Risk:* med (data).
+  ⏳ **Plan DONE (Wave 55)**: `docs/db-migration-consolidation.md`. Grounded the real state — non-saas uses
+  `ddl-auto=update` on a **file-based H2 DB holding live user data** (no migrations); saas is a *hybrid*
+  (Hibernate base + Flyway `baseline-on-migrate` deltas V2–V9, no V1, V7 skipped). The safe consolidation is
+  to **extend that hybrid model** to non-saas (`baseline-on-migrate=true` → adopt existing user schemas,
+  then incremental versioned migrations, `ddl-auto` retired to `validate`), **not** a risky full V1-baseline
+  rewrite. Gave a 5-step staged plan, each gated on booting against a *copied populated* DB + a fresh DB (H2
+  & Postgres). The cutover is runtime/DB-gated (corrupting live user H2 DBs is the risk) → executed
+  step-by-step against real DB copies, not blind here.
 - **C7. Logging hygiene.** Remove `System.out`/`printStackTrace` holdovers; adopt structured
   (JSON) logging with trace/correlation IDs. *Effort:* S–M. *Risk:* low.
 
