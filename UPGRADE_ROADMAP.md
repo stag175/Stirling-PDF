@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 163 — B4 frontend coverage: tour waitForElement best-effort resolution (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `tourUtils.test.ts` (3 tests) for the untested `waitForElement` onboarding
+  helper — a best-effort async DOM waiter that resolves (never rejects) so a tour step can't crash the app.
+  Pinned all three resolution paths in jsdom: resolves **immediately** when the selector is already present;
+  resolves once a matching element is **inserted later** (the `MutationObserver` path); and resolves **without
+  throwing after the timeout** when the element never appears (short real timeout exercising the best-effort
+  branch). Honestly scoped: the sibling `waitForHighlightable` additionally depends on
+  `getClientRects`/`ResizeObserver` layout, which jsdom doesn't model reliably, so it is intentionally left
+  uncovered (documented in the test) rather than asserted against fake layout. Verified: **core `tsc` 0 errors,
+  `eslint --max-warnings=0` clean, `vitest` 3/3 green**.
+
 ### Wave 162 — B4 frontend coverage: StampPreviewUtils pure helpers (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `StampPreviewUtils.test.ts` (19 tests) for the untested pure helpers in the
