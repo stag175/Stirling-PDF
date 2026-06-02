@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 147 — B4 frontend coverage: imageToPdfUtils.isImageFile predicate (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `imageToPdfUtils.test.ts` (4 tests) for the untested pure predicate
+  `isImageFile(file)` (`file.type.startsWith("image/")`). Pinned: `image/png|jpeg|svg+xml` and the `image/`
+  prefix boundary → true; `application/pdf`/`text/plain`/`video/mp4` → false; empty type → false; `"image"`
+  (no slash) and `"x-image/png"` (not a prefix) → false. Caught a real jsdom quirk while writing it — the
+  `File`/`Blob` constructor **lowercases the MIME type**, so an uppercase input is normalised to `image/png`
+  before the predicate runs (the case-sensitivity of `startsWith` can't be exercised through a real `File`); the
+  unreachable uppercase assertion was removed and the constraint documented rather than asserted falsely.
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 4/4 green**.
+
 ### Wave 146 — B4 extract-pure-from-coupled: signatureFlattening coordinate flip (frontend; verified; pushed)
 
 - **B4 extract-pure-from-coupled (frontend)**: the signature-annotation coordinate resolution + **CSS top-left →
