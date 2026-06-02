@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 140 — I-workstream engine coverage: contradiction.detector._escape_for_tag (Python security guard; verified; pushed)
+
+- **Engine coverage (Python, security-relevant)**: added `tests/contradiction/test_escape_for_tag.py` (9 tests)
+  for the previously-undirectly-tested prompt-injection guard `detector._escape_for_tag`, which rewrites
+  `<`/`>` to their JSON unicode escapes (`<`/`>`) so a JSON payload interpolated into a
+  `<verdict>`/`<subjects>`/`<claims>`/`<content>` envelope can't prematurely close the wrapping tag (`json.dumps`
+  does not escape `<`/`>`). It was only referenced indirectly in an integration-test docstring. Pinned: no-op on
+  safe text/empty; single `<`/`>`; the `</verdict>` breakout example; multiple occurrences; and — critically —
+  that it emits **JSON unicode escapes, not the HTML entities** (`&lt;`/`&gt;`) used by the deliberately-distinct
+  sibling `capability._escape_for_xml_tag` (tested in `test_capability_escape.py`). Expected escape sequences are
+  built from `chr(92)` to keep backslash semantics unambiguous. Verified: **pytest 9/9, ruff clean, pyright 0
+  errors**.
+
 ### Wave 139 — I-workstream engine coverage: chunker._split_long_paragraph (Python; verified; pushed)
 
 - **Engine coverage (Python)**: added `tests/test_split_long_paragraph.py` (5 tests) pinning
