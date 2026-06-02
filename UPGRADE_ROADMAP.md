@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 150 — B4 frontend coverage: downloadService anchor contract (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `downloadService.test.ts` (4 tests) for the untested `downloadFile` /
+  `downloadFromUrl` helpers, which synthesise a transient `<a download>` anchor, click it, then remove it.
+  jsdom's `click` is a navigation no-op and `URL.createObjectURL`/`revokeObjectURL` are unimplemented, so the
+  test spies on `HTMLAnchorElement.prototype.click` (capturing the anchor's `download`/`href` at click time) and
+  stubs the object-URL APIs. Pinned: `downloadFile` calls `createObjectURL(blob)`, sets `download=filename` +
+  `href=blob:url`, clicks once, **revokes** the blob URL, leaves no anchor in the DOM, and returns `{savedPath:
+  localPath}` (or `undefined` without one); `downloadFromUrl` points the anchor at the raw url + filename,
+  clicks once, **never** touches the object-URL APIs, cleans up the anchor, and returns the localPath. Verified:
+  **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 4/4 green**.
+
 ### Wave 149 — B4 frontend coverage: getApiBaseUrl resolution priority (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `apiClientConfig.test.ts` (4 tests) for the untested `getApiBaseUrl()` —
