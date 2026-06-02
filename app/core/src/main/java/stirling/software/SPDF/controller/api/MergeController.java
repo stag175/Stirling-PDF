@@ -185,7 +185,8 @@ public class MergeController {
         return new String[0];
     }
 
-    private void addTableOfContents(PDDocument mergedDocument, MultipartFile[] files) {
+    // Package-private (not private) so tests call it directly instead of via reflection.
+    void addTableOfContents(PDDocument mergedDocument, MultipartFile[] files) {
         PDDocumentOutline outline = new PDDocumentOutline();
         mergedDocument.getDocumentCatalog().setDocumentOutline(outline);
 

@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 98 — C2 MergeController.addTableOfContents de-reflection (backend; verified; pushed)
+
+- **C2 de-reflection (backend)**: `MergeControllerTest` invoked `addTableOfContents(PDDocument, MultipartFile[])`
+  **via reflection** at **6 sites** (fetch + `setAccessible` + `invoke` in each test). Made the method
+  package-private and mechanically converted all 6 to direct compile-checked calls
+  (`mergeController.addTableOfContents(...)` / `assertDoesNotThrow(() -> …)`), removing the per-test reflection
+  plumbing and the now-unused `java.lang.reflect.Method` import. Same assertions (TOC outline creation,
+  per-file page-count loading + close, empty-array, graceful IOException handling). Behaviour-preserving
+  (visibility-only source change). Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with `MergeControllerTest`
+  green.
+
 ### Wave 97 — C2 MetadataController.checkUndefined de-reflection (backend; verified; pushed)
 
 - **C2 de-reflection (backend)**: `MetadataControllerTest` exercised `checkUndefined(String)` **via reflection**

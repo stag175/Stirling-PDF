@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -97,11 +96,7 @@ class MergeControllerTest {
         when(doc3.getNumberOfPages()).thenReturn(2);
 
         // When
-        Method addTableOfContentsMethod =
-                MergeController.class.getDeclaredMethod(
-                        "addTableOfContents", PDDocument.class, MultipartFile[].class);
-        addTableOfContentsMethod.setAccessible(true);
-        addTableOfContentsMethod.invoke(mergeController, mockMergedDocument, files);
+        mergeController.addTableOfContents(mockMergedDocument, files);
 
         // Then
         ArgumentCaptor<PDDocumentOutline> outlineCaptor =
@@ -136,11 +131,7 @@ class MergeControllerTest {
         when(doc1.getNumberOfPages()).thenReturn(3);
 
         // When
-        Method addTableOfContentsMethod =
-                MergeController.class.getDeclaredMethod(
-                        "addTableOfContents", PDDocument.class, MultipartFile[].class);
-        addTableOfContentsMethod.setAccessible(true);
-        addTableOfContentsMethod.invoke(mergeController, mockMergedDocument, files);
+        mergeController.addTableOfContents(mockMergedDocument, files);
 
         // Then
         verify(mockCatalog).setDocumentOutline(any(PDDocumentOutline.class));
@@ -155,11 +146,7 @@ class MergeControllerTest {
         when(mockMergedDocument.getDocumentCatalog()).thenReturn(mockCatalog);
 
         // When
-        Method addTableOfContentsMethod =
-                MergeController.class.getDeclaredMethod(
-                        "addTableOfContents", PDDocument.class, MultipartFile[].class);
-        addTableOfContentsMethod.setAccessible(true);
-        addTableOfContentsMethod.invoke(mergeController, mockMergedDocument, files);
+        mergeController.addTableOfContents(mockMergedDocument, files);
 
         // Then
         verify(mockMergedDocument).getDocumentCatalog();
@@ -187,14 +174,9 @@ class MergeControllerTest {
                 .thenThrow(new IOException("Failed to load document"));
 
         // When
-        Method addTableOfContentsMethod =
-                MergeController.class.getDeclaredMethod(
-                        "addTableOfContents", PDDocument.class, MultipartFile[].class);
-        addTableOfContentsMethod.setAccessible(true);
 
         // Should not throw exception
-        assertDoesNotThrow(
-                () -> addTableOfContentsMethod.invoke(mergeController, mockMergedDocument, files));
+        assertDoesNotThrow(() -> mergeController.addTableOfContents(mockMergedDocument, files));
 
         // Then
         verify(mockCatalog).setDocumentOutline(any(PDDocumentOutline.class));
@@ -223,11 +205,7 @@ class MergeControllerTest {
         when(doc.getNumberOfPages()).thenReturn(1);
 
         // When
-        Method addTableOfContentsMethod =
-                MergeController.class.getDeclaredMethod(
-                        "addTableOfContents", PDDocument.class, MultipartFile[].class);
-        addTableOfContentsMethod.setAccessible(true);
-        addTableOfContentsMethod.invoke(mergeController, mockMergedDocument, files);
+        mergeController.addTableOfContents(mockMergedDocument, files);
 
         // Then
         verify(mockCatalog).setDocumentOutline(any(PDDocumentOutline.class));
@@ -247,14 +225,9 @@ class MergeControllerTest {
         when(doc1.getNumberOfPages()).thenReturn(3);
 
         // When
-        Method addTableOfContentsMethod =
-                MergeController.class.getDeclaredMethod(
-                        "addTableOfContents", PDDocument.class, MultipartFile[].class);
-        addTableOfContentsMethod.setAccessible(true);
 
         // Should not throw exception
-        assertDoesNotThrow(
-                () -> addTableOfContentsMethod.invoke(mergeController, mockMergedDocument, files));
+        assertDoesNotThrow(() -> mergeController.addTableOfContents(mockMergedDocument, files));
 
         // Then
         verify(mockCatalog).setDocumentOutline(any(PDDocumentOutline.class));
