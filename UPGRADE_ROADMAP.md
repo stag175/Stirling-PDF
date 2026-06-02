@@ -449,6 +449,11 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   gap as a future global-exception-handler improvement. **Grounded + verified, not prose:** every endpoint
   was cross-checked against the live `app.routes` (the check *caught a real omission* — the `DELETE` route I'd
   initially missed — which I then added), and the doc's own verification command is confirmed runnable.
+  Follow-on: added `engine/tests/test_failure_modes.py` (5 tests) making the doc **executable** — pins
+  422-on-bad-body, 400-on-bad-tolerance, the unary-route 500 (no global handler), and the streaming
+  200-then-`error`-frame model. (Surfaced + fixed a real test-isolation bug while doing so: a blind
+  `dependency_overrides.pop` teardown was deleting another module's *module-level* overrides → switched to
+  snapshot/restore.) Full engine suite **281 passed**, gate PASS at 81.21%.
 
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
