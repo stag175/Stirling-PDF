@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 186 — A1 coverage: S3FileStore.normalizePrefix key-prefix normalisation (backend proprietary; verified; pushed)
+
+- **A1 coverage (backend `proprietary`)**: made `S3FileStore.normalizePrefix(String)` package-private (was
+  `private static`) and added `S3FileStoreNormalizePrefixTest` (6 tests) for the S3 key-prefix normaliser (so
+  stored keys join cleanly as `prefix + name`). Pinned: null/blank/`"   "`/`"/"` collapse to `""` (no prefix); a
+  plain prefix gains a trailing slash (`docs`→`docs/`, `a/b`→`a/b/`); an existing trailing slash is preserved
+  (not doubled); a **single** leading slash is stripped (`/docs`→`docs/`, `/docs/`→`docs/`); surrounding
+  whitespace is trimmed first (`  docs  `→`docs/`); and **only one** leading slash is removed (`//x`→`/x/`).
+  Behaviour-preserving (modifier-only source change). Verified: **gradle `:proprietary:test --tests
+  S3FileStoreNormalizePrefixTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide
+  threshold, not a test failure).
+
 ### Wave 185 — A1 coverage: PdfCommentAgentOrchestrator output-name + CR/LF sanitiser (backend proprietary; verified; pushed)
 
 - **A1 coverage (backend `proprietary`)**: made `PdfCommentAgentOrchestrator.buildOutputFileName(String)` and
