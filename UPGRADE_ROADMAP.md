@@ -696,6 +696,20 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 59 — H2/H3 CI-consolidation audit + plan (grounded; pushed)
+
+- **H2/H3 audit + plan DONE**: `docs/ci-workflow-consolidation.md`. Grounded in the real
+  `.github/workflows/` tree (38 workflows, 7,412 lines). Headline: **consolidation is already ~80% done**
+  in the fork — `build.yml` orchestrates 15 reusable `workflow_call` sub-workflows, `_runner-pick.yml`
+  centralizes runner selection (18 callers), `setup-bot` composite action exists, JDK/Gradle setup lives
+  once in `backend-build.yml` (only one literal `java-version: 25` pin remains). The residual is the
+  per-job `harden-runner`+`checkout` prelude (38/34 workflows) — GitHub requires it per job, so only a
+  composite action can DRY it (readability, not structure). Documented a staged composite-action rollout
+  (`setup-backend`/`setup-frontend`/`setup-engine`), each step CI-gated because it edits live workflows
+  whose egress-policy/permissions/SHA-resolution are only observable on a runner (absent here). Same
+  posture as E3/H4: identify the precise residual, stage behind CI validation, don't restructure 38 live
+  workflows blind.
+
 ### Wave 58 — C2 SectionGridGeometry pure-extraction (verified; pushed)
 
 - **C2 pure-extraction + DRY**: lifted the grid-cell geometry (sub-page sizing + the bottom-left-origin
@@ -1113,8 +1127,21 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   meaningful incremental-build speedup once tasks are compatible. *Effort:* M. *Risk:* low.
 - **H2. Consolidate workflow sprawl.** Collapse the 4 e2e workflows and 3 PR-deploy workflows into
   parameterized reusable workflows; document CI profiles/flags. *Effort:* M. *Risk:* low.
+  ⏳ **Audited + plan DONE (Wave 59)**: `docs/ci-workflow-consolidation.md`. Finding: **largely already
+  done in the fork** — `build.yml` is an orchestrator delegating to **15 reusable `workflow_call`
+  sub-workflows** (backend-build, e2e-stubbed/live, frontend-validation, db-migration-test, …), runner
+  selection is centralized in `_runner-pick.yml` (18 callers), and a `setup-bot` composite action exists.
+  The residual duplication is the per-job `harden-runner`+`checkout` prelude (38/34 workflows), which
+  GitHub *structurally requires per job* — only a composite action can DRY it, a readability win not a
+  structural one. Staged composite-action rollout documented, but each step edits a **live** workflow whose
+  egress/permissions/SHA-resolution are only verifiable on a CI runner (absent here) → plan-only, like E3/H4.
 - **H3. Unify Docker build matrix** (base / embedded / fat / ultra-lite / frontend / unoserver) into
   one cache-shared build. *Effort:* M. *Risk:* low.
+  ⏳ **Covered by the Wave 59 audit** (`docs/ci-workflow-consolidation.md`): the build-matrix workflows
+  (`push-docker`, `test-build-docker`, `multiOSReleases`, `tauri-build`) are already reusable
+  `workflow_call` units invoked by the orchestrator. Further matrix-cache unification edits release-critical
+  Docker workflows and needs Docker + a CI runner to validate (neither here), so it's explicitly deferred to
+  the CI-gated rollout — not done blind.
 - **H4. Add a release approval gate** before AUR/package-manager auto-publish. *Effort:* S. *Risk:* low.
   ✅ **DONE (Wave 41)**: added a job-level `environment: package-publish` gate to the `publish-aur`
   (`aur-publish.yml`) and `update-homebrew-and-scoop` (`package-managers.yml`) jobs. Configure required
