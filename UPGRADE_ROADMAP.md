@@ -656,10 +656,11 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   convert, OCR, sign) — bridges the gap between unit tests and Cucumber e2e. *Effort:* M. *Risk:* low.
 - **A4. Accessibility tests** (axe-core / jest-axe) — 399 aria/role usages, zero a11y assertions.
   Wire into CI as a regression gate. *Effort:* M. *Risk:* low.
-  ⏳ **Foundation DONE (Wave 35)**: `jest-axe` (+ `@types/jest-axe`) added; first automated a11y assertion
-  (`ButtonSelector.a11y.test.tsx`) runs axe-core against the rendered component on the existing jsdom
-  infra (0 violations). The pattern is reusable per-component; broadening coverage + a dedicated CI gate
-  remain.
+  ⏳ **Foundation + initial coverage DONE (Waves 35–37)**: `jest-axe` (+ `@types/jest-axe`) added; **10
+  automated a11y assertions** now run axe-core against rendered shared components on the existing jsdom
+  infra (ButtonSelector, Badge, TextInput, ButtonToggle, InfoBanner, SkeletonLoader, LoadingFallback,
+  LocalIcon, FitText, PageSelectionSyntaxHint) — all 0 violations. The reusable pattern is established;
+  broadening to the remaining component tree + a dedicated CI a11y gate remain.
 - **A5. Unified coverage reporting** across Java (JaCoCo) + TS (v8) + Python (pytest-cov),
   surfaced as a single PR comment. *Effort:* M. *Risk:* low.
   ✅ **DONE (Wave 34)**: root `task coverage` runs all three tiers' coverage (JaCoCo + Vitest v8 +
