@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 189 — B4 frontend coverage: stripeCheckout cardStyles builders (frontend proprietary layer; verified; pushed)
+
+- **B4 coverage (frontend, proprietary layer — first frontend test outside `core` this segment)**: added
+  `cardStyles.test.ts` (6 tests) for the untested plan-card style builders in
+  `proprietary/components/shared/stripeCheckout/utils/cardStyles.ts`. Pinned: `getCardBorderStyle(true)` → green
+  `2px` border, `(false)` → both border props `undefined` (no border); `getBaseCardStyle` → relative flex-column
+  with the shared `CARD_MIN_HEIGHT`, spreading in the highlighted border, defaulting to not-highlighted;
+  `getClickablePaperStyle` → full-height `cursor:pointer` paper with the border spread, default not-highlighted.
+  Verified through the **proprietary** layer's toolchain (the `@app/*` alias resolves to the proprietary overlay):
+  **`tsc --project editor/src/proprietary/tsconfig.json` 0 errors, `eslint --max-warnings=0` clean, `vitest`
+  6/6 green** (the test runs under the `proprietary` vitest project).
+
 ### Wave 188 — A1 coverage: ClusterStorageGate.normalize value normaliser (backend proprietary; verified; pushed)
 
 - **A1 coverage (backend `proprietary`)**: made `ClusterStorageGate.normalize(String)` package-private (was
