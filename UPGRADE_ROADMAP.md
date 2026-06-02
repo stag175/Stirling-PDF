@@ -317,6 +317,21 @@ mockable-class headroom but trends toward Spring-context-dependent classes.
   load flakiness without masking real failures. (Cumulative frontend coverage **6.96 → 14.64** — more than
   doubled; branches 53.6→78.3, functions 25.5→46.3.)
 
+### Wave 21 — backend coverage round 8 (security/config/model; verified; pushed)
+
+- **+238 tests across 12 classes** — proprietary `KeygenLicenseVerifier`/`UserAuthenticationFilter`/
+  `CustomOAuth2UserService`/`AsyncConfig`/`SaveUserRequest`/`Email`/`CustomSaml2AuthenticatedPrincipal`;
+  core `Type3FontLibrary`/`PdfJsonFont`/`PdfJsonFormField`/`OptimizePdfRequest`/`PipelineResult`.
+- **Coverage:** proprietary 42.89→**45.64** line / 39.82→**42.83** branch (now exceeds `:common`); core
+  36.16→**36.96** line. Floors raised: `:stirling-pdf`→0.37/0.36/0.30; `:proprietary`→0.46/0.45/0.42.
+- **Central gate caught 19 failures, all resolved** — notably `Type3FontLibraryTest` (16) all stemmed from a
+  single helper mocking-a-Resource *inside* a `thenReturn(...)` arg (interleaved stubbing →
+  `UnfinishedStubbingException`); switching to a real `ByteArrayResource` fixed all 16. Plus 3
+  `CustomOAuth2UserService` tests asserting `getMessage()` where the 1-arg `OAuth2AuthenticationException`
+  stores text in the `OAuth2Error` code.
+- **Cumulative backend (line):** `:common` 41.3, `:stirling-pdf` 37.0, `:proprietary` 45.6 — all from a
+  decorative 13% floor at session start.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
