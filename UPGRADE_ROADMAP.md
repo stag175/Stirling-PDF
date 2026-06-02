@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 89 — I-workstream engine NDJSON frame-serializer coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/test_serialize_frame.py` (3 tests) for
+  `_serialize_frame` in the orchestrator streaming route — the function that renders a stream `_StreamFrame`
+  as one NDJSON line. Covers the payload-free arms (`_HeartbeatFrame` → `{"event":"heartbeat"}`,
+  `_ErrorFrame` → `{"event":"error","message":…}`), asserts bytes output with a single trailing newline, and
+  verifies JSON-escaping of embedded quotes/newlines so the NDJSON delimiter stays intact (round-trips via
+  `json.loads`). (`_ProgressFrame`/`_ResultFrame` wrap `model_dump` and are covered by route tests.) Pure
+  value-add, zero source change. Verified via the engine venv: **pytest 3/3 passed, ruff clean, pyright 0
+  errors**.
+
 ### Wave 88 — I-workstream engine review-anchor coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/test_anchor_text_for.py` (7 cases) for the pure
