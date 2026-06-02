@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 169 — I-workstream engine coverage: API-key auth middleware helpers (Python security; verified; pushed)
+
+- **Engine coverage (Python, security boundary)**: added `tests/test_api_key_middleware.py` (17 tests) for the
+  pure auth helpers on `ApiKeyAuthMiddleware` (the Java↔engine shared-token guard, roadmap D3). `_is_exempt`
+  decides which paths bypass the token check (liveness/docs only); pinned that `/health`, `/health/live`,
+  `/docs`, `/redoc`, `/openapi.json` are exempt **but look-alikes are NOT** — `/healthz`, `/health-check`,
+  `/docsy` all return False (the prefix must be an exact segment or followed by `/`), which is exactly the
+  bypass-the-auth footgun worth guarding. `_presented_key` extracts the caller's key from `X-API-Key` or
+  `Authorization: Bearer <key>`; pinned header read, bearer parse, X-API-Key precedence over bearer, non-bearer
+  `Authorization` ignored, and no-credentials → None. Helpers exercised without standing up the ASGI stack
+  (`object.__new__` for the instance method; a minimal `Request` scope for the static one). Verified: **pytest
+  17/17, ruff clean, pyright 0 errors**.
+
 ### Wave 168 — I-workstream engine coverage: FormulaEvaluator cell helpers (Python; verified; pushed)
 
 - **Engine coverage (Python)**: added `tests/ledger/test_formula_helpers.py` (15 tests) for the two untested
