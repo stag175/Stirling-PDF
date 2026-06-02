@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 82 — I-workstream engine markdown-table repair coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/test_markdown_tables.py` (17 tests) for four
+  untested pure helpers in the `pdf_to_markdown` agent that repair LLM-mangled Markdown tables: `_is_sep_row`
+  (recognises `| --- | :--: |` separators incl. alignment colons; rejects data/mixed/empty/no-pipe rows),
+  `_fix_markdown_tables` (removes blank lines *between* table rows but keeps blanks before prose),
+  `_remove_extra_separators` (keeps only the first separator per contiguous table block; distinct blocks keep
+  theirs), and `_merge_orphaned_table_rows` (folds separator-less orphan pipe blocks back into the preceding
+  table, discarding intervening prose; leaves well-formed tables and table-less orphans alone). Pure value-add,
+  zero source change. Verified via the engine venv: **pytest 17/17 passed, ruff clean, pyright 0 errors**.
+
 ### Wave 81 — I-workstream engine subject-normaliser coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/contradiction/test_normalise_subject.py` (12
