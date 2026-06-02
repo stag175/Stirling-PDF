@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 154 — I-workstream engine coverage: GenerateFileResponse filename path-traversal guard (Python security; verified; pushed)
+
+- **Engine coverage (Python, security-relevant)**: added `tests/test_generate_file_response.py` (14 tests) for
+  the untested `GenerateFileResponse` contract, focused on its `filename: Field(pattern=r"^[^/\\]+$")` guard —
+  the constraint that a model-generated output filename can't smuggle a path-traversal sequence (`../`, a
+  subdirectory, or an absolute path) into Java's file packaging. Pinned via pydantic `ValidationError`: rejects
+  forward-slash paths (`../etc/passwd`, `sub/dir/file.pdf`, `/abs.pdf`), backslash paths/traversal, and the empty
+  string (the `+` requires ≥1 non-separator char); accepts plain names incl. spaces, unicode (`résumé.docx`),
+  multi-dot (`a.b.c.tar.gz`), and dotfiles. Also pinned the response defaults (`outcome=GENERATE_FILE`, `summary`
+  optional/`None`). Backslash cases built from `chr(92)` to avoid ambiguous source escapes. Verified: **pytest
+  14/14, ruff clean, pyright 0 errors**.
+
 ### Wave 153 — B4 frontend coverage: openFilesFromDisk orchestration (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `openFilesFromDisk.test.ts` (5 tests) for the untested
