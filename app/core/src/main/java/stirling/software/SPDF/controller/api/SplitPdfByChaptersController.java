@@ -74,20 +74,6 @@ public class SplitPdfByChaptersController {
         }
     }
 
-    private static void assignEndPages(List<Bookmark> bookmarks, int totalPages) {
-        for (int i = 0; i < bookmarks.size(); i++) {
-            Bookmark current = bookmarks.get(i);
-            int next = -1;
-            for (int j = i + 1; j < bookmarks.size(); j++) {
-                if (bookmarks.get(j).getStartPage() >= current.getStartPage()) {
-                    next = bookmarks.get(j).getStartPage();
-                    break;
-                }
-            }
-            current.setEndPage(next == -1 ? totalPages : next);
-        }
-    }
-
     @AutoJobPostMapping(
             value = "/split-pdf-by-chapters",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -133,12 +119,12 @@ public class SplitPdfByChaptersController {
                             "error.pdfBookmarksNotFound",
                             "No PDF bookmarks/outline found in document");
                 }
-                assignEndPages(bookmarks, totalPages);
+                ChapterBookmarkUtils.assignEndPages(bookmarks, totalPages);
             }
 
             boolean allowDuplicates = Boolean.TRUE.equals(request.getAllowDuplicates());
             if (!allowDuplicates) {
-                bookmarks = mergeBookmarksThatCorrespondToSamePage(bookmarks);
+                bookmarks = ChapterBookmarkUtils.mergeBookmarksOnSamePage(bookmarks);
             }
             for (Bookmark bookmark : bookmarks) {
                 log.info(
@@ -168,31 +154,6 @@ public class SplitPdfByChaptersController {
             String filename = GeneralUtils.generateFilename(file.getOriginalFilename(), "");
             return WebResponseUtils.zipFileToWebResponse(zipTempFile, filename + ".zip");
         }
-    }
-
-    private List<Bookmark> mergeBookmarksThatCorrespondToSamePage(List<Bookmark> bookmarks) {
-        String mergedTitle = "";
-        List<Bookmark> chaptersToBeRemoved = new ArrayList<>();
-        for (Bookmark bookmark : bookmarks) {
-            if (bookmark.getStartPage() == bookmark.getEndPage()) {
-                mergedTitle = mergedTitle.concat(bookmark.getTitle().concat(" "));
-                chaptersToBeRemoved.add(bookmark);
-            } else {
-                if (!mergedTitle.isEmpty()) {
-                    if (mergedTitle.length() > 255) {
-                        mergedTitle = mergedTitle.substring(0, 253) + "...";
-                    }
-
-                    bookmarks.set(
-                            bookmarks.indexOf(bookmark),
-                            new Bookmark(
-                                    mergedTitle, bookmark.getStartPage(), bookmark.getEndPage()));
-                }
-                mergedTitle = "";
-            }
-        }
-        bookmarks.removeAll(chaptersToBeRemoved);
-        return bookmarks;
     }
 
     private TempFile createZipFile(

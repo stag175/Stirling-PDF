@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 61 — C2 ChapterBookmarkUtils pure-extraction (verified; pushed)
+
+- **C2 pure-extraction + characterization tests**: lifted the bookmark/chapter arithmetic
+  (`assignEndPages`, `mergeBookmarksThatCorrespondToSamePage`) out of `SplitPdfByChaptersController` into a
+  pure `ChapterBookmarkUtils` operating on the package-private `Bookmark`, so it's unit-testable without
+  opening a PDF. Controller delegates. Added `ChapterBookmarkUtilsTest` (9 characterization tests pinning
+  end-page assignment incl. same-start zero-length chapters, and the merge of zero-length chapters incl.
+  multi-fold, trailing-drop, and the 256-char title truncation). The tests **document a preserved quirk**:
+  the merge *replaces* the surviving chapter's title with only the accumulated same-page titles (drops its
+  own) — flagged for separate review, not fixed here (behaviour-preserving extraction). Verified:
+  `:stirling-pdf:test` BUILD SUCCESSFUL with the new test (9) and existing `SplitPdfByChaptersControllerTest`.
+
 ### Wave 60 — B2 state-management migration plan (grounded; pushed)
 
 - **B2 plan DONE**: `docs/state-management-migration.md`. Grounded: **no state library installed** (pure
