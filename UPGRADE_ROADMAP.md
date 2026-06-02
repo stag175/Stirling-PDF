@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 54 — E3 build-provenance workflow (config-complete; YAML-validated; pushed)
+
+- **E3 config DONE (runtime-pending)**: added `.github/workflows/provenance.yml` — an **additive**,
+  standalone workflow (release-publish + `workflow_dispatch`) that downloads the release assets and emits
+  Sigstore-signed SLSA **build-provenance attestations** via `actions/attest-build-provenance@…v4.1.0`
+  (downstream-verifiable with `gh attestation verify`). SHA-pinned (action SHA fetched from the official
+  repo tags; harden-runner reuses the repo's existing pin), `id-token: write` + `attestations: write`
+  permissions, `contents: read` default. YAML-validated (triggers/permissions/steps parse correctly).
+  Because it's a **new** workflow it cannot break the existing build/release pipelines. Honestly labeled a
+  **draft** (no CI runner here to execute it); next: run on a real release, then inline the attest step into
+  the build jobs for build-time provenance + add cosign signing for Docker/Tauri artifacts.
+
 ### Wave 53 — C2/A3 CropController: package-private + de-reflected tests (verified; pushed)
 
 - **C2/A3 (test-quality)**: the auto-crop pixel-scan logic (`detectContentBounds`, `isWhite`) was already
@@ -977,6 +989,14 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   components), all CycloneDX 1.6. Only the release-attachment step is CI-side.
 - **E3. Release provenance + signing.** Add SLSA provenance/attestations and signed tags/artifacts
   for JAR, Docker images, and Tauri installers. *Effort:* M. *Risk:* low.
+  ⏳ **Config DONE / runtime-pending (Wave 54)**: added `.github/workflows/provenance.yml` — a standalone,
+  additive workflow (release-publish + manual-dispatch) that downloads release assets and generates
+  Sigstore-signed **build-provenance attestations** via `actions/attest-build-provenance@…v4.1.0`
+  (verifiable downstream with `gh attestation verify`). SHA-pinned (incl. the repo's own harden-runner pin),
+  correct `id-token`/`attestations` permissions, YAML-validated. It's **additive** (a new workflow — cannot
+  break the existing build/release pipelines) and labeled a **draft authored without a CI runner** to
+  validate against. Remaining: run it on a real release, then move the attest step into the build jobs for
+  full build-time SLSA, and add Docker-image + Tauri-installer signing (cosign).
 - **E4. Enforce the license report in CI** (currently generated but not gated). *Effort:* S. *Risk:* low.
 - **E5. Re-evaluate stale deps** — `telegrambots 6.9.7.1` (4+ yrs, heavily excluded) and the JAXB 2
   stack. Remove if unused. *Effort:* S–M. *Risk:* low.
