@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 175 — A1 pure-extraction: AutoSplitPdfController.isBlankImage → AutoSplitBlankImageUtils (backend core; verified; pushed)
+
+- **A1 pure-extraction (backend `core`)**: lifted the blank-image heuristic out of `AutoSplitPdfController` into a
+  new sibling `AutoSplitBlankImageUtils` (with the `BLANK_CHECK_SAMPLES = 20` constant), since both were used
+  only there; the controller now delegates `AutoSplitBlankImageUtils.isBlankImage(pixels)`. Added
+  `AutoSplitBlankImageUtilsTest` (7 tests) pinning the sampling heuristic and its **deliberate trade-off**: empty
+  → blank, single pixel → blank, uniform → blank, a differing pixel **at a sampled index** (len 40, step 2, idx 2)
+  → not blank, a differing pixel **between sample points** (idx 1) → intentionally **missed** (still blank), a
+  differing first pixel makes the sampled rest mismatch → not blank, and small images (< sample count, step
+  clamped to 1) check every pixel. Behaviour-preserving (logic moved verbatim). 13th pure-extraction util this
+  segment. Verified: **gradle `:stirling-pdf:test --tests AutoSplitBlankImageUtilsTest` BUILD SUCCESSFUL**
+  (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 174 — B4 frontend coverage: fileContext id/extract/guard helpers (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `fileContext.test.ts` (10 tests) for four untested pure helpers in
