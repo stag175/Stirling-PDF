@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 185 — A1 coverage: PdfCommentAgentOrchestrator output-name + CR/LF sanitiser (backend proprietary; verified; pushed)
+
+- **A1 coverage (backend `proprietary`)**: made `PdfCommentAgentOrchestrator.buildOutputFileName(String)` and
+  `safeName(String)` package-private (were `private static`) and added
+  `PdfCommentAgentOrchestratorOutputNameTest` (8 tests). `safeName` is a **CR/LF-stripping injection guard**:
+  null → `<unnamed>`, `a\nb.pdf` → `a_b.pdf`, `a\r\nb` → `a__b`, clean name unchanged. `buildOutputFileName`
+  derives `<base>-commented.pdf`: normal name (`report.pdf`→`report-commented.pdf`), **path stripped to base**
+  (`/path/to/doc.pdf`→`doc-commented.pdf`), newlines sanitised first (`a\nb.pdf`→`a_b-commented.pdf`),
+  null/blank/`<unnamed>` → the `document-commented.pdf` fallback, and an **extension-only** name (`.pdf`) →
+  `document` base. Behaviour-preserving (modifier-only source change). Verified: **gradle `:proprietary:test
+  --tests PdfCommentAgentOrchestratorOutputNameTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL
+  is the project-wide threshold, not a test failure).
+
 ### Wave 184 — A1 coverage: UIDataController.FontResource extension→format mapping (backend core; verified; pushed)
 
 - **A1 coverage (backend `core`, test-only)**: added `UIDataControllerFontResourceTest` (4 tests) for the

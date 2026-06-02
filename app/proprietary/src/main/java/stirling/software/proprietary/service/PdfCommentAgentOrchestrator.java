@@ -229,7 +229,9 @@ public class PdfCommentAgentOrchestrator {
     // Helpers
     // -----------------------------------------------------------------------
 
-    private static String buildOutputFileName(String originalFilename) {
+    // Package-private (not private) so PdfCommentAgentOrchestratorOutputNameTest can pin the
+    // fallback/basename/suffix logic and the CR/LF-stripping sanitiser.
+    static String buildOutputFileName(String originalFilename) {
         String safe = safeName(originalFilename);
         if (safe == null || safe.isBlank() || "<unnamed>".equals(safe)) {
             return FALLBACK_OUTPUT_NAME;
@@ -241,7 +243,7 @@ public class PdfCommentAgentOrchestrator {
         return base + "-commented.pdf";
     }
 
-    private static String safeName(String originalFilename) {
+    static String safeName(String originalFilename) {
         return originalFilename != null
                 ? originalFilename.replaceAll("[\\r\\n]", "_")
                 : "<unnamed>";
