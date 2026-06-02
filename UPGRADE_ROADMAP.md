@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 95 — C2 FormFillController.buildBaseName de-reflection (backend; verified; pushed)
+
+- **C2 de-reflection (backend)**: `FormFillControllerTest` tested `buildBaseName` **via reflection**
+  (`getDeclaredMethod`/`setAccessible`/`invoke`). Made the method package-private and rewrote all 3 tests as
+  direct **compile-checked** calls (`FormFillController.buildBaseName(file, "filled")`) — same behaviour, but
+  now refactor-safe and reflection-free. Added 2 previously-uncovered branches: blank original filename →
+  `document_filled` (the `isBlank()` path, distinct from null) and case-insensitive `.PDF` stripping
+  (`REPORT.PDF` → `REPORT_filled`). Behaviour-preserving (visibility-only source change). Verified:
+  `:stirling-pdf:test` BUILD SUCCESSFUL with the updated `FormFillControllerTest` (5 buildBaseName cases) green.
+
 ### Wave 94 — C2/security ConfigController.isLoopbackHost coverage (backend; verified; pushed)
 
 - **C2 de-reflection + security coverage (backend)**: pivoted back to backend. Made

@@ -68,7 +68,8 @@ public class FormFillController {
         return WebResponseUtils.pdfDocToWebResponse(document, baseName + ".pdf", tempFileManager);
     }
 
-    private static String buildBaseName(MultipartFile file, String suffix) {
+    // Package-private (not private) so tests can call it directly instead of via reflection.
+    static String buildBaseName(MultipartFile file, String suffix) {
         String original = Filenames.toSimpleFileName(file.getOriginalFilename());
         if (original == null || original.isBlank()) {
             original = "document";
