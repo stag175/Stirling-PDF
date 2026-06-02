@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 118 — B4 textFit pure-math extraction + coverage (frontend; verified; pushed)
+
+- **B4 extract-pure-from-coupled (frontend)**: the font-fitting maths (parameter resolution, line-height
+  threshold, fit/shrink decisions) were buried inside `textFit.ts`'s DOM/ResizeObserver/MutationObserver-coupled
+  `adjustFontSizeToFit`, where the off-by-one tolerances and clamps couldn't be tested. Lifted them into a new
+  sibling `textFitUtils.ts` (`resolveFitParams`, `computeMaxHeight`, `contentFits`, `nextFontSize`,
+  `shouldStopShrinking`); `textFit.ts` now delegates and only owns measurement/mutation/observer wiring.
+  `AdjustFontSizeOptions` re-aliases the lifted `FitOptionsInput` so consumers (`FitText.tsx`) are unaffected.
+  Added `textFitUtils.test.ts` (20 tests, hand-computed): the `minFontScale≥0.1` / `stepScale≥0.005` / `0.5px`
+  step floors, `maxLines≤0`→`+Infinity` and NaN/0 line-height fallback to `baseFontPx*1.2`, the 1px width/height
+  fit tolerances, the min-clamped decrement, and the fits-or-at-minimum stop condition. Behaviour-preserving.
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean on all 3 files, `vitest` 20/20 green**.
+
 ### Wave 117 — B4 computeGeometry pure-export coverage (frontend; verified; pushed)
 
 - **B4 export-for-test + coverage (frontend)**: exported the previously-module-private `computeGeometry` helper
