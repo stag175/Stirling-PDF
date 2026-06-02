@@ -5,9 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -36,7 +34,8 @@ class PdfJsonFallbackFontServiceTest {
     void setUp() {
         resourceLoader = mock(ResourceLoader.class);
         applicationProperties = mock(ApplicationProperties.class);
-        // Field declaration order on @RequiredArgsConstructor: resourceLoader, applicationProperties
+        // Field declaration order on @RequiredArgsConstructor: resourceLoader,
+        // applicationProperties
         service = new PdfJsonFallbackFontService(resourceLoader, applicationProperties);
     }
 
@@ -46,21 +45,18 @@ class PdfJsonFallbackFontServiceTest {
 
     @Test
     void resolveByName_arialRegular_mapsToLiberationSans() {
-        assertEquals(
-                "fallback-liberation-sans", service.resolveFallbackFontId("Arial", 'a'));
+        assertEquals("fallback-liberation-sans", service.resolveFallbackFontId("Arial", 'a'));
     }
 
     @Test
     void resolveByName_helveticaMapsToLiberationSans() {
-        assertEquals(
-                "fallback-liberation-sans", service.resolveFallbackFontId("Helvetica", 'a'));
+        assertEquals("fallback-liberation-sans", service.resolveFallbackFontId("Helvetica", 'a'));
     }
 
     @Test
     void resolveByName_arialBold_appendsBoldSuffix() {
         assertEquals(
-                "fallback-liberation-sans-bold",
-                service.resolveFallbackFontId("Arial-Bold", 'a'));
+                "fallback-liberation-sans-bold", service.resolveFallbackFontId("Arial-Bold", 'a'));
     }
 
     @Test
@@ -89,16 +85,14 @@ class PdfJsonFallbackFontServiceTest {
     void resolveByName_spacesAreRemoved() {
         // "Times New Roman" -> "timesnewroman"
         assertEquals(
-                "fallback-liberation-serif",
-                service.resolveFallbackFontId("Times New Roman", 'a'));
+                "fallback-liberation-serif", service.resolveFallbackFontId("Times New Roman", 'a'));
     }
 
     @Test
     void resolveByName_commaDelimiterSplitsBaseName() {
         // "Arial,Bold" -> base "arial", style bold
         assertEquals(
-                "fallback-liberation-sans-bold",
-                service.resolveFallbackFontId("Arial,Bold", 'a'));
+                "fallback-liberation-sans-bold", service.resolveFallbackFontId("Arial,Bold", 'a'));
     }
 
     @Test
@@ -112,21 +106,18 @@ class PdfJsonFallbackFontServiceTest {
     @Test
     void resolveByName_heavyKeywordDetectedAsBold() {
         assertEquals(
-                "fallback-liberation-sans-bold",
-                service.resolveFallbackFontId("Arial-Heavy", 'a'));
+                "fallback-liberation-sans-bold", service.resolveFallbackFontId("Arial-Heavy", 'a'));
     }
 
     @Test
     void resolveByName_blackKeywordDetectedAsBold() {
         assertEquals(
-                "fallback-liberation-sans-bold",
-                service.resolveFallbackFontId("Arial-Black", 'a'));
+                "fallback-liberation-sans-bold", service.resolveFallbackFontId("Arial-Black", 'a'));
     }
 
     @Test
     void resolveByName_courierMapsToLiberationMono() {
-        assertEquals(
-                "fallback-liberation-mono", service.resolveFallbackFontId("Courier", 'a'));
+        assertEquals("fallback-liberation-mono", service.resolveFallbackFontId("Courier", 'a'));
     }
 
     @Test
@@ -177,8 +168,7 @@ class PdfJsonFallbackFontServiceTest {
     @Test
     void resolveByName_unsupportedFamilyCjkIgnoresStyle() {
         // simsun -> fallback-noto-cjk which is NOT a style-supported family, so suffix not applied
-        assertEquals(
-                "fallback-noto-cjk", service.resolveFallbackFontId("SimSun-Bold", 'a'));
+        assertEquals("fallback-noto-cjk", service.resolveFallbackFontId("SimSun-Bold", 'a'));
     }
 
     @Test
@@ -406,8 +396,7 @@ class PdfJsonFallbackFontServiceTest {
     void buildFallbackFontModel_unknownId_throwsIOException() {
         IOException ex =
                 assertThrows(
-                        IOException.class,
-                        () -> service.buildFallbackFontModel("does-not-exist"));
+                        IOException.class, () -> service.buildFallbackFontModel("does-not-exist"));
         assertTrue(ex.getMessage().contains("Unknown fallback font id"));
     }
 
@@ -431,8 +420,7 @@ class PdfJsonFallbackFontServiceTest {
         assertEquals("TrueType", model.getSubtype());
         assertEquals(Boolean.TRUE, model.getEmbedded());
         assertEquals("ttf", model.getProgramFormat());
-        assertEquals(
-                Base64.getEncoder().encodeToString(fontBytes), model.getProgram());
+        assertEquals(Base64.getEncoder().encodeToString(fontBytes), model.getProgram());
     }
 
     @Test
@@ -500,8 +488,7 @@ class PdfJsonFallbackFontServiceTest {
 
         invokeLoadConfig(service);
 
-        assertEquals(
-                "classpath:/fonts/Configured.ttf", getField(service, "fallbackFontLocation"));
+        assertEquals("classpath:/fonts/Configured.ttf", getField(service, "fallbackFontLocation"));
     }
 
     @Test
@@ -588,26 +575,17 @@ class PdfJsonFallbackFontServiceTest {
     // reflection helpers
     // ---------------------------------------------------------------------
 
-    private static void invokeLoadConfig(PdfJsonFallbackFontService target) throws Exception {
-        Method m = PdfJsonFallbackFontService.class.getDeclaredMethod("loadConfig");
-        m.setAccessible(true);
-        m.invoke(target);
+    // Direct compile-checked calls to the package-private service helpers (was reflection).
+    private static void invokeLoadConfig(PdfJsonFallbackFontService target) {
+        target.loadConfig();
     }
 
-    private String invokeInferBaseName(String location, String defaultName) throws Exception {
-        Method m =
-                PdfJsonFallbackFontService.class.getDeclaredMethod(
-                        "inferBaseName", String.class, String.class);
-        m.setAccessible(true);
-        return (String) m.invoke(service, location, defaultName);
+    private String invokeInferBaseName(String location, String defaultName) {
+        return service.inferBaseName(location, defaultName);
     }
 
-    private String invokeInferFormat(String location, String defaultFormat) throws Exception {
-        Method m =
-                PdfJsonFallbackFontService.class.getDeclaredMethod(
-                        "inferFormat", String.class, String.class);
-        m.setAccessible(true);
-        return (String) m.invoke(service, location, defaultFormat);
+    private String invokeInferFormat(String location, String defaultFormat) {
+        return service.inferFormat(location, defaultFormat);
     }
 
     private static void setField(Object target, String fieldName, Object value) throws Exception {

@@ -328,7 +328,8 @@ public class PdfJsonFallbackFontService {
     private final Map<String, byte[]> fallbackFontCache = new ConcurrentHashMap<>();
 
     @jakarta.annotation.PostConstruct
-    private void loadConfig() {
+    // Package-private (not private) so tests call it directly instead of via reflection.
+    void loadConfig() {
         String configured = null;
         if (applicationProperties.getPdfEditor() != null) {
             configured = applicationProperties.getPdfEditor().getFallbackFont();
@@ -636,7 +637,7 @@ public class PdfJsonFallbackFontService {
         }
     }
 
-    private String inferBaseName(String location, String defaultName) {
+    String inferBaseName(String location, String defaultName) {
         if (location == null || location.isBlank()) {
             return defaultName;
         }
@@ -649,7 +650,7 @@ public class PdfJsonFallbackFontService {
         return fileName.isEmpty() ? defaultName : fileName;
     }
 
-    private String inferFormat(String location, String defaultFormat) {
+    String inferFormat(String location, String defaultFormat) {
         if (location == null || location.isBlank()) {
             return defaultFormat;
         }

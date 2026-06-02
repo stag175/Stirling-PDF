@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 100 — C2 PdfJsonFallbackFontService de-reflection (backend; verified; pushed)
+
+- **C2 de-reflection (backend)**: `PdfJsonFallbackFontServiceTest` invoked three helpers
+  (`loadConfig`, `inferBaseName`, `inferFormat`) **via reflection** in its private wrapper helpers. Made the
+  three package-private and rewrote the wrappers as direct compile-checked calls
+  (`service.inferBaseName(...)` etc.), removing the unused `java.lang.reflect.Method` import (the separate
+  `Field`-based `setField` helper is retained — field reflection is out of scope). Same assertions (font
+  base-name/format inference + config loading), now refactor-safe. Behaviour-preserving (visibility-only source
+  change). Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with `PdfJsonFallbackFontServiceTest` green.
+
 ### Wave 99 — C2 EditTableOfContentsController.createOutlineItem de-reflection (backend; verified; pushed)
 
 - **C2 de-reflection (backend)**: `EditTableOfContentsControllerTest` invoked `createOutlineItem(PDDocument,
