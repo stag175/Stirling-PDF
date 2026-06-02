@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 80 — I-workstream engine contract-helper coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/test_common_helpers.py` (10 tests) for three
+  untested pure helpers in `stirling.contracts.common`: `format_conversation_history` (`None` when empty,
+  `- role: content` lines joined by newline), `format_file_names` (explanatory message when empty,
+  comma-joined names), and `drop_unknown_tool_endpoints` (the version-drift guard that silently drops
+  unrecognised endpoint identifiers — tested self-referentially with real `ToolEndpoint` members so it needs
+  no hard-coded values: empty→[], all-unknown→[], valid value kept + unknown dropped, actual members accepted).
+  Pure value-add, zero source change. **pyright caught a real `FileId` NewType mismatch** in the first draft
+  (`id="1"` → must be `FileId("1")`); fixed. Verified via the engine venv: **pytest 10/10 passed, ruff clean,
+  pyright 0 errors**.
+
 ### Wave 79 — I-workstream engine page-text coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/agents/test_page_text.py` (12 tests) for the
