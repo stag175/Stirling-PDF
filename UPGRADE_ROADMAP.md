@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 88 — I-workstream engine review-anchor coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/test_anchor_text_for.py` (7 cases) for the pure
+  `_anchor_text_for` helper in `agents/pdf_review.py` (chooses the anchor text for a `Discrepancy`: prefers
+  the stripped `stated` value, falls back to stripped `context`, else `None`). Covers stated-wins,
+  whitespace stripping on both fields, blank-stated→context fallback, and both-blank→`None`. Built with real
+  `DiscrepancyKind`/`Severity` enum members (no hard-coded values). Pure value-add, zero source change.
+  Verified via the engine venv: **pytest 7/7 passed, ruff clean, pyright 0 errors**.
+
 ### Wave 87 — I-workstream engine layout-formatter coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/test_format_layout.py` (7 tests) for the pure
