@@ -696,6 +696,20 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 148 — B2-adjacent coverage: viewer bridge registry (frontend; verified; pushed)
+
+- **B4 coverage / B2-adjacent groundwork (frontend)**: added `viewerBridges.test.ts` (8 tests) for the untested
+  pure viewer↔tool bridge registry in `contexts/viewer/viewerBridges.ts` — `createBridgeRegistry`,
+  `registerBridge`, `getBridgeState`, `getBridgeApi`. These are the state-bridge primitives the viewer context is
+  built on, so pinning them is concrete safety groundwork for the **B2 state-management migration** (the
+  registry's contract is now regression-guarded before any context refactor). Pinned: a fresh registry has all
+  **13** bridge keys present and `null`; each `createBridgeRegistry()` is independent (no cross-leak);
+  `getBridgeState` returns the fallback when unregistered and the registered `state` otherwise; `getBridgeApi`
+  returns `null` when unregistered and the registered `api` otherwise; `registerBridge` overwrites a prior
+  registration; and `registerBridge(…, null)` clears a bridge back to fallback/null lookups. API wrappers are
+  identity-stubbed via `as unknown as` (no method exercise needed). Verified: **core `tsc` 0 errors, `eslint
+  --max-warnings=0` clean, `vitest` 8/8 green**.
+
 ### Wave 147 — B4 frontend coverage: imageToPdfUtils.isImageFile predicate (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `imageToPdfUtils.test.ts` (4 tests) for the untested pure predicate
