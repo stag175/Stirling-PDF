@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 114 — I-workstream engine ToolOperationStep validator coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/test_tool_operation_step.py` (2 tests) for the
+  `ToolOperationStep.validate_tool_parameter_pairing` model validator — the type-safety guard that ensures a
+  step's `parameters` model matches the `tool`'s expected operation type (via the `OPERATIONS`/`AGENT_OPERATIONS`
+  maps). The success path was exercised by existing tests; this pins the **failure branch** (pairing a tool
+  with the wrong param model raises pydantic `ValidationError` — a dispatch-safety regression guard). Pure
+  value-add, zero source change. Verified via the engine venv: **pytest 2/2 passed, ruff clean, pyright 0
+  errors**.
+
 ### Wave 113 — B4 scriptLoader coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `scriptLoader.test.ts` (4 tests) for `loadScript`/
