@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 83 — I-workstream engine chunker-helper coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: `chunk_text` is covered by `test_documents.py`, but its pure
+  building blocks weren't directly tested. Added `tests/test_chunker_helpers.py` (18 cases) for
+  `_split_paragraphs` (double-newline split incl. whitespace-only dividers, multi-blank collapse, single
+  newline stays one paragraph, stripping, all-blank→[]), `_split_sentences` (the `(?<=[.!?])\s+` lookbehind
+  split — multi-sentence, no-punctuation, no-space-after-`.`, ellipsis), and `_get_overlap` (word-boundary
+  snapping of the trailing overlap, no-chunks/non-positive→"", short-chunk whole, no-space tail, and the
+  index-0-space-not-snapped edge). Pure value-add, zero source change. Verified via the engine venv: **pytest
+  18/18 passed, ruff clean, pyright 0 errors**.
+
 ### Wave 82 — I-workstream engine markdown-table repair coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/test_markdown_tables.py` (17 tests) for four
