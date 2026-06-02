@@ -696,6 +696,20 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 139 — I-workstream engine coverage: chunker._split_long_paragraph (Python; verified; pushed)
+
+- **Engine coverage (Python)**: added `tests/test_split_long_paragraph.py` (5 tests) pinning
+  `chunker._split_long_paragraph(paragraph, chunk_size, overlap)` — the branch `chunk_text` delegates to for an
+  over-long paragraph. `chunk_text` itself is covered by `test_documents.py` and the building-block splitters by
+  `test_chunker_helpers.py`, but this helper's trickiest path — **force-slicing a single oversize sentence with a
+  stride of `chunk_size - overlap`** — was not pinned directly. Hand-computed cases: short sentences all fit →
+  one space-joined chunk; oversize single sentence, overlap 0 → contiguous non-overlapping 4-char slices
+  (`"abcdefgh"` → `["abcd","efgh"]`); oversize single sentence, overlap 1 → stride-3 slices at offsets 0/3/6/9
+  incl. the trailing short slice (`"abcdefghij"` → `["abcd","defg","ghij","j"]`); multiple fitting sentences
+  exceeding the running budget flush into separate chunks (`"One. Two. Three. Four."` @ size 9 →
+  `["One. Two.","Three.","Four."]`); empty paragraph → `[]`. Verified: **pytest 5/5, ruff clean, pyright 0
+  errors**.
+
 ### Wave 138 — I-workstream engine coverage: chunked_reasoner._note_range_label (Python; verified; pushed)
 
 - **Engine coverage (Python)**: added `tests/agents/test_note_range_label.py` (7 tests) for the previously
