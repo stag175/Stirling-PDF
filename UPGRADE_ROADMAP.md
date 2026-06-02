@@ -696,6 +696,13 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 102 — C2 Type3LibraryStrategy.loadConfiguration de-reflection (backend; verified; pushed)
+
+- **C2 de-reflection (backend)**: `Type3LibraryStrategyTest`'s `invokePostConstruct` helper called
+  `loadConfiguration()` **via reflection**. Made the method package-private and rewrote the helper as a direct
+  compile-checked call (`strategy.loadConfiguration()`). Behaviour-preserving (visibility-only source change).
+  Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with `Type3LibraryStrategyTest` green.
+
 ### Wave 101 — C2/E1 VeraPDFService de-reflection (backend; verified; pushed)
 
 - **C2 de-reflection (backend; E1 veraPDF workstream)**: `VeraPDFServiceTest` exercised **5 static helpers**

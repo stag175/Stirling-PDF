@@ -42,7 +42,8 @@ public class Type3LibraryStrategy implements Type3ConversionStrategy {
     }
 
     @jakarta.annotation.PostConstruct
-    private void loadConfiguration() {
+    // Package-private (not private) so tests call it directly instead of via reflection.
+    void loadConfiguration() {
         if (applicationProperties.getPdfEditor() != null
                 && applicationProperties.getPdfEditor().getType3() != null
                 && applicationProperties.getPdfEditor().getType3().getLibrary() != null) {
