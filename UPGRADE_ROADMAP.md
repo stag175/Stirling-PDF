@@ -696,6 +696,24 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 132 — C2 de-reflection: DatabaseConfig.getDriverClassName (backend proprietary; verified; pushed)
+
+- **C2 de-reflection (backend `proprietary`)**: `DatabaseConfigTest#getDriverClassName_returnsH2Driver`
+  reflectively invoked the private `getDriverClassName(String)` (DB-type → JDBC driver-class resolver) via
+  `getDeclaredMethod`/`setAccessible`/`invoke` with a `(String)` cast. Made the method package-private (was
+  `private`; kept `throws UnsupportedProviderException`); the same-package test now calls
+  `databaseConfig.getDriverClassName("h2")` directly — cast gone, no reflection. The H2-driver assertion is
+  unchanged; the test already declared `throws Exception` which covers the checked
+  `UnsupportedProviderException`. Behaviour-preserving. Verified: **gradle `:proprietary:test --tests
+  DatabaseConfigTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide threshold,
+  not a test failure).
+- **Noted, not changed**: `CustomUserDetailsServiceTest#setRawAuthType` reflects on `User.authenticationType`,
+  but **legitimately** — it deliberately bypasses the typed `setAuthenticationType` setter (which rejects
+  null/empty and applies enum semantics) to reproduce legacy null/empty states the public API forbids, and
+  `User` is in a different package (`…security.model`) so package-private access wouldn't reach it anyway.
+  Exposing a public raw-string setter purely for tests would be a worse design than the localized reflection, so
+  it is correctly left intact rather than dishonestly counted as a de-reflection.
+
 ### Wave 131 — C2 de-reflection: remove dead reflection in KeyPersistenceServiceInterfaceTest (backend proprietary; verified; pushed)
 
 - **C2 de-reflection (backend `proprietary`, dead-code removal)**: `KeyPersistenceServiceInterfaceTest#testGetKeyPair`

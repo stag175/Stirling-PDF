@@ -149,7 +149,9 @@ public class DatabaseConfig {
      * @return the fully qualified driver for the database chosen
      * @throws UnsupportedProviderException when an unsupported database is selected
      */
-    private String getDriverClassName(String driverName) throws UnsupportedProviderException {
+    // Package-private (not private) so DatabaseConfigTest can call it directly (not via
+    // reflection).
+    String getDriverClassName(String driverName) throws UnsupportedProviderException {
         try {
             ApplicationProperties.Driver driver =
                     ApplicationProperties.Driver.valueOf(driverName.toUpperCase(Locale.ROOT));
