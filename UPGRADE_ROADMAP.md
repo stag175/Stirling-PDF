@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 180 — A1 coverage: FormPayloadParser.extractName key precedence (backend core; verified; pushed)
+
+- **A1 coverage (backend `core`)**: made `FormPayloadParser.extractName(JsonNode)` and its helper
+  `textProperty(JsonNode, String...)` package-private (were `private static`) and added
+  `FormPayloadParserExtractNameTest` (9 tests, real Jackson-3 `tools.jackson` nodes — no mocks). Pinned the
+  name-resolution contract that was previously only exercised indirectly via `parseValueMap`: null/JSON-null →
+  null; textual node trimmed (blank → null); number node → null; the **`name` > `targetName` > `fieldName` key
+  precedence**; a blank higher-precedence key **falls through** to the next; a nested `field` object's name keys
+  are used as fallback; a top-level name **wins over** a nested one; and `textProperty` returns the first
+  non-blank key value in order. Behaviour-preserving (modifier-only source change). Verified: **gradle
+  `:stirling-pdf:test --tests FormPayloadParserExtractNameTest` BUILD SUCCESSFUL** (single-class run's JaCoCo
+  aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 179 — A1 coverage: FormFillController.decodePart UTF-8 payload decoder (backend core; verified; pushed)
 
 - **A1 coverage (backend `core`)**: made `FormFillController.decodePart(byte[])` package-private (was `private
