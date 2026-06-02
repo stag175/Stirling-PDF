@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 161 — B4 frontend coverage: tour event dispatch helpers + event-name invariants (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `events.test.ts` (5 tests) for the untested `constants/events.ts` dispatch
+  helpers and event-name registry. Pinned: `requestStartTour(type)` dispatches a `START_TOUR_EVENT` `CustomEvent`
+  with `detail.tourType` (verified via a real `window.addEventListener`, and that each of `admin`/`tools`/
+  `whatsnew` is forwarded verbatim); `dispatchTourState(isOpen)` dispatches a `TOUR_STATE_EVENT` with
+  `detail.isOpen` (true and false); and the five exported event-name constants are **unique** (no cross-wiring)
+  and all **`stirling:`-namespaced**. Listeners are removed in `finally` so the tests don't leak handlers.
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 5/5 green**.
+
 ### Wave 160 — B4 frontend coverage: convert dropdown options ↔ matrix sync (frontend; verified; pushed)
 
 - **B4 coverage (frontend, cross-registry consistency)**: extended `convertConstants.test.ts` (+3 tests, 11
