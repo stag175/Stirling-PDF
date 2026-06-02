@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 184 — A1 coverage: UIDataController.FontResource extension→format mapping (backend core; verified; pushed)
+
+- **A1 coverage (backend `core`, test-only)**: added `UIDataControllerFontResourceTest` (4 tests) for the
+  font-extension → CSS `@font-face` format mapping in the nested `@Data` `FontResource`. Exercised it **through
+  the public constructor** (which derives `type` from the extension via the private `getFormatFromExtension`
+  switch) + the Lombok `getType()` — so **no production change was needed**. Pinned the known mappings (`ttf`→
+  `truetype`, `woff`→`woff`, `woff2`→`woff2`, `eot`→`embedded-opentype`, `svg`→`svg`), unknown/empty → `""`, the
+  **case-sensitivity** of the switch (`TTF`/`WOFF2` → `""`), and that `name`/`extension` are preserved alongside
+  the derived `type`. Verified: **gradle `:stirling-pdf:test --tests UIDataControllerFontResourceTest` BUILD
+  SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 183 — A1 coverage: GetInfoOnPDF.getPageModeDescription slash-strip (backend core; verified; pushed)
 
 - **A1 coverage (backend `core`)**: made `GetInfoOnPDF.getPageModeDescription(String)` package-private (was
