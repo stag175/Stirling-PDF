@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 66 — C2/D-security TsaUrlUtils pure-extraction (verified; pushed)
+
+- **C2 + security pure-extraction**: lifted the TSA-URL validation/normalization (`isValidTsaUrlProtocol`,
+  `normalizeTsaUrl`) out of `TimestampController` into a pure `TsaUrlUtils`, so the **security allow-list**
+  logic (used to block SSRF to non-allowed timestamp authorities) is directly unit-testable. Controller
+  delegates (incl. the `TimestampController::normalizeTsaUrl` method-ref → `TsaUrlUtils::normalizeTsaUrl`);
+  removed the now-unused `Locale` import. Added `TsaUrlUtilsTest` (8 tests): http/https case-insensitive
+  accept, reject of ftp/file/javascript/scheme-less, no-trim-before-protocol-check, scheme+host lowercased
+  with **path case preserved**, explicit-port kept / default `-1` dropped, whitespace trimming, case-variant
+  URLs canonicalizing equally (the property the allow-list `contains()` relies on), and malformed-URL
+  fallback to lower-case. Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with the new test (8) and existing
+  `TimestampControllerTest` green.
+
 ### Wave 65 — C2 ScannerEffectGradientUtils pure-extraction + C3 evidence (verified; pushed)
 
 - **C2 pure-extraction**: lifted the gradient lookup-table maths (`createGradientLUT`, `fillWithGradient`) out
