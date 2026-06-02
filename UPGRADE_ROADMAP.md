@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 116 — B4 provider-config integrity coverage (frontend renderHook; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `providerDefinitions.test.ts` (3 tests) for the
+  `useAllProviders` hook — the 881-line auth-provider config (OAuth2/SAML2/Telegram/Google Drive). First
+  **`renderHook` + `vi.mock("react-i18next")` test** this segment (passthrough `t` returns the fallback so the
+  real definition data is exercised without an i18n provider). Pins config integrity: providers have unique
+  non-empty ids/names and a valid `type`; the Google OAuth2 provider exposes `clientId`/`clientSecret`; every
+  field has a non-empty `key` and a valid input `type`. A malformed provider def would break the config UI.
+  Pure value-add, zero source change. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean,
+  `vitest` 3/3 green**. (Establishes the renderHook+mock pattern for testing hooks going forward.)
+
 ### Wave 115 — B4 generateId coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `generateId.test.ts` (3 tests) for `generateId` — the
