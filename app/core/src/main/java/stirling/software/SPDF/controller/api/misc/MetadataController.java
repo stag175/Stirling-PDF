@@ -42,7 +42,8 @@ public class MetadataController {
     private final CustomPDFDocumentFactory pdfDocumentFactory;
     private final TempFileManager tempFileManager;
 
-    private String checkUndefined(String entry) {
+    // Package-private (not private) so tests call it directly instead of via reflection.
+    String checkUndefined(String entry) {
         // Check if the string is "undefined"
         if ("undefined".equals(entry)) {
             // Return null if it is

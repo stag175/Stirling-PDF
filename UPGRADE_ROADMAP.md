@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 97 — C2 MetadataController.checkUndefined de-reflection (backend; verified; pushed)
+
+- **C2 de-reflection (backend)**: `MetadataControllerTest` exercised `checkUndefined(String)` **via reflection**
+  (3 tests, the only reflection in the file). Made the method package-private and rewrote the 3 tests as direct
+  compile-checked calls (`metadataController.checkUndefined(...)`), dropping the reflection + the now-unneeded
+  `throws Exception`. Added an edge-case test confirming only the exact lowercase `"undefined"` is nulled —
+  empty/whitespace/`"Undefined"` pass through unchanged (case-sensitive). Behaviour-preserving (visibility-only
+  source change). Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with `MetadataControllerTest` green.
+
 ### Wave 96 — C2 StampController de-reflection (backend; verified; pushed)
 
 - **C2 de-reflection (backend)**: `StampControllerTest` exercised three helpers
