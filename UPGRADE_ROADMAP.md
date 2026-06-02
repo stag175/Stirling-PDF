@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 86 — I-workstream engine arithmetic-evaluator coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/ledger/test_eval_expression.py` (16 tests) for
+  the additive-expression evaluator `_eval_expression` (`A ± B ± C …`) and its `_parse` delegate in
+  `ledger/validators/arithmetic.py`. Covers chained add/subtract, currency/separator stripping
+  (`$1,000 + $234.56 → 1234.56`), leading-negative and parenthesised-negative tokens (`(100)+50 → -50`),
+  empty-expression→0, whitespace+currency, unparseable-operand→`None`, and that extra `+` produces skipped
+  empty tokens rather than a failure (`1 + + 2 → 3` — caught and corrected during authoring). Pure value-add,
+  zero source change. Verified via the engine venv: **pytest 16/16 passed, ruff clean, pyright 0 errors**.
+
 ### Wave 85 — I-workstream engine detector-helper coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/contradiction/test_detector_helpers.py` (16
