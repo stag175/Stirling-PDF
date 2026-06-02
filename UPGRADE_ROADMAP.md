@@ -618,6 +618,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
 - These are the implementable halves of two infra-tier items; the runtime activation (GitHub Environment
   approval / an actual load run) happens on the respective infrastructure, transparently not verifiable here.
 
+### Wave 42 — B4 AdminAdvancedSection decomposition + C3 scope (verified; pushed)
+
+- **B4 continued**: extracted 5 genuinely-pure helpers from `AdminAdvancedSection.tsx` (1,790→1,724 LoC)
+  into a tested `adminAdvancedSectionUtils.ts` (**31 tests** where the section had none), and removed a
+  now-dead `useMemo`. Behaviour-preserving; verified (proprietary tsc 0 errors, 31 tests pass, eslint clean).
+  Second of the three named mega-components decomposed (after PdfTextEditorView in Wave 40).
+- **C3 scoped**: audited the 19 `Files.readAllBytes`/`readAllLines` sites. The meaningful ones (for the
+  100 GB+ goal) are `byte[]`-returning temp-file reads whose conversion to streaming requires changing the
+  HTTP **response** handling (StreamingResponseBody / InputStreamResource) — correctness-critical and not
+  safe to do blind without the load harness (now added in F1) and integration coverage. The only *safe*
+  conversions are trivial (a line-count), so C3's real work is staged behind F1 + integration tests rather
+  than padded with a token change.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -726,13 +739,14 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **B4. Decompose mega-components** — `PdfTextEditorView.tsx` (2,897), `pdfiumService.ts` (1,934),
   `AdminAdvancedSection.tsx` (1,790) into focused units; lazy-load per-tool UIs with `React.lazy`.
   *Effort:* M–L. *Risk:* low.
-  ⏳ **Started (Wave 40)**: extracted a cohesive cluster of 6 genuinely-pure font helpers
-  (`normalizeFontFormat`/`getFontMimeType`/`getFontFormatHint`/`buildFontFamilyName`/`normalizePageNumber`/
-  `buildFontLookupKeys`) out of `PdfTextEditorView.tsx` (2,920→2,838 LoC) into a new, separately-tested
-  `pdfTextEditorFontUtils.ts` (**22 unit tests**, where the view previously had none) + tightened a
-  `string` return into a `NormalizedFontFormat` union. Behaviour-preserving; verified (core tsc 0, 22 tests,
-  eslint clean). `pdfiumService.ts` was assessed and left alone (almost entirely WASM-bound — not safely
-  pure-extractable). Continued decomposition + `React.lazy` per-tool splitting remain.
+  ⏳ **Started (Waves 40, 42)**: applied the proven pure-extraction pattern to **two** of the three named
+  mega-components. **Wave 40** — `PdfTextEditorView.tsx` (2,920→2,838 LoC): 6 pure font helpers →
+  `pdfTextEditorFontUtils.ts` (22 tests; view had none) + a `NormalizedFontFormat` union. **Wave 42** —
+  `AdminAdvancedSection.tsx` (1,790→1,724 LoC): 5 pure helpers (save-delta builder, pending-merge,
+  tessdata language diff/sanitize/download-link derivation) → `adminAdvancedSectionUtils.ts` (**31 tests**;
+  section had none), also removing a now-dead `useMemo`. Both behaviour-preserving + verified (tsc 0, tests
+  green, eslint clean). `pdfiumService.ts` assessed + left (WASM-bound). Continued decomposition +
+  `React.lazy` per-tool splitting remain.
 - **B5. Tighten TypeScript incrementally** — enable `noUncheckedIndexedAccess`, `noUnusedLocals`,
   `noImplicitReturns` (currently commented out); burn down 71 `as any` casts (worst in
   `layerUtils.ts`, `StampPreview.tsx`). *Effort:* M. *Risk:* low.
