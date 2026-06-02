@@ -332,6 +332,16 @@ mockable-class headroom but trends toward Spring-context-dependent classes.
 - **Cumulative backend (line):** `:common` 41.3, `:stirling-pdf` 37.0, `:proprietary` 45.6 — all from a
   decorative 13% floor at session start.
 
+### Wave 22 — backend coverage round 9 (font/config/session/aspects; verified; pushed)
+
+- **+185 tests across 12 classes, 0 fixes needed** (cleanest backend round) — core `PdfJsonFallbackFontService`
+  (66)/`TauriProcessMonitor`/`InitialSetup`; proprietary `SignDocumentRequest`/`UpdateFolderRequest`/
+  `SessionScheduled`/`SupabaseUserLoginProperties`/`Enterprise`+`PremiumEndpointAspect`/
+  `CustomHttpSessionListener`/`RateLimitResetScheduler`/`AuditSeverity`.
+- **Coverage:** core 36.96→**38.42** line / 30.73→**32.13** branch; proprietary 45.64→**45.97** line. Floors
+  raised: `:stirling-pdf`→0.39/0.38/0.32; `:proprietary` BRANCH→0.43.
+- **Cumulative backend (line):** `:common` 41.3, `:stirling-pdf` 38.4, `:proprietary` 46.0.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
