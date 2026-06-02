@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 182 — A1 coverage: ScannerEffectController.blendColors per-channel RGB blend (backend core; verified; pushed)
+
+- **A1 coverage (backend `core`)**: made `ScannerEffectController.blendColors(int fg, int bg, float alpha)`
+  package-private (was `private static`) and added `ScannerEffectBlendColorsTest` (5 tests) pinning the
+  per-channel RGB alpha blend used to composite the scanner gradient. `alpha` is the foreground weight: pinned
+  `1.0`→fg RGB (and that the input's top/alpha byte is **dropped** — `0xFF112233`→`0x112233`), `0.0`→bg RGB, the
+  round-half-up midpoint `0.5`→`0x808080` (both directions), independent per-channel blending
+  (`0xFF0000`⊕`0x0000FF`@0.5→`0x800080`), and that the result **never carries an alpha byte** across several
+  alphas. Behaviour-preserving (modifier-only source change). Verified: **gradle `:stirling-pdf:test --tests
+  ScannerEffectBlendColorsTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide
+  threshold, not a test failure).
+
 ### Wave 181 — A1 coverage: FormPayloadParser value normalisation (backend core; verified; pushed)
 
 - **A1 coverage (backend `core`)**: made `FormPayloadParser.normalizeFieldValue(JsonNode)` and

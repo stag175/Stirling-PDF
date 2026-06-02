@@ -294,7 +294,8 @@ public class ScannerEffectController {
         return output;
     }
 
-    private static int blendColors(int fg, int bg, float alpha) {
+    // Package-private (not private) so ScannerEffectBlendColorsTest can pin the per-channel blend.
+    static int blendColors(int fg, int bg, float alpha) {
         int r = Math.round(((fg >> 16) & 0xFF) * alpha + ((bg >> 16) & 0xFF) * (1 - alpha));
         int g = Math.round(((fg >> 8) & 0xFF) * alpha + ((bg >> 8) & 0xFF) * (1 - alpha));
         int b = Math.round((fg & 0xFF) * alpha + (bg & 0xFF) * (1 - alpha));
