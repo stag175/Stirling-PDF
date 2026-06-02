@@ -696,6 +696,21 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 62 — I2 Valkey cluster-backplane design (grounded; pushed)
+
+- **I2 design DONE**: `docs/valkey-backplane-design.md`. Corrected my earlier offhand "no Valkey impl" into a
+  precise, grounded design. Finding: the fork is already Valkey-**ready** — clean 6-interface cluster SPI,
+  `InProcessClusterConfiguration` wiring all 6 beans as `@ConditionalOnMissingBean`, and Valkey
+  config+validation (`cluster.valkey.url`/`.tls.*`; `ClusterConfig.validate()` already requires the url when
+  `backplane=valkey`). The only missing piece is a `cluster/valkey/` impl package. Design specifies a
+  Lettuce-backed `ValkeyClusterConfiguration` per interface + the **Lua scripts** for the atomic ones
+  (`RateLimitStore` token-bucket, `DistributedLock` SET-NX + compare-and-delete release). Key honesty point:
+  that atomic correctness is exactly what a **mocked client cannot verify** (a mock test of `EVAL` is
+  tautological) — it needs a real Valkey via Testcontainers, which needs Docker (absent). So design +
+  verification strategy here; impl + integration suite gated on infra. **With this, all 9 of workstream I and
+  every enumerated-residual item (E3/H2/H3/Docker/I2/C3/C6/B2) now has a verified impl, partial, config, or a
+  grounded code-referenced plan/design.**
+
 ### Wave 61 — C2 ChapterBookmarkUtils pure-extraction (verified; pushed)
 
 - **C2 pure-extraction + characterization tests**: lifted the bookmark/chapter arithmetic
@@ -1193,6 +1208,17 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   emits `coverage.xml`, gate verified real. *Effort:* S. *Risk:* low.
 - **I2. Cluster backplane resilience tests** — exercise Valkey partition/failover, lock release, and
   rate-limit key expiry; the in-process impl is well-tested but the external path less so. *Effort:* M. *Risk:* med.
+  ⏳ **Design DONE (Wave 62)**: `docs/valkey-backplane-design.md`. Investigation corrected the premise — the
+  **Valkey path's implementation doesn't exist yet** (only `cluster/inprocess/`; no `valkey/` package), so I2
+  is blocked on *two* layers: the missing impl AND no Valkey server to test it. But the fork is already
+  Valkey-**ready**: a clean 6-interface SPI (`ClusterBackplane`/`KeyValueCache`/`RateLimitStore`/
+  `DistributedLock`/`InstanceRegistry`/`JobStore`), `InProcessClusterConfiguration` providing all 6 as
+  `@ConditionalOnMissingBean` (so a `ValkeyClusterConfiguration` slots straight in), and config+validation
+  (`cluster.valkey.url`/`.tls.*`, `ClusterConfig.validate()` already enforces the Valkey contract). Design
+  specifies a Lettuce-backed impl per interface + the **Lua scripts** for the atomic ones, and the key honesty
+  point: the bug-prone correctness (token-bucket refill, lock compare-and-delete) lives in Redis-side
+  atomicity a **mock cannot exercise** → needs a Testcontainers Valkey suite (Docker absent here). So design +
+  verification strategy now; impl+integration gated on infra, like C6/H2/H3.
 - **I3. Document the engine contract & failure modes** (typed in/typed out, what happens when the
   model/provider is down or returns malformed structured output). *Effort:* S–M. *Risk:* low.
   ✅ **DONE (Wave 28)**: `engine/CONTRACT.md` — full typed endpoint table (verified against live
