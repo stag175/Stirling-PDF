@@ -696,6 +696,22 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 56 — C3 streaming-I/O plan (grounded; pushed)
+
+- **C3 plan DONE**: `docs/streaming-io-plan.md`. Key finding from reading `WebResponseUtils.java`: the
+  **streaming response infrastructure already exists** — `fileToWebResponse`/`pdfFileToWebResponse`/
+  `zipFileToWebResponse` are backed by `ManagedTempFileResource` (a `FileSystemResource` whose
+  `ClosingInputStream` streams the temp file and **auto-deletes it after** Spring writes the body). The
+  buffering methods (`bytesToWebResponse`/`baosToWebResponse`) are what the `Files.readAllBytes(tempFile)`
+  callers hit. So C3's work is converting those callers to `fileToWebResponse` — correctness-critical
+  because of a **premature-delete pitfall** (the caller's manual `finally { deleteIfExists }` must move to
+  `ManagedTempFileResource` or it deletes the file before it streams). That correctness property *is*
+  unit-testable here (drain the returned `Resource` — see `CropControllerTest.drainBody`), but the actual
+  memory benefit at the 100 GB+ target needs the **F1 k6 harness** + heap profiling. Plan: pin the pattern
+  on one native-tool-free controller, convert the rest one-at-a-time with drain tests, then validate memory
+  under load. (Same posture as the E1/C6 plans — high-risk implementation, grounded plan as the safe-here
+  deliverable; but here the infra turned out to already exist, which de-risks the eventual implementation.)
+
 ### Wave 55 — C6 DB-migration consolidation plan (grounded; pushed)
 
 - **C6 plan DONE**: `docs/db-migration-consolidation.md` — grounded the real state (non-saas
@@ -937,6 +953,13 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **C3. Streaming I/O for large files.** Replace whole-file `Files.readAllBytes`/`readAllLines`
   in converters with `InputStream→OutputStream` streaming to make the 100 GB+ target real and cap
   memory under concurrency. *Effort:* L. *Risk:* med.
+  ⏳ **Plan DONE (Wave 56)**: `docs/streaming-io-plan.md`. Key finding: the streaming response infra
+  **already exists** (`WebResponseUtils.fileToWebResponse` → `ManagedTempFileResource`, which streams a
+  temp file and auto-deletes it after the body is written). C3's work is converting the
+  `Files.readAllBytes(tempFile)` → `bytesToWebResponse` callers, handling the premature-delete pitfall
+  (move the manual `finally`-delete to the resource). Correctness is unit-testable here (drain the
+  `Resource`); the memory benefit needs the F1 load rig. Staged plan; eventual impl de-risked by the
+  pre-existing infra.
 - **C4. Formalize temp-file lifecycle.** Unify `TempFileManager` vs ad-hoc `Files.createTempFile`,
   guarantee try-with-resources, add leaked-temp-file metrics, harden temp dir permissions.
   *Effort:* M. *Risk:* low.
