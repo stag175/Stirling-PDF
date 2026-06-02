@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 172 — B4 frontend coverage: folder id parser + deterministic colour picker (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `folder.test.ts` (8 tests) for the two untested pure helpers in
+  `types/folder.ts`. `parseFolderId` is the wire-input guard — returns a valid UUID unchanged (case-insensitive,
+  any UUID variant, not strict-v4) and **throws `Invalid FolderId`** for non-strings (`number`/`null`/`undefined`/
+  object) and malformed strings (empty, `not-a-uuid`, unhyphenated). `pickFolderColor` is the deterministic
+  seed→palette-colour hash; pinned determinism (same seed → same colour), that the result is always a palette
+  member, the **exact hash→index algorithm** for known seeds (empty → index 0; `"a"` → `97 % palette.length`,
+  computed in-test against the real palette), and that it distributes across more than one colour over 50 seeds.
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 8/8 green**.
+
 ### Wave 171 — B4 frontend coverage: ToolId guards + registry partition invariants (frontend; verified; pushed)
 
 - **B4 coverage (frontend, registry invariants)**: added `toolId.test.ts` (8 tests) for the untested
