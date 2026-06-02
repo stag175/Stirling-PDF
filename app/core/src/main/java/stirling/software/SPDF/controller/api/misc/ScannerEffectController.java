@@ -134,7 +134,9 @@ public class ScannerEffectController {
         return result;
     }
 
-    private static double calculateRotation(int baseRotation, int rotateVariance) {
+    // Package-private (not private) so ScannerEffectRotationTest can pin the zero-shortcut and the
+    // [base-variance, base+variance) envelope of the random rotation.
+    static double calculateRotation(int baseRotation, int rotateVariance) {
         if (baseRotation == 0 && rotateVariance == 0) {
             return 0;
         }

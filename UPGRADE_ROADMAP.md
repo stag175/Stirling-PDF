@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 177 — A1 coverage: ScannerEffectController.calculateRotation variance envelope (backend core; verified; pushed)
+
+- **A1 coverage (backend `core`)**: made `ScannerEffectController.calculateRotation(baseRotation, rotateVariance)`
+  package-private (was `private static`) and added `ScannerEffectRotationTest` (4 tests). The output is randomised
+  (`ThreadLocalRandom`), so the tests pin the deterministic shortcuts and a **property invariant**: zero-base +
+  zero-variance short-circuits to exactly `0`; zero-variance pins the result to exactly the base angle (the
+  `(rand*2-1)*0` term vanishes — `45`→`45.0`, `-30`→`-30.0`); and across 1000 samples the rotation stays within
+  the `[base-variance, base+variance)` envelope (for `(10,5)` and symmetrically `[-3,3)` for `(0,3)`), with
+  observed variation. Guards against a sign/scaling regression flinging pages past the requested skew.
+  Behaviour-preserving (modifier-only source change). Verified: **gradle `:stirling-pdf:test --tests
+  ScannerEffectRotationTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide
+  threshold, not a test failure).
+
 ### Wave 176 — A1 coverage: CompressController.bytesToHexString unsigned-byte encoding (backend core; verified; pushed)
 
 - **A1 coverage (backend `core`)**: made `CompressController.bytesToHexString` package-private (was `private
