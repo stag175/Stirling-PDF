@@ -392,6 +392,32 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   (*"FAIL Required test coverage of 90% not reached"*). No engine source touched — pure visibility +
   enforcement wiring.
 
+### Wave 26 — D4 SSRF validation hardening + isValidURL contract fix (security; verified; pushed)
+
+- **D4 (unit-testable validation portion) DONE** (workstream D, security). The URL-to-PDF SSRF surface
+  (`ConvertWebsiteToPDF` → `GeneralUtils.isValidURL`/`isURLReachable`) is already well-defended (IP-range
+  classifier blocks loopback/link-local/private/CGNAT/ULA/IPv4-mapped/multicast/reserved). Two contributions:
+  - **Real fix:** `GeneralUtils.isValidURL` caught only `MalformedURLException`, but the pixee `Urls.create`
+    throws a **`SecurityException`** (a `RuntimeException`) for a well-formed URL whose scheme isn't http(s)
+    or whose host is a denied common-infrastructure target — so the method *violated its documented "return
+    false otherwise" contract* and let the exception propagate. In `ConvertWebsiteToPDF` (which evaluates
+    `isValidURL` eagerly on line 88) submitting e.g. `http://169.254.169.254` surfaced an unhandled **500**
+    instead of a clean rejection. Broadened the catch to `MalformedURLException | SecurityException` → clean
+    `false`. **Discovered by actually running the test, not by reading** — the first test run threw
+    `SecurityException` on `ftp://…`, exposing the wart. Only production caller uses the boolean result;
+    behaviour is strictly safer (the metadata host is still blocked downstream by `isURLReachable`).
+  - **Regression guard:** added `isURLReachable_blocksCanonicalSsrfTargets` (pins the canonical attack
+    destinations that were missing — cloud IMDS `169.254.169.254` + its IPv4-mapped form, IPv4 loopback
+    literal `127.0.0.1`/`127.255.255.254`, IPv6 loopback `::1`, IPv6 link-local `fe80::1`, limited broadcast
+    `255.255.255.255`, `240.0.0.0/4`) and `isValidURL_accepts…RejectsMalformedNonHttpAndInfraTargets`. All
+    deterministic + network-free (blocked literal IPs short-circuit before any socket; literals aren't DNS-
+    resolved). Verified: full `:common:test` green, JaCoCo gate **PASS** (LINE 41.33% / INSTRUCTION 43.85% /
+    BRANCH 37.02%, all above floor).
+  - **Flagged for follow-up (integration-level, not safe to ship blind here):** a TOCTOU/DNS-rebinding gap —
+    `isURLReachable` validates a resolved IP, then `fetchRemoteHtml` re-resolves+connects separately (rebinding
+    window), and WeasyPrint may fetch sub-resources from internal URLs during `--base-url` rendering. Fix needs
+    connect-time IP pinning + an integration test simulating rebinding. Spawned as a separate task.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -403,10 +429,11 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   module. See Waves 7–8.)
 - **Multi-week refactors (not safe to rush in a session):** B2 (state-library migration),
   C3 (streaming I/O — correctness-critical, needs load testing), the *stateful* remainder of C1
-  (needs characterization tests on real PDFs first). Security hardening: **D2 done** (Wave 24); D1 (Tauri
+  (needs characterization tests on real PDFs first). Security hardening: **D2 done** (Wave 24);
+  **D4 unit-testable validation portion done** (Wave 26 — `isValidURL` contract fix + SSRF regression
+  guard; its TOCTOU/rebinding remainder is integration-level and was spawned as a follow-up task); D1 (Tauri
   OAuth nonce audit), D3 (Java↔engine mTLS), D5 (S3 deployment guardrails) need a running app / real
-  providers / deployment to verify; D4 (SSRF URL allow-listing) has a unit-testable validation portion that
-  remains a candidate. (B1 is now **done** — see Wave 5.)
+  providers / deployment to verify. (B1 is now **done** — see Wave 5.)
 
 ---
 
@@ -522,6 +549,11 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   *Effort:* M. *Risk:* med.
 - **D4. SSRF review of URL-fetch features** (HTML→PDF, URL→PDF, TSA timestamp client uses raw
   `URLConnection`): allow-list/deny internal ranges, validate user-supplied URLs. *Effort:* M. *Risk:* med.
+  ⏳ **PARTIAL (Wave 26)**: the unit-testable validation core is done — `isValidURL` now honours its boolean
+  contract (catches the `SecurityException` from `Urls.create` for non-http/denied-infra hosts instead of
+  500-ing) and a `GeneralUtilsAdditionalTest` SSRF regression guard pins the canonical targets (cloud IMDS,
+  IPv6 loopback/link-local, broadcast/reserved). Remaining (integration-level, spawned as a follow-up task):
+  the URL→PDF TOCTOU/DNS-rebinding window + WeasyPrint sub-resource fetching, and the TSA client review.
 - **D5. S3 backend deployment guardrails.** New S3 store is reasonably tested in-repo, but document
   and template bucket encryption, least-privilege IAM, and lifecycle/expiry for `transient/` keys.
   *Effort:* S–M. *Risk:* med.
