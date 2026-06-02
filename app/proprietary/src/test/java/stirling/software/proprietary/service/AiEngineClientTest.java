@@ -3,6 +3,7 @@ package stirling.software.proprietary.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -10,11 +11,13 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -83,5 +86,40 @@ class AiEngineClientTest {
                 assertThrows(ResponseStatusException.class, () -> client.post("/x", "{}"));
 
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ex.getStatusCode());
+    }
+
+    // D3: when an engine service token is configured, it must be sent as X-API-Key.
+    @Test
+    @SuppressWarnings("unchecked")
+    void postSendsServiceTokenHeaderWhenConfigured() throws Exception {
+        applicationProperties.getAiEngine().setApiKey("super-secret");
+        HttpResponse<String> resp = mock(HttpResponse.class);
+        when(resp.statusCode()).thenReturn(200);
+        when(resp.body()).thenReturn("{}");
+        ArgumentCaptor<HttpRequest> captor = ArgumentCaptor.forClass(HttpRequest.class);
+        when(httpClient.send(captor.capture(), any(HttpResponse.BodyHandler.class)))
+                .thenReturn(resp);
+
+        client.post("/x", "{}");
+
+        assertEquals(
+                "super-secret", captor.getValue().headers().firstValue("X-API-Key").orElse(null));
+    }
+
+    // D3: with no token configured (default blank), the X-API-Key header must be absent so
+    // loopback deployments and a no-auth engine are unaffected.
+    @Test
+    @SuppressWarnings("unchecked")
+    void postOmitsServiceTokenHeaderWhenBlank() throws Exception {
+        HttpResponse<String> resp = mock(HttpResponse.class);
+        when(resp.statusCode()).thenReturn(200);
+        when(resp.body()).thenReturn("{}");
+        ArgumentCaptor<HttpRequest> captor = ArgumentCaptor.forClass(HttpRequest.class);
+        when(httpClient.send(captor.capture(), any(HttpResponse.BodyHandler.class)))
+                .thenReturn(resp);
+
+        client.post("/x", "{}");
+
+        assertTrue(captor.getValue().headers().firstValue("X-API-Key").isEmpty());
     }
 }

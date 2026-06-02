@@ -16,7 +16,7 @@ from stirling.agents import (
 )
 from stirling.agents.ledger import MathAuditorAgent
 from stirling.agents.pdf_comment import PdfCommentAgent
-from stirling.api.middleware import UserIdMiddleware
+from stirling.api.middleware import ApiKeyAuthMiddleware, UserIdMiddleware
 from stirling.api.routes import (
     agent_draft_router,
     document_router,
@@ -63,6 +63,9 @@ async def lifespan(fast_api: FastAPI):
 
 
 app = FastAPI(title="Stirling AI Engine", lifespan=lifespan, version="0.1.0")
+# D3: optional shared-service-token auth (enforced only when STIRLING_ENGINE_API_KEY is set).
+# Added before UserIdMiddleware so unauthenticated requests are rejected before any tracking.
+app.add_middleware(ApiKeyAuthMiddleware)
 app.add_middleware(UserIdMiddleware)
 app.include_router(orchestrator_router)
 app.include_router(pdf_edit_router)

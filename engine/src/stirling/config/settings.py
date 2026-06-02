@@ -98,6 +98,12 @@ class AppSettings(BaseSettings):
     posthog_api_key: str = Field(validation_alias="STIRLING_POSTHOG_API_KEY")
     posthog_host: str = Field(validation_alias="STIRLING_POSTHOG_HOST")
 
+    # D3: optional shared service token for the Java<->engine hop. When set, every request
+    # (except liveness/docs) must present a matching `X-API-Key` header (or `Authorization:
+    # Bearer <key>`). Left blank by default so loopback-only deployments are unaffected; set it
+    # for any non-loopback engine exposure. Enforced by ApiKeyAuthMiddleware.
+    engine_api_key: str = Field(default="", validation_alias="STIRLING_ENGINE_API_KEY")
+
 
 def _configure_logging(level_name: str, log_file: str, http_debug: bool) -> None:
     """Configure the ``stirling`` logger hierarchy."""

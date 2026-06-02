@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import hmac
+
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import JSONResponse, Response
 
 from stirling.services.tracking import current_user_id
 
 _USER_ID_HEADER = "X-User-Id"
+_API_KEY_HEADER = "X-API-Key"
+_BEARER_PREFIX = "Bearer "
 
 
 class UserIdMiddleware(BaseHTTPMiddleware):
@@ -20,4 +24,50 @@ class UserIdMiddleware(BaseHTTPMiddleware):
                 return await call_next(request)
             finally:
                 current_user_id.reset(token)
+        return await call_next(request)
+
+
+class ApiKeyAuthMiddleware(BaseHTTPMiddleware):
+    """Optional shared-service-token auth for the Java<->engine hop (roadmap D3).
+
+    The expected key is read per-request from ``request.app.state.settings.engine_api_key``
+    (populated in the app lifespan), so the middleware can be installed at import time before
+    settings are loaded. Behaviour:
+
+    * key unset/blank (default)  -> auth disabled, every request passes (loopback deployments);
+    * key set                    -> requests must carry ``X-API-Key: <key>`` or
+                                     ``Authorization: Bearer <key>``, except the exempt liveness/
+                                     docs paths; otherwise a 401 JSON response is returned.
+
+    Comparison is constant-time (``hmac.compare_digest``) to avoid leaking the key via timing.
+    """
+
+    # Liveness + schema/docs stay open so health probes and OpenAPI tooling don't need the token.
+    _EXEMPT_PREFIXES = ("/health", "/docs", "/redoc", "/openapi.json")
+
+    def _expected_key(self, request: Request) -> str:
+        settings = getattr(request.app.state, "settings", None)
+        key = getattr(settings, "engine_api_key", "") if settings is not None else ""
+        return key or ""
+
+    def _is_exempt(self, path: str) -> bool:
+        return any(path == p or path.startswith(p + "/") for p in self._EXEMPT_PREFIXES)
+
+    @staticmethod
+    def _presented_key(request: Request) -> str | None:
+        header = request.headers.get(_API_KEY_HEADER)
+        if header:
+            return header
+        authorization = request.headers.get("Authorization", "")
+        if authorization.startswith(_BEARER_PREFIX):
+            return authorization[len(_BEARER_PREFIX) :]
+        return None
+
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        expected = self._expected_key(request)
+        if not expected or self._is_exempt(request.url.path):
+            return await call_next(request)
+        presented = self._presented_key(request)
+        if presented is None or not hmac.compare_digest(presented, expected):
+            return JSONResponse({"detail": "Invalid or missing API key"}, status_code=401)
         return await call_next(request)

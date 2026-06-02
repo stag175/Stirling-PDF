@@ -254,6 +254,15 @@ public class ApplicationProperties {
          * explicitly requests it via {@code AiEngineClient.postWithTimeout}.
          */
         private int longRunningTimeoutSeconds = 600;
+
+        /**
+         * Optional shared service token for the Java&rarr;engine hop (roadmap D3). When set, it is
+         * sent as the {@code X-API-Key} header on every engine request; the engine must be
+         * configured with the same value via {@code STIRLING_ENGINE_API_KEY}. Leave blank for
+         * loopback-only deployments (the engine then enforces no auth). Set it whenever the engine
+         * is reachable beyond loopback.
+         */
+        private String apiKey = "";
     }
 
     /**

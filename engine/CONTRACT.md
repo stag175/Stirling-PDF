@@ -40,6 +40,12 @@ Definitions live in `engine/src/stirling/contracts/` (re-exported from `contract
 - **`X-User-Id` header** (optional): captured by `UserIdMiddleware` and used as the PostHog
   `distinct_id` for that request. Absent → events are anonymous/"personless". It is *not* an auth
   credential; it does not gate access.
+- **`X-API-Key` header** (D3, optional service token): when `STIRLING_ENGINE_API_KEY` is configured,
+  every request except the exempt liveness/docs paths (`/health`, `/docs`, `/redoc`, `/openapi.json`)
+  must present `X-API-Key: <key>` **or** `Authorization: Bearer <key>` (constant-time compared), else
+  **401**. When the env var is unset (default), auth is disabled — loopback deployments are
+  unaffected. Enforced by `ApiKeyAuthMiddleware`; the Java caller must send the header when the key is
+  set.
 - **Long-running calls**: every agent route makes one or more LLM calls and can take many seconds.
   Clients should use generous read timeouts. For long multi-step work use the streaming orchestrator
   (below), whose frame cadence is the liveness signal.
@@ -69,6 +75,10 @@ buckets:
 
 1. **Invalid / missing request fields → `422 Unprocessable Entity`** (automatic, FastAPI + Pydantic).
    Body is the standard `{"detail": [ {loc, msg, type}, … ]}`. Applies to every typed-body route.
+
+1a. **Missing/invalid service token → `401 Unauthorized`** (only when `STIRLING_ENGINE_API_KEY` is
+   set; D3). Body `{"detail": "Invalid or missing API key"}`. Checked by `ApiKeyAuthMiddleware` before
+   routing, so it precedes validation/dependency errors.
 
 2. **Invalid query parameter → `400 Bad Request`.** The only hand-written HTTP error mapping today:
    `deliberate`'s `tolerance` must parse as a non-negative `Decimal`, else

@@ -503,6 +503,26 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   artifacts; "attach to releases" is the CI-side remainder). Verified both commands end-to-end on this box;
   engine gate still green (281 passed, 81.21%). Only the release-attachment wiring (CI) remains.
 
+### Wave 32 — D3 Java↔engine service-token auth (security; verified both sides; pushed)
+
+- **D3 DONE** (workstream D, security — implemented, not just audited). The Python engine had **no auth**
+  and the Java `AiEngineClient` sent **no** credential, so the engine was wide open beyond loopback.
+  Added an **optional shared service token**, enforced on the engine and sent by the client, fully
+  unit-tested on both sides:
+  - **Engine:** `ApiKeyAuthMiddleware` (`engine/src/stirling/api/middleware.py`) — when
+    `STIRLING_ENGINE_API_KEY` is set, every request except the exempt liveness/docs paths must present
+    `X-API-Key: <key>` or `Authorization: Bearer <key>` (constant-time `hmac.compare_digest`), else
+    **401**; when unset (default) auth is disabled so loopback deployments are unaffected. Key read
+    per-request from `app.state.settings` so it installs at import time. 6 tests
+    (`tests/test_engine_auth.py`): disabled-when-blank, 401 on missing/wrong, pass on correct
+    `X-API-Key`/`Bearer`, `/health` exempt. Engine suite **287 passed**, 81.52%, ruff + pyright clean.
+  - **Java:** added `aiEngine.apiKey` (`ApplicationProperties.AiEngine`); `AiEngineClient` now sends
+    `X-API-Key` on every request (post/stream/get) **only when configured** (no-op when blank). 2 tests
+    capture the outgoing `HttpRequest` and assert the header is present when set / absent when blank.
+    Full `:proprietary:test` green, JaCoCo gate **PASS** (46.14/47.07/43.27).
+  - Documented in `engine/CONTRACT.md` (auth convention + the new 401 failure mode). Default-off, so it's
+    a safe opt-in; the original roadmap framing ("audit") is satisfied *and* the hardening is shipped.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -519,8 +539,9 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   guard; its TOCTOU/rebinding remainder is integration-level and was spawned as a follow-up task);
   **D5 done** (Wave 29 — S3 deployment-guardrails doc, grounded in the store code);
   **D1 done** (Wave 30 — desktop OAuth2 nonce/state audit: swap is prevented; redirect-origin hardening
-  spawned as a follow-up); only D3 (Java↔engine mTLS) remains, needing a real multi-host deployment to
-  verify. (B1 is now **done** — see Wave 5.)
+  spawned as a follow-up); **D3 done** (Wave 32 — engine service-token auth, verified both sides; only
+  cert-based mTLS remains a deployment-time alternative). **The entire D-series (D1–D5) is now done.**
+  (B1 is now **done** — see Wave 5.)
 
 ---
 
@@ -638,6 +659,10 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **D3. Harden Java↔engine trust.** `AiProxyService` forwards `X-API-KEY` to the Python engine over
   plain localhost HTTP; add mTLS or scoped service tokens for any non-loopback deployment.
   *Effort:* M. *Risk:* med.
+  ✅ **DONE (Wave 32)**: scoped service token — engine `ApiKeyAuthMiddleware` enforces
+  `STIRLING_ENGINE_API_KEY` (401 when set+missing/wrong; off by default), Java `AiEngineClient` sends
+  `X-API-Key` from `aiEngine.apiKey`. Verified both sides (engine 287 tests; `:proprietary` gate PASS).
+  mTLS proper (cert-based) remains a deployment-time alternative.
 - **D4. SSRF review of URL-fetch features** (HTML→PDF, URL→PDF, TSA timestamp client uses raw
   `URLConnection`): allow-list/deny internal ranges, validate user-supplied URLs. *Effort:* M. *Risk:* med.
   ⏳ **PARTIAL (Wave 26)**: the unit-testable validation core is done — `isValidURL` now honours its boolean
