@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 110 — B4 browserIdentifier coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `browserIdentifier.test.ts` (4 tests) for `getBrowserId`
+  — the WAU-tracking browser id that's generated once and persisted in `localStorage`. Covers: generate +
+  persist on first call, idempotence across calls, returning an already-stored id without regenerating, and
+  the `session_`-prefixed fallback when `localStorage` throws. (Note: the throw-path spy had to target the
+  `window.localStorage` **instance** — `Storage.prototype` spying doesn't intercept jsdom's localStorage.)
+  Pure value-add, zero source change. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean,
+  `vitest` 4/4 green**.
+
 ### Wave 109 — B4 toolSynonyms coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `toolSynonyms.test.ts` (6 tests) for `getSynonyms(t,
