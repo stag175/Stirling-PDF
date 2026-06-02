@@ -1,8 +1,5 @@
 import { SignParameters } from "@app/hooks/tools/sign/useSignParameters";
-import {
-  HORIZONTAL_PADDING_RATIO,
-  VERTICAL_PADDING_RATIO,
-} from "@app/constants/signConstants";
+import { computeTextSignatureDimensions } from "@app/utils/signaturePreviewUtils";
 
 export interface SignaturePreview {
   dataUrl: string;
@@ -39,9 +36,6 @@ export const buildSignaturePreview = async (
     const fontFamily = config.fontFamily ?? "Helvetica";
     const textColor = config.textColor ?? "#000000";
 
-    const paddingX = Math.round(fontSize * HORIZONTAL_PADDING_RATIO);
-    const paddingY = Math.round(fontSize * VERTICAL_PADDING_RATIO);
-
     const measureCanvas = document.createElement("canvas");
     const measureCtx = measureCanvas.getContext("2d");
 
@@ -53,8 +47,10 @@ export const buildSignaturePreview = async (
     const metrics = measureCtx.measureText(text);
     const textWidth = Math.ceil(metrics.width);
 
-    const width = Math.max(1, textWidth + paddingX * 2);
-    const height = Math.max(1, Math.ceil(fontSize + paddingY * 2));
+    const { paddingX, width, height } = computeTextSignatureDimensions(
+      textWidth,
+      fontSize,
+    );
 
     const canvas = document.createElement("canvas");
     canvas.width = width;

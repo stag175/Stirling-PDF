@@ -696,6 +696,21 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 145 — B4 extract-pure-from-coupled: signaturePreview geometry (frontend; verified; pushed)
+
+- **B4 extract-pure-from-coupled (frontend)**: the text-signature preview geometry (padding-ratio rounding +
+  1px-minimum dimension clamps) was buried inside `signaturePreview.ts`'s canvas-coupled `buildSignaturePreview`
+  (`document.createElement("canvas")` + `measureText` + `toDataURL`), untestable. Lifted it into a new sibling
+  `signaturePreviewUtils.ts` (`computeTextSignatureDimensions(textWidth, fontSize)` → `{paddingX, paddingY,
+  width, height}`); `buildSignaturePreview` now measures the text width on the canvas and delegates the geometry,
+  dropping its direct `HORIZONTAL_PADDING_RATIO`/`VERTICAL_PADDING_RATIO` imports. Behaviour-preserving — the
+  `paddingX`/`paddingY` computation simply moved to just after the text measurement (it never depended on the
+  width). Added `signaturePreviewUtils.test.ts` (6 tests, hand-computed): default font 16 →
+  `{13,10,126,36}`; horizontal padding on both sides; `round()` padding (`fontSize 3` → paddingX/Y 2); `ceil()`
+  height for fractional font (`16.5` → 37); the **1px-minimum clamp** at degenerate `fontSize 0` →
+  `{0,0,1,1}`; and no clamp when measured text already exceeds 1px. Verified: **core `tsc` 0 errors, `eslint
+  --max-warnings=0` clean on all 3 files, `vitest` 6/6 green**.
+
 ### Wave 144 — B4 frontend coverage: ResourceManager blob-URL tracking + file factories (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `resourceManager.test.ts` (8 tests) for the untested `ResourceManager` util
