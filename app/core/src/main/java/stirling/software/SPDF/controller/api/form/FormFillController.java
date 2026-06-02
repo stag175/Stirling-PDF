@@ -88,7 +88,9 @@ public class FormFillController {
         }
     }
 
-    private static String decodePart(byte[] payload) {
+    // Package-private (not private) so FormFillControllerDecodePartTest can pin the null/empty
+    // guards and the UTF-8 decoding.
+    static String decodePart(byte[] payload) {
         if (payload == null || payload.length == 0) {
             return null;
         }

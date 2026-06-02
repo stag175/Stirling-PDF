@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 179 — A1 coverage: FormFillController.decodePart UTF-8 payload decoder (backend core; verified; pushed)
+
+- **A1 coverage (backend `core`)**: made `FormFillController.decodePart(byte[])` package-private (was `private
+  static`; used at 3 sites to decode the multipart updates/names/values payloads) and added
+  `FormFillControllerDecodePartTest` (5 tests). Pinned the **null/empty → null guards** (empty payload yields
+  `null`, not an empty string — so downstream "absent vs blank" logic stays correct) and UTF-8 decoding: ASCII
+  verbatim, a multi-byte sequence (`café` via `0xC3 0xA9`), and a JSON payload round-trip. Behaviour-preserving
+  (modifier-only source change). Verified: **gradle `:stirling-pdf:test --tests FormFillControllerDecodePartTest`
+  BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test
+  failure).
+
 ### Wave 178 — A1 coverage: MergeController.indexOfByOriginalFilename first-match search (backend core; verified; pushed)
 
 - **A1 coverage (backend `core`)**: made `MergeController.indexOfByOriginalFilename(List<MultipartFile>, String)`
