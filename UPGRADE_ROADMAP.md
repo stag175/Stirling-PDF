@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 85 — I-workstream engine detector-helper coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/contradiction/test_detector_helpers.py` (16
+  tests) for two pure helpers in `contradiction/detector.py`. `_windows` — the overlapping-window generator
+  with documented invariants (small/empty bucket → single window, no-overlap tiling, `step = size - overlap`,
+  **every item covered by ≥1 window**, and `ValueError` when `size<=0` or `overlap∉[0,size)`); since `_windows`
+  only slices its input it's tested with placeholder items via `cast` rather than full `Claim` fixtures.
+  `_fallback_summary` — the contradiction-count summary string with singular/plural agreement
+  (`contradiction`/`contradictions`, `tension`/`tensions`) and the no-findings branch. Pure value-add, zero
+  source change. Verified via the engine venv: **pytest 16/16 passed, ruff clean, pyright 0 errors**.
+
 ### Wave 84 — I-workstream engine escape-guard + label coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: two focused test files.
