@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 93 — I-workstream engine logging-default + prompt-shape coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: two small test files.
+  (1) `tests/test_logging_default.py` (4 tests) for the JSON-serialisation fallback `_default` in
+  `stirling.logging` (BaseModel → `model_dump()` dict; Decimal/set/arbitrary objects → `str`).
+  (2) `tests/agents/test_default_build_prompt.py` (2 tests) for `_default_build_prompt` (the default
+  query-then-content extraction-prompt shape, incl. empty inputs).
+  Pure value-add, zero source change. Verified via the engine venv: **pytest 6/6 passed, ruff clean, pyright 0
+  errors**. *(The engine's remaining untested top-level functions are now side-effectful config/client/logging
+  builders — `_build_model`, `_build_anthropic_http_client`, `_configure_logging`, `load_settings`,
+  `get_runtime` — which need mocking/integration rather than pure unit tests; the pure-logic surface is
+  largely covered.)*
+
 ### Wave 92 — I-workstream engine reconstruction-prompt coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/test_reconstruction_prompt.py` (5 tests) for the
