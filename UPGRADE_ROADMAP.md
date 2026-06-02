@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 188 — A1 coverage: ClusterStorageGate.normalize value normaliser (backend proprietary; verified; pushed)
+
+- **A1 coverage (backend `proprietary`)**: made `ClusterStorageGate.normalize(String)` package-private (was
+  `private static`) and added `ClusterStorageGateNormalizeTest` (4 tests) for the storage-provider/artifact-store
+  value normaliser used by the cluster compatibility checks. Pinned: **only `null` defaults to `"local"`**;
+  values are lower-cased (`S3`→`s3`, `DATABASE`→`database`); surrounding whitespace is trimmed (`  Local  `→
+  `local`); and — the subtle bit — an **empty (non-null) string stays `""`, NOT `"local"`** (only null hits the
+  `orElse("local")`). Complements the Wave 133 gate-validation tests by pinning the normaliser directly.
+  Behaviour-preserving (modifier-only source change). Verified: **gradle `:proprietary:test --tests
+  ClusterStorageGateNormalizeTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the
+  project-wide threshold, not a test failure).
+
 ### Wave 187 — A1 coverage: AiWorkflowService tool timeout/failure messages (backend proprietary; verified; pushed)
 
 - **A1 coverage (backend `proprietary`)**: made `AiWorkflowService.toolTimeoutMessage(String,

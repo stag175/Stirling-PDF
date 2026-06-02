@@ -74,7 +74,9 @@ public class ClusterStorageGate {
                         + " before enabling clustering.");
     }
 
-    private static String normalize(String value) {
+    // Package-private (not private) so ClusterStorageGateNormalizeTest can pin the
+    // null-defaults-to-local / trim / lowercase normalisation.
+    static String normalize(String value) {
         return Optional.ofNullable(value).orElse("local").trim().toLowerCase(Locale.ROOT);
     }
 
