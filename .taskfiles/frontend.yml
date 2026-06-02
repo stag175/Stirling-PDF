@@ -304,3 +304,9 @@ tasks:
     deps: [install]
     cmds:
       - npm run license:check
+
+  sbom:
+    desc: "Generate a CycloneDX SBOM for the frontend (E2) -> frontend/sbom.json"
+    deps: [install]
+    cmds:
+      - npm run sbom

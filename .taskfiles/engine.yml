@@ -91,6 +91,15 @@ tasks:
     cmds:
       - uv run pytest tests --cov=src --cov-branch --cov-report=html --cov-report=term
 
+  sbom:
+    desc: "Generate a CycloneDX SBOM for the engine (E2) -> engine/sbom.json"
+    deps: [install]
+    cmds:
+      # cyclonedx-bom (cyclonedx-py) reads the installed .venv environment.
+      - uv run cyclonedx-py environment .venv --of JSON -o sbom.json
+    generates:
+      - sbom.json
+
   fix:
     desc: "Auto-fix lint + format"
     cmds:

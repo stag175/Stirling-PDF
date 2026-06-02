@@ -19,6 +19,9 @@ coverage.xml
 htmlcov/
 .pytest_cache/
 
+# SBOM (E2 — generated CycloneDX SBOM artifact)
+sbom.json
+
 # Node
 node_modules/
 npm-debug.log*

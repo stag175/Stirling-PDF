@@ -491,6 +491,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   **spawned the redirect-origin hardening as a separate task** (with unit-test guidance). Also noted the
   STATELESS-chain vs session-backed-authz-repo fragility for multi-instance deployments.
 
+### Wave 31 — E2 SBOM completion: npm + Python (supply chain; verified; pushed)
+
+- **E2 now COMPLETE** (workstream E). The CycloneDX **Gradle** SBOM was already wired (`org.cyclonedx.bom`
+  3.1.0 → `./gradlew cyclonedxBom`); the roadmap also asked for **npm + Python** SBOMs, which were missing.
+  Added both, each verified to emit valid **CycloneDX 1.6** JSON: (1) **Python/engine** — `cyclonedx-bom`
+  added to engine dev deps + `uv.lock`, new `engine:sbom` task runs `cyclonedx-py environment .venv`
+  → `engine/sbom.json` (**213 components**); (2) **npm/frontend** — pinned `sbom` npm script
+  (`npx @cyclonedx/cyclonedx-npm@4.2.1`, consistent with the repo's existing `npx`-based scripts) + a
+  `frontend:sbom` task → `frontend/sbom.json` (**988 components**). Generated SBOMs are gitignored (build
+  artifacts; "attach to releases" is the CI-side remainder). Verified both commands end-to-end on this box;
+  engine gate still green (281 passed, 81.21%). Only the release-attachment wiring (CI) remains.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -648,6 +660,9 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   paper over veraPDF lag. *Evidence:* `build.gradle:196–214`, `app/core/build.gradle:82–89`.
   *Effort:* M–L. *Risk:* med.
 - **E2. Generate an SBOM** (CycloneDX Gradle + npm + Python) and attach to releases. *Effort:* S. *Risk:* low.
+  ✅ **DONE (Wave 31)**: all three SBOMs wired — Gradle (`cyclonedxBom`), Python (`engine:sbom` via
+  `cyclonedx-bom`, 213 components), npm (`frontend:sbom` via `@cyclonedx/cyclonedx-npm@4.2.1`, 988
+  components), all CycloneDX 1.6. Only the release-attachment step is CI-side.
 - **E3. Release provenance + signing.** Add SLSA provenance/attestations and signed tags/artifacts
   for JAR, Docker images, and Tauri installers. *Effort:* M. *Risk:* low.
 - **E4. Enforce the license report in CI** (currently generated but not gated). *Effort:* S. *Risk:* low.
