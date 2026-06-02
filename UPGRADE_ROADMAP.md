@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 76 — B4 sidebarUtils coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `sidebarUtils.test.ts` (6 tests) for the untested
+  `getSidebarInfo` (tool-panel vs quick-access rect resolution from React refs + state). Tested with mock refs
+  (no real DOM): tool-panel rect when active+present, quick-access fallback when the panel is absent, reader
+  mode deactivates the panel (falls back), hidden sidebars deactivate it, null rect when nothing is mounted,
+  and state pass-through. Pure value-add, zero source change. Verified: **core `tsc` 0 errors, `eslint
+  --max-warnings=0` clean, `vitest` 6/6 green**. (Note: `thumbnailUtils.calculateScaleFromFileSize` deferred —
+  that module import-pulls the PDFium WASM service, so it needs extraction/mocking rather than a direct test.)
+
 ### Wave 75 — B4 pdfTextEditorUtils image-extraction coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: extended `pdfTextEditorUtils.test.ts` (+6 tests, 21 total) for
