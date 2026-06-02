@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 109 — B4 toolSynonyms coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `toolSynonyms.test.ts` (6 tests) for `getSynonyms(t,
+  toolId)` — the tool-search synonym lookup that reads i18n `home.<id>.tags`/`<id>.tags`, comma-splits, trims,
+  and drops empties. Tested with a mock `TFunction` that mirrors i18next's "return the key when missing"
+  behaviour (so the `value !== key` fallback path is exercised): home-key hit, fallback to `<id>.tags`,
+  no-key-resolves → `[]`, whitespace/empty-entry filtering, empty value → `[]`, and translator-throws → `[]`
+  (graceful). Pure value-add, zero source change. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0`
+  clean, `vitest` 6/6 green**.
+
 ### Wave 108 — B4 urlMapping routing-contract coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `urlMapping.test.ts` (5 tests) for the `URL_TO_TOOL_MAP`
