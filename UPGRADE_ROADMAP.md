@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 190 — B4 frontend coverage: desktop backendErrors error/guard (frontend desktop layer; verified; pushed)
+
+- **B4 coverage (frontend, desktop layer)**: added `backendErrors.test.ts` (7 tests) for
+  `desktop/constants/backendErrors.ts` — the `BACKEND_NOT_READY` tagged-error pair used by the
+  desktop Tauri backend-startup flow. Pinned: `createBackendNotReadyError()` returns a real `Error`
+  carrying `code === "BACKEND_NOT_READY"` with the i18n fallback message ("Backend starting up…"),
+  and round-trips through its own guard; `isBackendNotReadyError` is **structural** — it accepts any
+  object with the matching `code` (not nominal), and rejects a plain `Error`, a wrong/non-string
+  `code`, `null`/`undefined`, and non-objects. `@app/i18n` mocked to return the fallback (same pattern
+  as the sibling desktop service tests). Verified through the **desktop** layer's toolchain:
+  **`tsc --project src/desktop/tsconfig.json` 0 errors, `eslint --max-warnings=0` clean, `vitest`
+  7/7 green** (test tagged under the `desktop` vitest project).
+
 ### Wave 189 — B4 frontend coverage: stripeCheckout cardStyles builders (frontend proprietary layer; verified; pushed)
 
 - **B4 coverage (frontend, proprietary layer — first frontend test outside `core` this segment)**: added
