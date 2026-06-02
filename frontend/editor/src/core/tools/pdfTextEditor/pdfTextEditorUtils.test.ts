@@ -15,6 +15,8 @@ import {
   extractDocumentImages,
   extractPageImages,
   getImageBounds,
+  groupDocumentText,
+  groupPageTextElements,
   pageDimensions,
   valueOr,
 } from "@app/tools/pdfTextEditor/pdfTextEditorUtils";
@@ -251,5 +253,31 @@ describe("createMergedElement", () => {
       group({ originalElements: [txt({ text: "x" })], text: "" }),
     );
     expect(merged.text).toBe("");
+  });
+});
+
+describe("groupPageTextElements (empty/edge paths)", () => {
+  it("returns no groups for a null/undefined page", () => {
+    expect(groupPageTextElements(null, 0)).toEqual([]);
+    expect(groupPageTextElements(undefined, 0)).toEqual([]);
+  });
+
+  it("returns no groups when the page has no text elements", () => {
+    expect(groupPageTextElements(page({}), 0)).toEqual([]);
+    expect(groupPageTextElements(page({ textElements: [] }), 0)).toEqual([]);
+  });
+});
+
+describe("groupDocumentText (dispatch/edge paths)", () => {
+  it("returns no page-groups for a null/undefined document", () => {
+    expect(groupDocumentText(null)).toEqual([]);
+    expect(groupDocumentText(undefined)).toEqual([]);
+  });
+
+  it("returns an empty group list per text-less page", () => {
+    const doc = {
+      pages: [{ textElements: [] }, { textElements: [] }],
+    } as unknown as PdfJsonDocument;
+    expect(groupDocumentText(doc)).toEqual([[], []]);
   });
 });

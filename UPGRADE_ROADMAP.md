@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 105 — B4 pdfTextEditorUtils grouping edge-path coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: extended `pdfTextEditorUtils.test.ts` (+4 tests, 30 total) for
+  the entry points of the two large text-grouping functions, covering their fully-deterministic edge paths:
+  `groupPageTextElements` returns `[]` for a null/undefined page or a page with no text elements, and
+  `groupDocumentText` returns `[]` for a null/undefined document and `[[], []]` for a document of text-less
+  pages. (The multi-element line/paragraph-grouping heuristics are intentionally left to dedicated fixtures;
+  these pin the guard clauses + per-page dispatch.) Pure value-add, zero source change. Verified: **core `tsc`
+  0 errors, `eslint --max-warnings=0` clean, `vitest` 30/30 green**.
+
 ### Wave 104 — B4 pdfTextEditorUtils.createMergedElement coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: pivoted back to frontend. Extended `pdfTextEditorUtils.test.ts`
