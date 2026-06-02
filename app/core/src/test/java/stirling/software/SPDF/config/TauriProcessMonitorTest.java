@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.jupiter.api.AfterEach;
@@ -24,14 +23,14 @@ import org.springframework.context.ConfigurableApplicationContext;
  * Unit tests for {@link TauriProcessMonitor}.
  *
  * <p>The class is a plain Spring component with constructor injection. We exercise the public
- * surface ({@code getCurrentProcessId}, {@code init}, {@code cleanup}) directly and reach the
- * private lifecycle/branch logic ({@code startMonitoring}, {@code checkParentProcess},
- * {@code isProcessAlive}, {@code initiateGracefulShutdown}) via reflection. No Spring context,
- * DB, network or native tooling is used; the {@link ApplicationContext} collaborator is mocked.
+ * surface ({@code getCurrentProcessId}, {@code init}, {@code cleanup}) and the package-private
+ * lifecycle/branch logic ({@code startMonitoring}, {@code checkParentProcess}, {@code
+ * isProcessAlive}, {@code initiateGracefulShutdown}) directly. No Spring context, DB, network or
+ * native tooling is used; the {@link ApplicationContext} collaborator is mocked.
  *
- * <p>The {@code System.exit(0)} fallback branch in {@code initiateGracefulShutdown} (non
- * {@link ConfigurableApplicationContext}) is intentionally NOT triggered because it would
- * terminate the test JVM.
+ * <p>The {@code System.exit(0)} fallback branch in {@code initiateGracefulShutdown} (non {@link
+ * ConfigurableApplicationContext}) is intentionally NOT triggered because it would terminate the
+ * test JVM.
  */
 class TauriProcessMonitorTest {
 
@@ -111,7 +110,7 @@ class TauriProcessMonitorTest {
     }
 
     // ---------------------------------------------------------------------
-    // startMonitoring() - reached via reflection so we do not depend on env vars
+    // startMonitoring() - called directly so we do not depend on env vars
     // ---------------------------------------------------------------------
 
     @Test
@@ -120,7 +119,7 @@ class TauriProcessMonitorTest {
         monitor = new TauriProcessMonitor(ctx);
         setField(monitor, "parentProcessId", String.valueOf(ProcessHandle.current().pid()));
 
-        invokePrivate(monitor, "startMonitoring");
+        monitor.startMonitoring();
 
         assertTrue((boolean) getField(monitor, "monitoring"));
         ScheduledExecutorService scheduler =
@@ -132,7 +131,7 @@ class TauriProcessMonitorTest {
     }
 
     // ---------------------------------------------------------------------
-    // isProcessAlive() - private, exercised via reflection
+    // isProcessAlive() - package-private, exercised directly
     // ---------------------------------------------------------------------
 
     @Test
@@ -140,7 +139,7 @@ class TauriProcessMonitorTest {
         monitor = new TauriProcessMonitor(mock(ApplicationContext.class));
         String livePid = String.valueOf(ProcessHandle.current().pid());
 
-        boolean alive = (boolean) invokePrivate(monitor, "isProcessAlive", String.class, livePid);
+        boolean alive = monitor.isProcessAlive(livePid);
 
         assertTrue(alive);
     }
@@ -151,7 +150,7 @@ class TauriProcessMonitorTest {
         // A very large PID that is exceedingly unlikely to map to a real process.
         String deadPid = "999999999";
 
-        boolean alive = (boolean) invokePrivate(monitor, "isProcessAlive", String.class, deadPid);
+        boolean alive = monitor.isProcessAlive(deadPid);
 
         assertFalse(alive);
     }
@@ -160,8 +159,7 @@ class TauriProcessMonitorTest {
     void isProcessAlive_returnsFalseForInvalidPidFormat() throws Exception {
         monitor = new TauriProcessMonitor(mock(ApplicationContext.class));
 
-        boolean alive =
-                (boolean) invokePrivate(monitor, "isProcessAlive", String.class, "not-a-number");
+        boolean alive = monitor.isProcessAlive("not-a-number");
 
         assertFalse(alive);
     }
@@ -171,13 +169,13 @@ class TauriProcessMonitorTest {
         monitor = new TauriProcessMonitor(mock(ApplicationContext.class));
 
         // Long.parseLong(null) throws NumberFormatException -> handled, returns false.
-        boolean alive = (boolean) invokePrivate(monitor, "isProcessAlive", String.class, (Object) null);
+        boolean alive = monitor.isProcessAlive((String) null);
 
         assertFalse(alive);
     }
 
     // ---------------------------------------------------------------------
-    // checkParentProcess() - private, exercised via reflection
+    // checkParentProcess() - package-private, exercised directly
     // ---------------------------------------------------------------------
 
     @Test
@@ -189,7 +187,7 @@ class TauriProcessMonitorTest {
         setField(monitor, "parentProcessId", "999999999");
         setField(monitor, "monitoring", false);
 
-        invokePrivate(monitor, "checkParentProcess");
+        monitor.checkParentProcess();
 
         // No shutdown attempted because the method short-circuits on !monitoring.
         verify(ctx, never()).close();
@@ -203,7 +201,7 @@ class TauriProcessMonitorTest {
         setField(monitor, "parentProcessId", String.valueOf(ProcessHandle.current().pid()));
         setField(monitor, "monitoring", true);
 
-        invokePrivate(monitor, "checkParentProcess");
+        monitor.checkParentProcess();
 
         verify(ctx, never()).close();
         assertTrue((boolean) getField(monitor, "monitoring"));
@@ -216,7 +214,7 @@ class TauriProcessMonitorTest {
         setField(monitor, "parentProcessId", "999999999");
         setField(monitor, "monitoring", true);
 
-        invokePrivate(monitor, "checkParentProcess");
+        monitor.checkParentProcess();
 
         // Shutdown happens on a virtual thread after a 1s sleep -> await it.
         verify(ctx, timeout(5000)).close();
@@ -233,12 +231,12 @@ class TauriProcessMonitorTest {
         setField(monitor, "parentProcessId", "999999999");
         setField(monitor, "monitoring", true);
 
-        assertDoesNotThrow(() -> invokePrivate(monitor, "checkParentProcess"));
+        assertDoesNotThrow(() -> monitor.checkParentProcess());
         assertFalse((boolean) getField(monitor, "monitoring"));
     }
 
     // ---------------------------------------------------------------------
-    // initiateGracefulShutdown() - private, exercised via reflection
+    // initiateGracefulShutdown() - package-private, exercised directly
     // ---------------------------------------------------------------------
 
     @Test
@@ -248,7 +246,7 @@ class TauriProcessMonitorTest {
         monitor = new TauriProcessMonitor(ctx);
         setField(monitor, "monitoring", true);
 
-        invokePrivate(monitor, "initiateGracefulShutdown");
+        monitor.initiateGracefulShutdown();
 
         // monitoring is flipped synchronously before the async thread starts.
         assertFalse((boolean) getField(monitor, "monitoring"));
@@ -273,7 +271,7 @@ class TauriProcessMonitorTest {
         ApplicationContext ctx = mock(ApplicationContext.class);
         monitor = new TauriProcessMonitor(ctx);
         setField(monitor, "parentProcessId", String.valueOf(ProcessHandle.current().pid()));
-        invokePrivate(monitor, "startMonitoring");
+        monitor.startMonitoring();
 
         ScheduledExecutorService scheduler =
                 (ScheduledExecutorService) getField(monitor, "scheduler");
@@ -303,18 +301,5 @@ class TauriProcessMonitorTest {
         Field field = TauriProcessMonitor.class.getDeclaredField(name);
         field.setAccessible(true);
         field.set(target, value);
-    }
-
-    private static Object invokePrivate(Object target, String methodName) throws Exception {
-        Method method = TauriProcessMonitor.class.getDeclaredMethod(methodName);
-        method.setAccessible(true);
-        return method.invoke(target);
-    }
-
-    private static Object invokePrivate(
-            Object target, String methodName, Class<?> paramType, Object arg) throws Exception {
-        Method method = TauriProcessMonitor.class.getDeclaredMethod(methodName, paramType);
-        method.setAccessible(true);
-        return method.invoke(target, arg);
     }
 }

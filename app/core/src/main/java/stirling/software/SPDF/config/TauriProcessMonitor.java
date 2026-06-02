@@ -49,7 +49,8 @@ public class TauriProcessMonitor {
         }
     }
 
-    private void startMonitoring() {
+    // Package-private (not private) so tests call these directly instead of via reflection.
+    void startMonitoring() {
         scheduler =
                 Executors.newSingleThreadScheduledExecutor(
                         r -> {
@@ -66,7 +67,7 @@ public class TauriProcessMonitor {
         logger.info("Started monitoring parent Tauri process (PID: {})", parentProcessId);
     }
 
-    private void checkParentProcess() {
+    void checkParentProcess() {
         if (!monitoring) {
             return;
         }
@@ -83,7 +84,7 @@ public class TauriProcessMonitor {
         }
     }
 
-    private boolean isProcessAlive(String pid) {
+    boolean isProcessAlive(String pid) {
         try {
             long processId = Long.parseLong(pid);
 
@@ -99,7 +100,7 @@ public class TauriProcessMonitor {
         }
     }
 
-    private void initiateGracefulShutdown() {
+    void initiateGracefulShutdown() {
         monitoring = false;
 
         logger.info("Orphaned Java backend detected. Shutting down gracefully...");

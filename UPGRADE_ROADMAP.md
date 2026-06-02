@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 103 — C2 TauriProcessMonitor de-reflection (backend; verified; pushed)
+
+- **C2 de-reflection (backend)**: `TauriProcessMonitorTest` used two generic `invokePrivate(target, "name", …)`
+  reflection helpers to reach **4 lifecycle methods** (`startMonitoring`, `checkParentProcess`,
+  `isProcessAlive`, `initiateGracefulShutdown`) across **11 call sites**. Made the 4 methods package-private and
+  converted every site to a direct compile-checked call (`monitor.startMonitoring()` etc.; the `(Object) null`
+  arg became `(String) null` to match the typed parameter), removed both generic helpers + the unused
+  `java.lang.reflect.Method` import, and refreshed the now-stale "via reflection" Javadoc/comments. The
+  `Field`-based `setField`/`getField` helpers are retained (field reflection out of scope). Behaviour-preserving
+  (visibility-only source change). Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with `TauriProcessMonitorTest`
+  green.
+
 ### Wave 102 — C2 Type3LibraryStrategy.loadConfiguration de-reflection (backend; verified; pushed)
 
 - **C2 de-reflection (backend)**: `Type3LibraryStrategyTest`'s `invokePostConstruct` helper called
