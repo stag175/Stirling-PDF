@@ -696,6 +696,21 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 193 — B4 frontend coverage: core logo-variant + auth-route helpers (frontend core layer; verified; pushed)
+
+- **B4 coverage (frontend, core layer — two small constants helpers)**: added `logo.test.ts` (6 tests) and
+  `routes.test.ts` (5 tests).
+  - `logo.ts`: `ensureLogoVariant` passes through the two known variants and defaults **everything else**
+    (including `"Classic"`, `"classic "`, `""`, `null`, `undefined`) to `"modern"` — only the exact string
+    `"classic"` is classic; `getLogoFolder` maps each variant to its asset folder and falls back to
+    `modern-logo` for nullish input, staying consistent with the exported `LOGO_FOLDER_BY_VARIANT` table.
+  - `routes.ts`: `isAuthRoute` matches every declared route, matches by **prefix** (so sub-paths/query
+    strings count), and rejects ordinary routes / `/` / `""`. Pinned the documented sharp edge that it is a
+    `startsWith` check — `"/loginx"` reports `true` — so any future tightening to segment-aware matching is a
+    deliberate, visible change. `AUTH_ROUTES` order/contents pinned.
+  - Verified through the **core** layer's toolchain: **`tsc --project src/core/tsconfig.json` 0 errors,
+    `eslint --max-warnings=0` clean, `vitest` 11/11 green** (both tagged under the `core` vitest project).
+
 ### Wave 192 — B4 frontend coverage: saas appSettings config-modal events (frontend saas layer; verified; pushed)
 
 - **B4 coverage (frontend, saas layer — first test under `saas/utils` this segment)**: added
