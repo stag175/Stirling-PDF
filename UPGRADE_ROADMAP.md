@@ -696,6 +696,21 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 146 — B4 extract-pure-from-coupled: signatureFlattening coordinate flip (frontend; verified; pushed)
+
+- **B4 extract-pure-from-coupled (frontend)**: the signature-annotation coordinate resolution + **CSS top-left →
+  PDF bottom-left y-flip** (`pdfY = pageHeight - originalY - height`) was buried inside
+  `signatureFlattening.ts`'s PDFium/canvas-coupled `flattenSignatures` (nested in an `any`-typed annotation loop),
+  untestable. Lifted it into a new sibling `signatureFlatteningUtils.ts` (`resolveSignaturePdfRect(rect,
+  pageHeight)` → `{pdfX, pdfY, width, height}` with a structural `RawAnnotationRect` type replacing the inline
+  `any` probing); `flattenSignatures` now delegates in one line. Behaviour-preserving — same fallback chains
+  (`origin.{x,y}`→`{x,y}`→`{left,top}`→`0`; `size.{w,h}`→`{w,h}`→`100`/`50`, all via `||` so a literal `0`
+  intentionally falls through) and same flip. Added `signatureFlatteningUtils.test.ts` (7 tests, hand-computed):
+  origin/size happy path + y-flip; flat `x/y/width/height` fallback; `left/top` fallback; empty-rect defaults
+  (`100×50` at `0,0`); origin/size preferred over flat keys; the `|| 0`-falsy-width/height default quirk pinned;
+  and no horizontal flip (`pdfX === x`). Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean on all
+  3 files, `vitest` 7/7 green**.
+
 ### Wave 145 — B4 extract-pure-from-coupled: signaturePreview geometry (frontend; verified; pushed)
 
 - **B4 extract-pure-from-coupled (frontend)**: the text-signature preview geometry (padding-ratio rounding +
