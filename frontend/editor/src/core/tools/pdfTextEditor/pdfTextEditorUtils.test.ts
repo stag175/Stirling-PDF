@@ -10,6 +10,8 @@ import {
   cloneImageElement,
   cloneTextElement,
   deepCloneDocument,
+  extractDocumentImages,
+  extractPageImages,
   getImageBounds,
   pageDimensions,
   valueOr,
@@ -145,5 +147,57 @@ describe("deepCloneDocument", () => {
     expect(
       (original.pages as unknown as { width: number }[])[0].width,
     ).toBe(100);
+  });
+});
+
+describe("extractPageImages", () => {
+  it("returns an empty array for a null/undefined page", () => {
+    expect(extractPageImages(null, 0)).toEqual([]);
+    expect(extractPageImages(undefined, 3)).toEqual([]);
+  });
+
+  it("preserves an existing image id", () => {
+    const result = extractPageImages(
+      page({ imageElements: [img({ id: "keep-me", transform: [1, 0, 0, 1, 0, 0] })] }),
+      0,
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("keep-me");
+  });
+
+  it("assigns a deterministic id when missing or blank", () => {
+    const result = extractPageImages(
+      page({ imageElements: [img({}), img({ id: "   " })] }),
+      2,
+    );
+    expect(result[0].id).toBe("page-2-image-0");
+    expect(result[1].id).toBe("page-2-image-1");
+  });
+
+  it("returns clones (mutating the result does not affect the source)", () => {
+    const source = img({ id: "x", transform: [1, 0, 0, 1, 5, 5] });
+    const result = extractPageImages(page({ imageElements: [source] }), 0);
+    result[0].transform![4] = 999;
+    expect(source.transform![4]).toBe(5);
+  });
+});
+
+describe("extractDocumentImages", () => {
+  it("returns an empty array for a null/undefined document", () => {
+    expect(extractDocumentImages(null)).toEqual([]);
+    expect(extractDocumentImages(undefined)).toEqual([]);
+  });
+
+  it("maps each page to its images with per-page deterministic ids", () => {
+    const doc = {
+      pages: [
+        { imageElements: [img({ id: "a" }), img({})] },
+        { imageElements: [] },
+      ],
+    } as unknown as PdfJsonDocument;
+    const result = extractDocumentImages(doc);
+    expect(result).toHaveLength(2);
+    expect(result[0].map((i) => i.id)).toEqual(["a", "page-0-image-1"]);
+    expect(result[1]).toEqual([]);
   });
 });

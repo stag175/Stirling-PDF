@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 75 — B4 pdfTextEditorUtils image-extraction coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: extended `pdfTextEditorUtils.test.ts` (+6 tests, 21 total) for
+  `extractPageImages` and `extractDocumentImages`: null/undefined page/doc → `[]`, existing image ids
+  preserved, deterministic `page-{pageIndex}-image-{idx}` ids assigned when id is missing **or blank** (the
+  `!id || id.trim().length === 0` branch), clones returned (mutating a result's `transform` leaves the source
+  intact), and per-page id namespacing across a multi-page document. Pure value-add, zero source change.
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 21/21 green**.
+
 ### Wave 74 — B4 pdfTextEditorUtils clone-semantics coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: extended `pdfTextEditorUtils.test.ts` (+5 tests, 15 total) to
