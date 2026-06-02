@@ -362,6 +362,17 @@ mockable-class headroom but trends toward Spring-context-dependent classes.
 25.5→46.3 func); backend line **`:common` 41.3 / `:stirling-pdf` 38.4 / `:proprietary` 46.0** — all promoted
 from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. This finding is resolved.
 
+### Wave 24 — D2 PII-safe OIDC diagnostics (security; verified; pushed)
+
+- **D2 DONE** (workstream D, security hardening — the first non-coverage workstream item beyond the gates).
+  `CustomOAuth2UserService.logClaimDump()` (active under `security.oauth2.debugLogging=true`) wrote raw
+  ID-token/UserInfo claim **values** — email, name, upn, phone, `sub`, the resolved username — to logs.
+  Added `redactClaimValue()`: PII/identifier claim values (and anything email-shaped) are masked to
+  `<firstChar>***(len=N)` while structural claims (iss/aud/exp/iat/email_verified/scope/…) and all claim
+  **keys** stay visible for diagnostics. Verified: full `:proprietary:test` green; existing debug-logging
+  tests updated to assert the redacted form **and** that the raw PII no longer appears; added a focused
+  `redactClaimValue` unit test. Behaviour unchanged outside the debug-only dump. Commit `ebbc964aa`.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -373,8 +384,10 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   module. See Waves 7–8.)
 - **Multi-week refactors (not safe to rush in a session):** B2 (state-library migration),
   C3 (streaming I/O — correctness-critical, needs load testing), the *stateful* remainder of C1
-  (needs characterization tests on real PDFs first), and the security-hardening items D1–D5 (need a
-  running app + real auth providers to verify). (B1 is now **done** — see Wave 5.)
+  (needs characterization tests on real PDFs first). Security hardening: **D2 done** (Wave 24); D1 (Tauri
+  OAuth nonce audit), D3 (Java↔engine mTLS), D5 (S3 deployment guardrails) need a running app / real
+  providers / deployment to verify; D4 (SSRF URL allow-listing) has a unit-testable validation portion that
+  remains a candidate. (B1 is now **done** — see Wave 5.)
 
 ---
 
