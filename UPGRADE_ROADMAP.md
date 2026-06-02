@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 94 — C2/security ConfigController.isLoopbackHost coverage (backend; verified; pushed)
+
+- **C2 de-reflection + security coverage (backend)**: pivoted back to backend. Made
+  `ConfigController.isLoopbackHost(String)` package-private (was `private`) so it's directly unit-testable —
+  it's the loopback-host guard that gates whether a derived backend URL is exposed (an SSRF-adjacent check).
+  Added focused `ConfigControllerLoopbackTest` (5 tests): `localhost` matched case-insensitively, the IPv4/IPv6
+  loopback literals (`127.0.0.1`/`::1`/`0:0:0:0:0:0:0:1`), non-loopback hosts rejected, and that the match is
+  **exact** (`127.0.0.2` and `127.0.0.1 ` with trailing space are rejected — not the whole 127/8 block, and IP
+  literals are not case-folded). Behaviour-preserving (visibility-only change). Verified: `:stirling-pdf:test`
+  BUILD SUCCESSFUL with the new test (5) and existing `ConfigControllerTest` green.
+
 ### Wave 93 — I-workstream engine logging-default + prompt-shape coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: two small test files.

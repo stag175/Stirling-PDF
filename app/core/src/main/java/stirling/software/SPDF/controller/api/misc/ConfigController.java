@@ -124,7 +124,8 @@ public class ConfigController {
         return "";
     }
 
-    private static boolean isLoopbackHost(String host) {
+    // Package-private (not private) so it can be unit-tested directly; only used internally.
+    static boolean isLoopbackHost(String host) {
         return "localhost".equalsIgnoreCase(host)
                 || "127.0.0.1".equals(host)
                 || "::1".equals(host)
