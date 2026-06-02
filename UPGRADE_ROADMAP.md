@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 71 — B4 imageToPdfLayoutUtils pure-extraction (frontend; verified; pushed)
+
+- **B4 pure-extraction (frontend)**: pivoted from backend (common/proprietary statics are already
+  test-covered; misc controllers well-mined) to the frontend. Lifted the page-layout maths out of the
+  PDFium-WASM `convertImageToPdf` (`imageToPdfUtils.ts`) into a pure, pdfium-free
+  `imageToPdfLayoutUtils.ts`: `resolvePageDimensions` (page size + orientation-match rotation) and
+  `calculateImagePlacement` (aspect-ratio-preserving letterbox/pillarbox centring). The async converter now
+  delegates, so the layout maths is unit-testable without the WASM module or a canvas. Added
+  `imageToPdfLayoutUtils.test.ts` (11 tests): keep/letter/A4 sizing, orientation swap for landscape images,
+  square→portrait, stretch/keep full-fill, wide-image letterbox + tall-image pillarbox centring (hand-computed
+  offsets), and exact-fit at matching aspect. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0`
+  clean, `vitest` 11/11 green** — type-only/behaviour-preserving.
+
 ### Wave 70 — C2 ScannerEffectGrayscaleUtils pure-extraction (verified; pushed)
 
 - **C2 pure-extraction**: lifted `convertToGrayscale` out of `ScannerEffectController` into a pure
