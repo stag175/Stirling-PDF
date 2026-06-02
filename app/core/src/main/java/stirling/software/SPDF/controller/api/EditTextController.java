@@ -233,7 +233,7 @@ public class EditTextController {
         }
 
         Matcher matcher = edit.pattern().matcher(joined);
-        List<MatchSpan> spans = new ArrayList<>();
+        List<EditTextMatchUtils.MatchSpan> spans = new ArrayList<>();
         StringBuffer interpolation = new StringBuffer();
         int previousAppendPosition = 0;
         while (matcher.find()) {
@@ -246,78 +246,25 @@ public class EditTextController {
             int prefixLength = matcher.start() - previousAppendPosition;
             String actualReplacement =
                     interpolation.substring(sizeBefore + prefixLength, interpolation.length());
-            spans.add(new MatchSpan(matcher.start(), matcher.end(), actualReplacement));
+            spans.add(
+                    new EditTextMatchUtils.MatchSpan(
+                            matcher.start(), matcher.end(), actualReplacement));
             previousAppendPosition = matcher.end();
         }
 
         // Apply right-to-left so earlier match positions stay valid as we mutate elements.
         for (int i = spans.size() - 1; i >= 0; i--) {
-            MatchSpan span = spans.get(i);
-            int firstElement = findElementForCharIndex(starts, ends, span.start());
-            int lastElement = findElementForCharIndex(starts, ends, span.end() - 1);
+            EditTextMatchUtils.MatchSpan span = spans.get(i);
+            int firstElement =
+                    EditTextMatchUtils.findElementForCharIndex(starts, ends, span.start());
+            int lastElement =
+                    EditTextMatchUtils.findElementForCharIndex(starts, ends, span.end() - 1);
             if (firstElement < 0 || lastElement < 0) {
                 continue;
             }
-            applyMatchToElements(
+            EditTextMatchUtils.applyMatchToElements(
                     elements, starts, span, firstElement, lastElement, modifiedIndices);
         }
-    }
-
-    /**
-     * Find the element whose text covers the character at {@code charIndex} in the joined string.
-     * Returns -1 if no element covers that index (which should not happen for valid match spans).
-     */
-    private static int findElementForCharIndex(int[] starts, int[] ends, int charIndex) {
-        for (int i = 0; i < starts.length; i++) {
-            if (starts[i] <= charIndex && charIndex < ends[i]) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private static void applyMatchToElements(
-            List<PdfJsonTextElement> elements,
-            int[] starts,
-            MatchSpan span,
-            int firstElement,
-            int lastElement,
-            Set<Integer> modifiedIndices) {
-        if (firstElement == lastElement) {
-            PdfJsonTextElement element = elements.get(firstElement);
-            String text = nullToEmpty(element.getText());
-            int matchStartInElement = span.start() - starts[firstElement];
-            int matchEndInElement = span.end() - starts[firstElement];
-            element.setText(
-                    text.substring(0, matchStartInElement)
-                            + span.replacement()
-                            + text.substring(matchEndInElement));
-            modifiedIndices.add(firstElement);
-            return;
-        }
-
-        // Cross-element match: write the whole replacement into the first matched element, empty
-        // any intermediate elements, and keep only the suffix of the last matched element. The
-        // JSON->PDF rebuild concatenates per-token text, so the font lays out the replacement as
-        // one continuous run anchored at the first element's X position.
-        String firstText = nullToEmpty(elements.get(firstElement).getText());
-        int firstSplit = span.start() - starts[firstElement];
-        elements.get(firstElement).setText(firstText.substring(0, firstSplit) + span.replacement());
-        modifiedIndices.add(firstElement);
-
-        for (int mid = firstElement + 1; mid < lastElement; mid++) {
-            elements.get(mid).setText("");
-            modifiedIndices.add(mid);
-        }
-
-        String lastText = nullToEmpty(elements.get(lastElement).getText());
-        int lastSplit = span.end() - starts[lastElement];
-        elements.get(lastElement).setText(lastText.substring(lastSplit));
-        modifiedIndices.add(lastElement);
-    }
-
-    private static String nullToEmpty(String value) {
-        return value != null ? value : "";
     }
 
     private String buildOutputFilename(MultipartFile inputFile) {
@@ -332,6 +279,4 @@ public class EditTextController {
     }
 
     private record CompiledEdit(Pattern pattern, String replacement) {}
-
-    private record MatchSpan(int start, int end, String replacement) {}
 }

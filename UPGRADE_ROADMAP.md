@@ -696,6 +696,24 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 64 — C2 EditTextMatchUtils pure-extraction + C3 evidence (verified; pushed)
+
+- **C2 pure-extraction (highest-complexity yet)**: lifted the find/replace text-splicing logic
+  (`findElementForCharIndex`, `applyMatchToElements`, the `MatchSpan` record, `nullToEmpty`) out of
+  `EditTextController` into a pure `EditTextMatchUtils`, so the off-by-one-prone cross-element substring
+  replacement is unit-testable without round-tripping a real PDF through the JSON model. Controller delegates
+  (`MatchSpan` → `EditTextMatchUtils.MatchSpan`). Added `EditTextMatchUtilsTest` (8 tests): element lookup
+  by char index, single-element interior/trailing splice, null-text handling, two-element cross splice
+  (replacement into first + suffix of last), 3-element splice emptying the middle, and modifiedIndices
+  accumulation. Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with the new test (8) and existing
+  `EditTextControllerTest` green.
+- **C3 evidence (no code change)**: while scoping C3 I confirmed the pure-Java controllers have **already
+  adopted streaming** — `ConvertPdfJsonController` (all response paths) and `EditTextController` use
+  `fileToWebResponse`/`pdfFileToWebResponse`/`ManagedTempFileResource`, and `WebResponseUtilsTest` already
+  covers the `ManagedTempFileResource` stream + delete-on-close + error-cleanup paths. So C3's foundation is
+  tested and in use; only the **native-tool converters** (ebook/img/video/scan) still buffer via
+  `readAllBytes`, and those need their native tools to write a passing drain test. Updated the C3 plan note.
+
 ### Wave 63 — C2 BookletImpositionUtils pure-extraction (verified; pushed)
 
 - **C2 pure-extraction**: lifted the saddle-stitch booklet-imposition arithmetic (`padToMultipleOf4`,
