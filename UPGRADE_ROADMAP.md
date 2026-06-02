@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 171 — B4 frontend coverage: ToolId guards + registry partition invariants (frontend; verified; pushed)
+
+- **B4 coverage (frontend, registry invariants)**: added `toolId.test.ts` (8 tests) for the untested
+  `types/toolId.ts` guards and the tool-id registry's structural invariants. `isValidToolId` accepts every
+  `TOOL_IDS` member and rejects non-tools/empty; `isRegularToolId`/`isSuperToolId`/`isLinkToolId` each return true
+  exactly for their subset and false for the other two (iterated over the real arrays). Invariants pinned
+  (verified to actually hold): `TOOL_IDS` has **no duplicates**; the regular/super/link subsets are **pairwise
+  disjoint** (an id in two categories would make the guards misclassify); and **every `TOOL_ID` is classified
+  into exactly one** category. A whole class of "tool added to the wrong/both lists" regressions is now caught at
+  test time. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 8/8 green**.
+
 ### Wave 170 — I-workstream engine coverage: PdfEditAgent operation-prompt formatters (Python; verified; pushed)
 
 - **Engine coverage (Python)**: added `tests/test_pdf_edit_prompts.py` (6 tests) for the two untested pure
