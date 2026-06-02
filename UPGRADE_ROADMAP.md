@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 112 — B4 viewTransition coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `viewTransition.test.ts` (2 tests) for
+  `withViewTransition(update)` — the View Transitions API wrapper with a graceful fallback. Covers the
+  fallback path (jsdom has no `document.startViewTransition` → runs the update synchronously and resolves) and
+  the delegation path (when `startViewTransition` exists, it's invoked and the update runs). pyright/tsc caught
+  a DOM-lib type clash (assigning a simplified mock to the built-in `startViewTransition`); resolved by using a
+  standalone `as unknown as` cast type. Pure value-add, zero source change. Verified: **core `tsc` 0 errors,
+  `eslint --max-warnings=0` clean, `vitest` 2/2 green**.
+
 ### Wave 111 — B4 clickHandlers coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `clickHandlers.test.ts` (4 tests) for `isSpecialClick`
