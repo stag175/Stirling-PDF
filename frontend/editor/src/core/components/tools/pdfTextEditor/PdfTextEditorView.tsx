@@ -41,57 +41,17 @@ import {
   getImageBounds,
   pageDimensions,
 } from "@app/tools/pdfTextEditor/pdfTextEditorUtils";
+import {
+  buildFontFamilyName,
+  buildFontLookupKeys,
+  getFontFormatHint,
+  getFontMimeType,
+  normalizeFontFormat,
+  normalizePageNumber,
+} from "@app/tools/pdfTextEditor/pdfTextEditorFontUtils";
 
 const MAX_RENDER_WIDTH = 820;
 const MIN_BOX_SIZE = 18;
-
-const normalizeFontFormat = (format?: string | null): string => {
-  if (!format) {
-    return "ttf";
-  }
-  const lower = format.toLowerCase();
-  if (lower.includes("woff2")) {
-    return "woff2";
-  }
-  if (lower.includes("woff")) {
-    return "woff";
-  }
-  if (lower.includes("otf")) {
-    return "otf";
-  }
-  if (lower.includes("cff")) {
-    return "otf";
-  }
-  return "ttf";
-};
-
-const getFontMimeType = (format: string): string => {
-  switch (format) {
-    case "woff2":
-      return "font/woff2";
-    case "woff":
-      return "font/woff";
-    case "otf":
-      return "font/otf";
-    default:
-      return "font/ttf";
-  }
-};
-
-const getFontFormatHint = (format: string): string | null => {
-  switch (format) {
-    case "woff2":
-      return "woff2";
-    case "woff":
-      return "woff";
-    case "otf":
-      return "opentype";
-    case "ttf":
-      return "truetype";
-    default:
-      return null;
-  }
-};
 
 const decodeBase64ToUint8Array = (value: string): Uint8Array => {
   const binary = window.atob(value);
@@ -100,15 +60,6 @@ const decodeBase64ToUint8Array = (value: string): Uint8Array => {
     bytes[index] = binary.charCodeAt(index);
   }
   return bytes;
-};
-
-const buildFontFamilyName = (font: PdfJsonFont): string => {
-  const preferred = (font.baseName ?? "").trim();
-  const identifier =
-    preferred.length > 0
-      ? preferred
-      : (font.uid ?? font.id ?? "font").toString();
-  return `pdf-font-${identifier.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 };
 
 const getCaretOffset = (element: HTMLElement): number => {
@@ -232,39 +183,6 @@ const toCssBounds = (
     width: scaledWidth,
     height: scaledHeight,
   };
-};
-
-const normalizePageNumber = (
-  pageIndex: number | null | undefined,
-): number | null => {
-  if (
-    pageIndex === null ||
-    pageIndex === undefined ||
-    Number.isNaN(pageIndex)
-  ) {
-    return null;
-  }
-  return pageIndex + 1;
-};
-
-const buildFontLookupKeys = (
-  fontId: string,
-  font: PdfJsonFont | null | undefined,
-  pageIndex: number | null | undefined,
-): string[] => {
-  const keys: string[] = [];
-  const pageNumber = normalizePageNumber(pageIndex);
-  if (pageNumber !== null) {
-    keys.push(`${pageNumber}:${fontId}`);
-  }
-  if (font?.uid) {
-    keys.push(font.uid);
-  }
-  if (font?.pageNumber !== null && font?.pageNumber !== undefined && font?.id) {
-    keys.push(`${font.pageNumber}:${font.id}`);
-  }
-  keys.push(fontId);
-  return Array.from(new Set(keys.filter((value) => value && value.length > 0)));
 };
 
 /**

@@ -598,6 +598,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   icons `alt={p.label}` → `alt=""`) and pinned with `OAuthButtons.a11y.test.tsx`. Verified: 22 a11y tests +
   the existing 11-test `OAuthButtons.test.tsx` all green, core + proprietary tsc 0 errors, eslint clean.
 
+### Wave 40 — B4 mega-component pure-helper extraction (verified; pushed)
+
+- **B4 started**: extracted 6 genuinely-pure font helpers from the 2,920-LoC `PdfTextEditorView.tsx`
+  (→ 2,838) into a new, separately-tested `pdfTextEditorFontUtils.ts` (22 tests — the view had **no** test
+  before) and tightened a `string` return into a `NormalizedFontFormat` union. Behaviour-preserving;
+  verified (core tsc 0 errors, 22 tests pass, eslint clean). Evaluated `pdfiumService.ts` and correctly
+  left it (WASM-bound, not safely pure-extractable). The proven C1/C2 pure-extraction pattern, now applied
+  to the frontend mega-components; further decomposition + `React.lazy` splitting remain.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -706,6 +715,13 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **B4. Decompose mega-components** — `PdfTextEditorView.tsx` (2,897), `pdfiumService.ts` (1,934),
   `AdminAdvancedSection.tsx` (1,790) into focused units; lazy-load per-tool UIs with `React.lazy`.
   *Effort:* M–L. *Risk:* low.
+  ⏳ **Started (Wave 40)**: extracted a cohesive cluster of 6 genuinely-pure font helpers
+  (`normalizeFontFormat`/`getFontMimeType`/`getFontFormatHint`/`buildFontFamilyName`/`normalizePageNumber`/
+  `buildFontLookupKeys`) out of `PdfTextEditorView.tsx` (2,920→2,838 LoC) into a new, separately-tested
+  `pdfTextEditorFontUtils.ts` (**22 unit tests**, where the view previously had none) + tightened a
+  `string` return into a `NormalizedFontFormat` union. Behaviour-preserving; verified (core tsc 0, 22 tests,
+  eslint clean). `pdfiumService.ts` was assessed and left alone (almost entirely WASM-bound — not safely
+  pure-extractable). Continued decomposition + `React.lazy` per-tool splitting remain.
 - **B5. Tighten TypeScript incrementally** — enable `noUncheckedIndexedAccess`, `noUnusedLocals`,
   `noImplicitReturns` (currently commented out); burn down 71 `as any` casts (worst in
   `layerUtils.ts`, `StampPreview.tsx`). *Effort:* M. *Risk:* low.
