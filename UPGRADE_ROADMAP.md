@@ -472,6 +472,25 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   existing endpoint-SSRF guard (`allow-private-endpoints`) and a `storage.s3.*` config reference. Pure docs
   → no build to run; correctness is in the grounding (every claim cites a file/operation).
 
+### Wave 30 — D1 desktop OAuth2 nonce/state audit (security analysis; grounded; pushed)
+
+- **D1 DONE** (workstream D, security audit — read-only analysis, no code changed). Added
+  `docs/desktop-oauth-security-audit.md` answering the roadmap's question: *can the desktop (Tauri)
+  OAuth2 nonce/state be swapped on the `window.location` redirect path?* **Answer: no.** Grounded the
+  full flow in `TauriAuthorizationRequestResolver` / `TauriOAuthUtils` /
+  `CustomOAuth2AuthenticationSuccessHandler` / `SecurityConfiguration`. **Key insight:** disabling
+  `http.csrf()` (SecurityConfiguration:264) does **not** disable OAuth2 `state` validation — that's a
+  separate mechanism run by `OAuth2LoginAuthenticationFilter` against the (default, session-backed)
+  authorization-request repository. The Tauri resolver *preserves* Spring's random `state` (wraps it as
+  `tauri:<rand>[:<nonce>]`, never replaces it), the nonce is bound *inside* that validated state, and the
+  token is delivered via the URL **fragment** (not query) — so neither value can be swapped without
+  breaking state validation. The genuinely interesting surface is the **redirect-`origin` derivation**
+  (`X-Forwarded-Host`→`Referer`→request-host): not web-exploitable in a correct reverse-proxy setup, but
+  trusting `X-Forwarded-Host` first + a hardcoded/incomplete IdP allow-list (misses Keycloak/Okta/ADFS)
+  is worth tightening to a server-configured canonical origin. Documented as residual hardening and
+  **spawned the redirect-origin hardening as a separate task** (with unit-test guidance). Also noted the
+  STATELESS-chain vs session-backed-authz-repo fragility for multi-instance deployments.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -486,9 +505,10 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   (needs characterization tests on real PDFs first). Security hardening: **D2 done** (Wave 24);
   **D4 unit-testable validation portion done** (Wave 26 — `isValidURL` contract fix + SSRF regression
   guard; its TOCTOU/rebinding remainder is integration-level and was spawned as a follow-up task);
-  **D5 done** (Wave 29 — S3 deployment-guardrails doc, grounded in the store code); D1 (Tauri OAuth nonce
-  audit) and D3 (Java↔engine mTLS) need a running app / real providers / deployment to verify. (B1 is now
-  **done** — see Wave 5.)
+  **D5 done** (Wave 29 — S3 deployment-guardrails doc, grounded in the store code);
+  **D1 done** (Wave 30 — desktop OAuth2 nonce/state audit: swap is prevented; redirect-origin hardening
+  spawned as a follow-up); only D3 (Java↔engine mTLS) remains, needing a real multi-host deployment to
+  verify. (B1 is now **done** — see Wave 5.)
 
 ---
 
@@ -596,6 +616,10 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   proprietary security config (stateless + nonce-in-state); verify the nonce/state cannot be
   swapped on the desktop `window.location` redirect path. *Evidence:* `SecurityConfiguration.java`.
   *Effort:* M. *Risk:* high if wrong.
+  ✅ **DONE (Wave 30)** — audit `docs/desktop-oauth-security-audit.md`: nonce/state swap is **prevented**
+  (OAuth2 `state` validation survives the disabled `http.csrf()`; the random state is preserved + the
+  nonce is bound inside it; token via URL fragment). Residual hardening = the redirect-`origin`
+  derivation (`X-Forwarded-Host`/`Referer` heuristics) → spawned as a follow-up task.
 - **D2. PII-safe OIDC diagnostics.** `security.oauth2.debugLogging` dumps ID-token/UserInfo claims;
   add automatic scrubbing/redaction and short log retention so an operator can't leave PII in logs.
   *Effort:* S. *Risk:* med.
