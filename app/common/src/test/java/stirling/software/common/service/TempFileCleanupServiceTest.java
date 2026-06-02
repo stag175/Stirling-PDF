@@ -488,36 +488,20 @@ public class TempFileCleanupServiceTest {
         }
     }
 
-    /** Helper method to invoke the private cleanupDirectoryStreaming method using reflection */
+    /**
+     * Helper to invoke the package-private cleanupDirectoryStreaming directly (depth 0,
+     * unscheduled) with a delete-tracking callback.
+     */
     private void invokeCleanupDirectoryStreaming(
             Path directory, boolean containerMode, long maxAgeMillis) {
+        // Create a consumer that tracks deleted files
+        AtomicInteger deleteCount = new AtomicInteger(0);
+        Consumer<Path> deleteCallback = path -> deleteCount.incrementAndGet();
+
         try {
-            // Create a consumer that tracks deleted files
-            AtomicInteger deleteCount = new AtomicInteger(0);
-            Consumer<Path> deleteCallback = path -> deleteCount.incrementAndGet();
-
-            // Get the method with updated signature
-            var method =
-                    TempFileCleanupService.class.getDeclaredMethod(
-                            "cleanupDirectoryStreaming",
-                            Path.class,
-                            boolean.class,
-                            int.class,
-                            long.class,
-                            boolean.class,
-                            Consumer.class);
-            method.setAccessible(true);
-
-            // Invoke the method with appropriate parameters
-            method.invoke(
-                    cleanupService,
-                    directory,
-                    containerMode,
-                    0,
-                    maxAgeMillis,
-                    false,
-                    deleteCallback);
-        } catch (Exception e) {
+            cleanupService.cleanupDirectoryStreaming(
+                    directory, containerMode, 0, maxAgeMillis, false, deleteCallback);
+        } catch (IOException e) {
             throw new RuntimeException("Error invoking cleanupDirectoryStreaming", e);
         }
     }

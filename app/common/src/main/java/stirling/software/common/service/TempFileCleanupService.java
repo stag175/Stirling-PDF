@@ -302,7 +302,9 @@ public class TempFileCleanupService {
      * @param onDeleteCallback Callback function when a file is deleted
      * @throws IOException If an I/O error occurs
      */
-    private void cleanupDirectoryStreaming(
+    // Package-private (not private) so TempFileCleanupServiceTest can drive directory cleanup via a
+    // direct, compile-checked call instead of reflection.
+    void cleanupDirectoryStreaming(
             Path directory,
             boolean containerMode,
             int depth,

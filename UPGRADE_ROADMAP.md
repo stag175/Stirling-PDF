@@ -696,6 +696,21 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 124 — C2 de-reflection: TempFileCleanupService.cleanupDirectoryStreaming (backend common; verified; pushed)
+
+- **C2 de-reflection (backend `common`)**: `TempFileCleanupServiceTest`'s `invokeCleanupDirectoryStreaming`
+  helper (used at 6 cleanup-scenario sites) drove the private 6-arg
+  `cleanupDirectoryStreaming(Path, boolean, int, long, boolean, Consumer)` through
+  `getDeclaredMethod(... 6 param types)` + `setAccessible` + `invoke`, wrapping any reflective failure in a
+  `RuntimeException`. Made `cleanupDirectoryStreaming` package-private (was `private`; kept the `throws
+  IOException`); the helper now calls `cleanupService.cleanupDirectoryStreaming(directory, containerMode, 0,
+  maxAgeMillis, false, deleteCallback)` directly, catching only the real `IOException` (still wrapped in
+  `RuntimeException` to preserve the helper's contract). The delete-tracking `Consumer` callback is unchanged.
+  Left the unrelated Spring `ReflectionTestUtils.setField(…, "machineType", …)` field-injection idiom in place
+  (a distinct, accepted test mechanism, not a raw-`java.lang.reflect` target). Behaviour-preserving. Verified:
+  **gradle `:common:test --tests TempFileCleanupServiceTest` BUILD SUCCESSFUL** (single-class run's JaCoCo
+  aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 123 — C2 de-reflection: JobExecutorService.executeWithTimeout (backend common; verified; pushed)
 
 - **C2 de-reflection (backend `common`)**: `JobExecutorServiceTest` referenced the private generic
