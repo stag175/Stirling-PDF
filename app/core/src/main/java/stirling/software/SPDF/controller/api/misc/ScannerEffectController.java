@@ -69,26 +69,6 @@ public class ScannerEffectController {
     private static final ThreadLocal<BufferCache> BUFFER_CACHE =
             ThreadLocal.withInitial(BufferCache::new);
 
-    private static int calculateSafeResolution(
-            float pageWidthPts, float pageHeightPts, int resolution) {
-        int projectedWidth = (int) Math.ceil(pageWidthPts * resolution / 72.0);
-        int projectedHeight = (int) Math.ceil(pageHeightPts * resolution / 72.0);
-        long projectedPixels = (long) projectedWidth * projectedHeight;
-
-        if (projectedWidth <= MAX_IMAGE_WIDTH
-                && projectedHeight <= MAX_IMAGE_HEIGHT
-                && projectedPixels <= MAX_IMAGE_PIXELS) {
-            return resolution;
-        }
-
-        double widthScale = (double) MAX_IMAGE_WIDTH / projectedWidth;
-        double heightScale = (double) MAX_IMAGE_HEIGHT / projectedHeight;
-        double pixelScale = Math.sqrt((double) MAX_IMAGE_PIXELS / projectedPixels);
-        double minScale = Math.min(Math.min(widthScale, heightScale), pixelScale);
-
-        return (int) Math.max(72, resolution * minScale);
-    }
-
     private static int determineRenderResolution(ScannerEffectRequest request) {
         return request.getResolution();
     }
@@ -473,7 +453,13 @@ public class ScannerEffectController {
             float pageHeightPts = pageSize.getHeight();
 
             int safeResolution =
-                    calculateSafeResolution(pageWidthPts, pageHeightPts, renderResolution);
+                    ScannerEffectResolutionUtils.calculateSafeResolution(
+                            pageWidthPts,
+                            pageHeightPts,
+                            renderResolution,
+                            MAX_IMAGE_WIDTH,
+                            MAX_IMAGE_HEIGHT,
+                            MAX_IMAGE_PIXELS);
 
             BufferedImage image = renderingResources.renderPage(pageIndex, safeResolution);
             BufferedImage processed = convertColorspace(image, colorspace);

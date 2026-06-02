@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 69 — C2 ScannerEffectResolutionUtils pure-extraction (verified; pushed)
+
+- **C2 pure-extraction (OOM/DoS guard)**: lifted `calculateSafeResolution` out of `ScannerEffectController`
+  into a pure `ScannerEffectResolutionUtils`, passing the image limits as params (rather than reading the
+  controller's `MAX_IMAGE_*` constants) so the maths is fully pure and testable with arbitrary limits. This is
+  the guard that caps a page's rasterised dimensions/pixel-count to prevent render-time OOM. Controller
+  delegates. Added `ScannerEffectResolutionUtilsTest` (5 tests): within-limits returns the requested DPI
+  unchanged, boundary (exactly at max width) not clamped, over-pixel / over-width clamp **verified by
+  invariant** (the re-projected raster must fit all three limits — robust to FP rounding in the scale), and
+  the 72-DPI floor when limits are tiny. Verified: `:stirling-pdf:test` BUILD SUCCESSFUL (5 new; controller
+  recompiles, behaviour identical).
+
 ### Wave 68 — C2 CompressionLevelUtils pure-extraction (verified; pushed)
 
 - **C2 pure-extraction**: lifted the four compression-level tuning helpers (`getScaleFactorForLevel`,
