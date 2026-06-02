@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 165 — I-workstream engine coverage: runtime.build_model_settings (Python; verified; pushed)
+
+- **Engine coverage (Python)**: added `tests/test_build_model_settings.py` (3 tests) for the untested pure
+  `runtime.build_model_settings(max_tokens)` — builds a pydantic-ai `ModelSettings` dict from an optional token
+  budget. Pinned the meaningful distinction: it uses `is not None` (not truthiness), so `100` →
+  `{"max_tokens": 100}`, `None` → `{}` (key omitted so the provider default applies), and an explicit `0` →
+  `{"max_tokens": 0}` (included, **not** dropped as falsy). (The sibling `validate_structured_output_support` is
+  already covered; importing this symbol from `runtime` is pyright-clean despite the module's
+  `pydantic_ai.models` dependency.) Verified: **pytest 3/3, ruff clean, pyright 0 errors**.
+
 ### Wave 164 — I-workstream engine coverage: progress-emission robustness boundary (Python; verified; pushed)
 
 - **Engine coverage (Python, robustness boundary)**: added `tests/test_progress.py` (5 tests) for
