@@ -696,6 +696,25 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 138 — I-workstream engine coverage: chunked_reasoner._note_range_label (Python; verified; pushed)
+
+- **Engine coverage (Python)**: added `tests/agents/test_note_range_label.py` (7 tests) for the previously
+  untested pure helper `_note_range_label(list[ChunkNotes]) -> str` in `agents/shared/chunked_reasoner.py`. It
+  flattens the page numbers across a group of already-extracted notes, then **sorts + de-duplicates** before
+  taking endpoints (distinct from the sibling `chunked_mapper._page_range_label`, which uses the supplied list's
+  first/last as-is — a difference the tests pin explicitly). Covered: empty list → `pages=?`; notes with empty
+  page lists → `pages=?`; single page → `pages=5`; same page repeated across notes de-dups to one; min/max
+  endpoints across notes; unsorted+duplicate pages sorted/deduped (`{8,2,5,2}` → `pages=2-8`); single note with
+  multiple pages → endpoints. `ChunkNotes` built with just the required `pages`+`summary` (excerpts/facts default
+  to `[]`). Verified: **pytest 7/7, ruff clean, pyright 0 errors**.
+- **De-reflection campaign note**: the cleanly-de-reflectable backend reflection tests are now done (Waves
+  119–137 across `core`/`common`/`proprietary`). The remaining `LoginAttemptServiceTest` is intentionally left
+  reflective — its class-doc states it constructs the service reflectively *to avoid coupling to a specific
+  constructor signature*, and it reads `AttemptCounter.attemptCount` **cross-package** (`…security.service` vs
+  `…security.model`), which package-private can't reach and which would require making that field `public` (a
+  worse production change than the reflection removes). Forcing it would either leave reflection anyway or harm
+  the design, so it is honestly left as-is rather than counted.
+
 ### Wave 137 — C2 de-reflection: KeygenLicenseVerifier nested class + 7 methods (backend proprietary; verified; pushed)
 
 - **C2 de-reflection (backend `proprietary`, largest backend yet; agent-assisted, independently verified)**:
