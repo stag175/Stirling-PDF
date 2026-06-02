@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 67 — C2 ScalePagesSizeUtils pure-extraction (verified; pushed)
+
+- **C2 pure-extraction**: lifted the named-page-size resolution (`getSizeMap` + the size lookup / landscape
+  orientation swap from `getTargetSize`) out of `ScalePagesController` into a pure `ScalePagesSizeUtils`, so
+  the size table + orientation swap are unit-testable without a PDF. The controller keeps the `"KEEP"` branch
+  (which needs the source document) and delegates the named-size branch; removed the now-unused `Map`/`HashMap`
+  imports. Added `ScalePagesSizeUtilsTest` (7 tests): portrait base dims, landscape width/height swap,
+  case-insensitive `landscape`, null/unrecognized orientation → portrait, all 9 named sizes resolve, and
+  unknown size (incl. `"KEEP"`, which the util correctly treats as unknown) throws. Verified:
+  `:stirling-pdf:test` BUILD SUCCESSFUL with the new test (7) and existing `ScalePagesControllerTest` green.
+
 ### Wave 66 — C2/D-security TsaUrlUtils pure-extraction (verified; pushed)
 
 - **C2 + security pure-extraction**: lifted the TSA-URL validation/normalization (`isValidTsaUrlProtocol`,
