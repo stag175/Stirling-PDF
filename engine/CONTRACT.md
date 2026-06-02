@@ -40,6 +40,11 @@ Definitions live in `engine/src/stirling/contracts/` (re-exported from `contract
 - **`X-User-Id` header** (optional): captured by `UserIdMiddleware` and used as the PostHog
   `distinct_id` for that request. Absent → events are anonymous/"personless". It is *not* an auth
   credential; it does not gate access.
+- **`X-Request-Id` header** (G2, correlation): echoed back on the response; if the caller sends one
+  it is reused, otherwise the engine generates one. It is attached to every log line for that request
+  (`RequestIdLogFilter` → `%(request_id)s`), tying the frontend → Java → engine hop together.
+- **`traceparent` / `tracestate` headers** (G1, W3C TraceContext): extracted on entry so engine
+  OpenTelemetry spans continue the upstream distributed trace rather than starting a detached one.
 - **`X-API-Key` header** (D3, optional service token): when `STIRLING_ENGINE_API_KEY` is configured,
   every request except the exempt liveness/docs paths (`/health`, `/docs`, `/redoc`, `/openapi.json`)
   must present `X-API-Key: <key>` **or** `Authorization: Bearer <key>` (constant-time compared), else

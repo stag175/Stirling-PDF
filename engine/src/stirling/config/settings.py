@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from stirling.logging import RequestIdLogFilter
+
 ENGINE_ROOT = Path(__file__).resolve().parents[3]
 ENV_FILE = ENGINE_ROOT / ".env"
 ENV_LOCAL_FILE = ENGINE_ROOT / ".env.local"
@@ -117,12 +119,16 @@ def _configure_logging(level_name: str, log_file: str, http_debug: bool) -> None
 
     root = logging.getLogger("stirling")
     root.setLevel(level)
-    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s [%(funcName)s] %(message)s")
+    # G2: structured log correlation — every line carries the per-request id (or "-" outside a
+    # request), injected by RequestIdLogFilter on each handler.
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s [%(funcName)s] [%(request_id)s] %(message)s")
+    request_id_filter = RequestIdLogFilter()
 
     if not any(isinstance(h, logging.StreamHandler) for h in root.handlers):
         sh = logging.StreamHandler()
         sh.setFormatter(formatter)
         sh.setLevel(level)
+        sh.addFilter(request_id_filter)
         root.addHandler(sh)
         root.propagate = False
 
@@ -137,6 +143,7 @@ def _configure_logging(level_name: str, log_file: str, http_debug: bool) -> None
         )
         fh.setFormatter(formatter)
         fh.setLevel(level)
+        fh.addFilter(request_id_filter)
         root.addHandler(fh)
 
     if http_debug:
@@ -161,6 +168,8 @@ def _enable_http_debug(formatter: logging.Formatter) -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     handler.setLevel(logging.DEBUG)
+    # The shared formatter references %(request_id)s, so this handler needs the filter too.
+    handler.addFilter(RequestIdLogFilter())
 
     for name, level in (("httpx", logging.INFO), ("httpcore", logging.DEBUG)):
         lg = logging.getLogger(name)

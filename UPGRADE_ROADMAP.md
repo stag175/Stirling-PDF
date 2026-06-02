@@ -523,6 +523,25 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   - Documented in `engine/CONTRACT.md` (auth convention + the new 401 failure mode). Default-off, so it's
     a safe opt-in; the original roadmap framing ("audit") is satisfied *and* the hardening is shipped.
 
+### Wave 33 — G1 + G2 engine observability: trace propagation + log correlation (verified; pushed)
+
+- **G1 + G2 (engine slice) DONE** (workstream G). Both were dismissed as "cross-tier runtime", but the
+  engine has a fully-verifiable slice that makes it *participate correctly* in distributed tracing and
+  log correlation:
+  - **G2 (structured logging + correlation):** new `RequestContextMiddleware` resolves a correlation id
+    from the inbound `X-Request-Id` (or generates one), exposes it via `current_request_id`
+    (`stirling/context.py`), echoes it in the response header, and `RequestIdLogFilter` injects it into
+    **every** log line (formatter now carries `[%(request_id)s]`). One id ties frontend → Java → engine.
+  - **G1 (distributed tracing):** the same middleware extracts the W3C **`traceparent`** via OTel's
+    propagator and `attach`-es it, so engine spans continue the upstream trace instead of starting a
+    detached one. Installed outermost so id/trace are set before auth and any logging.
+  - 6 tests (`tests/test_request_context.py`): id generated when absent / echoed when present; log filter
+    injects the active id and defaults to `-`; a known `traceparent` round-trips to the right
+    trace_id/span_id; absent traceparent → fresh trace. Engine suite **293 passed**, 81.61%, ruff +
+    pyright clean. Documented in `engine/CONTRACT.md`. (Cross-tier *emission/collector* wiring — the Java
+    Micrometer-tracing side and an OTLP collector — remains a deployment concern; the engine now does its
+    half correctly and verifiably.)
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -709,7 +728,12 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **G1. End-to-end OpenTelemetry tracing.** The Python engine already uses OTel; the Java side has
   Micrometer/actuator but no distributed tracing. Propagate W3C TraceContext across
   frontend → Java → engine. *Effort:* M. *Risk:* low.
+  ⏳ **Engine slice DONE (Wave 33)**: `RequestContextMiddleware` extracts W3C `traceparent` so engine
+  spans continue the upstream trace. Java Micrometer-tracing emission + an OTLP collector remain
+  deployment-side.
 - **G2. Structured logging + log correlation** (pairs with C7). *Effort:* S–M. *Risk:* low.
+  ✅ **DONE (Wave 33)**: per-request `X-Request-Id` correlation id (generated/echoed) injected into every
+  engine log line via `RequestIdLogFilter`; verified by 6 tests.
 - **G3. Telemetry consent clarity.** PostHog is wired across all three tiers; document the opt-out
   and provide a single privacy-first kill switch. *Effort:* S. *Risk:* low.
   ⏳ **PARTIAL (Wave 27)**: the engine kill switch (`setup_posthog_tracking` → None when

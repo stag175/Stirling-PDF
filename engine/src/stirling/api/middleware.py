@@ -1,16 +1,58 @@
 from __future__ import annotations
 
 import hmac
+from collections.abc import Mapping
+from uuid import uuid4
 
+from opentelemetry.context import Context, attach, detach
+from opentelemetry.propagate import extract
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
+from stirling.context import current_request_id
 from stirling.services.tracking import current_user_id
 
 _USER_ID_HEADER = "X-User-Id"
 _API_KEY_HEADER = "X-API-Key"
 _BEARER_PREFIX = "Bearer "
+_REQUEST_ID_HEADER = "X-Request-Id"
+
+
+def extract_trace_context(headers: Mapping[str, str]) -> Context:
+    """Extract a W3C TraceContext (``traceparent``/``tracestate``) from request headers.
+
+    Uses OpenTelemetry's globally-configured propagator so that engine spans become children of
+    the trace started upstream (frontend -> Java -> engine), per roadmap G1. Returns an OTel
+    Context to be ``attach``-ed for the duration of the request.
+    """
+    return extract(dict(headers))
+
+
+class RequestContextMiddleware(BaseHTTPMiddleware):
+    """Per-request observability context (roadmap G1 + G2).
+
+    * **G2 (log correlation):** resolves a correlation id from the inbound ``X-Request-Id`` header
+      (or generates one), exposes it via :data:`current_request_id` so every log line carries it,
+      and echoes it back in the ``X-Request-Id`` response header.
+    * **G1 (distributed tracing):** extracts the W3C TraceContext from the request headers and
+      attaches it, so spans created while handling the request continue the upstream trace.
+
+    Installed as the outermost middleware so the id/trace are set before auth and any logging.
+    """
+
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        incoming = request.headers.get(_REQUEST_ID_HEADER)
+        request_id = incoming if incoming else uuid4().hex
+        rid_token = current_request_id.set(request_id)
+        otel_token = attach(extract_trace_context(dict(request.headers)))
+        try:
+            response = await call_next(request)
+            response.headers[_REQUEST_ID_HEADER] = request_id
+            return response
+        finally:
+            detach(otel_token)
+            current_request_id.reset(rid_token)
 
 
 class UserIdMiddleware(BaseHTTPMiddleware):
