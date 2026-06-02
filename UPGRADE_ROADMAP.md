@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 52 — B4 useViewerReadAloud decomposition (verified; pushed)
+
+- **B4 continued (6th component)**: extracted 6 pure helpers from the `useViewerReadAloud.ts` hook
+  (770→679 LoC) into a tested `readAloudTextUtils.ts` — `pickVoiceForLanguage` (exact→base→English→first
+  fallback), `collectSupportedLanguageCodes`, `sortTextItemsByReadingOrder` + `mergeAdjacentTextItems` (now
+  non-mutating), `buildSpokenText`, and `clampHighlightWordIndex`/`findWordIndexAtCharIndex` — with **40
+  tests** (threshold boundaries, non-mutation, fallback ordering, char/word off-by-ones). Speech-synthesis/
+  DOM I/O stays in the hook. Verified: core tsc 0, 40 tests, eslint clean.
+
 ### Wave 51 — B4 RulerOverlay decomposition (verified; pushed)
 
 - **B4 continued (5th component, first non-config)**: extracted **12 pure geometry/unit/scale helpers**
