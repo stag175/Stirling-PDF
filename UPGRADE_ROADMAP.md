@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 157 — B4 frontend coverage: split-method guard + registry completeness (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `splitConstants.test.ts` (14 tests) for the untested `isSplitMethod` type
+  guard and two completeness invariants in `constants/splitConstants.ts`. Pinned: `isSplitMethod` accepts all 8
+  `SPLIT_METHODS` values (parametrized) and rejects `null`, empty, unknown, and a key-name (`"BY_PAGES"`, which
+  is a key not a value); the `ENDPOINTS` registry maps **every** split method to a non-empty endpoint string with
+  **no stray keys** (a frontend analog of the engine `OPERATIONS` completeness meta-test — a new split method
+  added without an endpoint would break the UI); and every `METHOD_OPTIONS` card value is a valid split method
+  and the values are unique. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 14/14
+  green**.
+
 ### Wave 156 — I-workstream engine coverage: tool→param registry completeness meta-test (Python; verified; pushed)
 
 - **Engine coverage (Python, architectural meta-test)**: added `tests/test_operations_completeness.py` (5 tests)
