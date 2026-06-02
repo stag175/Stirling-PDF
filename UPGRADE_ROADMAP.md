@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 91 — I-workstream engine label-normaliser + model-validation coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: two test files.
+  (1) `tests/ledger/test_normalise_label.py` (8 cases) for the figure-tracker `_normalise_label` — whose noise
+  class `[:\-—\s]+` is **narrower** than the contradiction ledger's: commas/periods are kept and articles are
+  *not* stripped (explicitly contrasted in the tests).
+  (2) `tests/test_validate_structured_output.py` (3 tests) for `validate_structured_output_support` in
+  `services/runtime.py`: supporting model passes, the `"test"` stand-in bypasses the check, and a
+  non-supporting model raises `ValueError` naming the model. (Used a typed-`Any` `SimpleNamespace` stand-in to
+  avoid importing the pydantic-ai `Model` type — which standalone pyright can't resolve.)
+  Pure value-add, zero source change. Verified via the engine venv: **pytest 11/11 passed, ruff clean, pyright
+  0 errors**.
+
 ### Wave 90 — I-workstream engine page-chunking coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/test_build_page_chunks.py` (7 tests) for the
