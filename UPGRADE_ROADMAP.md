@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 170 — I-workstream engine coverage: PdfEditAgent operation-prompt formatters (Python; verified; pushed)
+
+- **Engine coverage (Python)**: added `tests/test_pdf_edit_prompts.py` (6 tests) for the two untested pure
+  static prompt formatters on `PdfEditAgent`. `_get_operations_prompt` renders a flat comma-joined
+  `NAME (endpoint)` list (used to tell the model which tools are unavailable); pinned single (`ROTATE_PDF
+  (/api/v1/general/rotate-pdf)`), empty → `""`, and the two-op comma-join. `_get_supported_operations_prompt`
+  renders each op as a `- NAME (endpoint)` head plus 4-space-indented parameter lines from the param model's
+  JSON schema; pinned the exact `[ROTATE_PDF]` render (`- … \n    angle`), empty → `""`, and structurally that
+  every op gets a `- `-prefixed head while all non-head lines are indented (never flush-left). Verified:
+  **pytest 6/6, ruff clean, pyright 0 errors**.
+
 ### Wave 169 — I-workstream engine coverage: API-key auth middleware helpers (Python security; verified; pushed)
 
 - **Engine coverage (Python, security boundary)**: added `tests/test_api_key_middleware.py` (17 tests) for the
