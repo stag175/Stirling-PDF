@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 192 — B4 frontend coverage: saas appSettings config-modal events (frontend saas layer; verified; pushed)
+
+- **B4 coverage (frontend, saas layer — first test under `saas/utils` this segment)**: added
+  `appSettings.test.ts` (5 tests) for `openAppSettings`/`openPlanSettings` in `saas/utils/appSettings.ts`,
+  the programmatic openers for the App-Config modal. Rather than mock `dispatchEvent`, the test captures
+  the real `CustomEvent`s off `window` (the same way `AppConfigModal` consumes them) and pins both the
+  event names and detail payloads: a bare `openAppSettings()` emits a single `appConfig:open` with empty
+  detail (no `navigate`); a notice-only call carries `{notice}` and still no navigate; supplying a target
+  section emits `appConfig:open` `{key[,notice]}` **followed by** `appConfig:navigate` `{key}`; and
+  `openPlanSettings(notice)` is exactly the `"plan"`-section shortcut. Verified through the **saas** layer's
+  toolchain: **`tsc --project src/saas/tsconfig.json` 0 errors, `eslint --max-warnings=0` clean, `vitest`
+  5/5 green** (test tagged under the `saas` vitest project, which loads `saas/setupTests.ts`).
+
 ### Wave 191 — B4 frontend coverage: staticStripeLinks email-prefill URL builder (frontend proprietary layer; verified; pushed)
 
 - **B4 coverage (frontend, proprietary layer)**: added `staticStripeLinks.test.ts` (4 tests) for
