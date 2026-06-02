@@ -3,6 +3,7 @@ package stirling.software.common.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -171,12 +172,6 @@ class JobExecutorServiceTest {
         Supplier<Object> work = () -> "test-result";
         long customTimeout = 60000L;
 
-        // Use reflection to access the private executeWithTimeout method
-        java.lang.reflect.Method executeMethod =
-                JobExecutorService.class.getDeclaredMethod(
-                        "executeWithTimeout", Supplier.class, long.class);
-        executeMethod.setAccessible(true);
-
         // Create a spy on the JobExecutorService to verify method calls
         JobExecutorService spy = Mockito.spy(jobExecutorService);
 
@@ -241,17 +236,9 @@ class JobExecutorServiceTest {
                     return "test-result";
                 };
 
-        // Use reflection to access the private executeWithTimeout method
-        java.lang.reflect.Method executeMethod =
-                JobExecutorService.class.getDeclaredMethod(
-                        "executeWithTimeout", Supplier.class, long.class);
-        executeMethod.setAccessible(true);
-
-        // When/Then
-        try {
-            executeMethod.invoke(jobExecutorService, work, 1L); // Very short timeout
-        } catch (Exception e) {
-            assertInstanceOf(TimeoutException.class, e.getCause());
-        }
+        // When/Then: executeWithTimeout is package-private — call it directly with a 1ms timeout
+        // against the ~100ms busy-wait; it must throw TimeoutException (thrown unwrapped now, not
+        // wrapped in InvocationTargetException as the old reflective invoke would have).
+        assertThrows(TimeoutException.class, () -> jobExecutorService.executeWithTimeout(work, 1L));
     }
 }

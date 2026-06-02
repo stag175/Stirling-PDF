@@ -696,6 +696,20 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 123 — C2 de-reflection: JobExecutorService.executeWithTimeout (backend common; verified; pushed)
+
+- **C2 de-reflection (backend `common`)**: `JobExecutorServiceTest` referenced the private generic
+  `executeWithTimeout(Supplier, long)` via reflection at two sites. One (`shouldUseCustomTimeoutWhenProvided`)
+  obtained the `getDeclaredMethod`/`setAccessible` handle but **never invoked it** — pure dead code, deleted.
+  The other (`shouldHandleTimeout`) reflectively invoked it with a 1ms timeout against a ~100ms busy-wait and
+  asserted `InvocationTargetException.getCause()` was a `TimeoutException`. Made `executeWithTimeout`
+  package-private (was `private`; kept the `<T>` generic and `throws TimeoutException, Exception`); the test now
+  calls `jobExecutorService.executeWithTimeout(work, 1L)` directly inside `assertThrows(TimeoutException.class,
+  …)` — the timeout propagates unwrapped (no `InvocationTargetException` hop), which also tightens the old
+  silent-pass-if-no-throw branch into a real assertion. Added the missing `assertThrows` static import.
+  Behaviour-preserving. Verified: **gradle `:common:test --tests JobExecutorServiceTest` BUILD SUCCESSFUL**
+  (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 122 — C2 de-reflection: ProcessExecutor.validateCommand (backend common; verified; pushed)
 
 - **C2 de-reflection (backend `common`)**: `ProcessExecutorTest` (9 security-guard cases — null/empty command,
