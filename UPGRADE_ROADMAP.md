@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 81 — I-workstream engine subject-normaliser coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/contradiction/test_normalise_subject.py` (12
+  cases) for the pure `_normalise_subject` helper in `contradiction/validators/ledger.py` (used to group claim
+  subjects without LLM help — only covered indirectly before). Hand-computed the regex pipeline (lowercase →
+  `\b`-bounded article/demonstrative strip → collapse `[:\-—_,.;!?\s]+` → trim): leading-article stripping,
+  case-insensitivity, standalone-`a`/`an` removal while keeping `apple`/`day`, whitespace + punctuation +
+  em-dash collapse, all-articles→empty, and a `\b`-boundary guard (articles embedded in words like "theatre"
+  are preserved). Pure value-add, zero source change. Verified via the engine venv: **pytest 12/12 passed,
+  ruff clean, pyright 0 errors**.
+
 ### Wave 80 — I-workstream engine contract-helper coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/test_common_helpers.py` (10 tests) for three
