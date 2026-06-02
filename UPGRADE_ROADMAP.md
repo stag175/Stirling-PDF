@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 168 — I-workstream engine coverage: FormulaEvaluator cell helpers (Python; verified; pushed)
+
+- **Engine coverage (Python)**: added `tests/ledger/test_formula_helpers.py` (15 tests) for the two untested
+  pure static helpers on `FormulaEvaluator`. `_parse_col_ref` turns a `colN` reference into its 0-based column
+  index; pinned valid refs (`col0`→0, `col12`→12, whitespace-stripped, and the `re.match` prefix behaviour where
+  `col5x`→5) and `None` for non-matches (`xcol5`, `col`, case-sensitive `COL5`, `row3`, empty). `_get_cell` reads
+  a row cell as `Decimal`; pinned in-bounds numeric/decimal reads, the **out-of-bounds column → None** guard, the
+  empty-row case, and a non-numeric cell → `None` (via `to_decimal`). Verified: **pytest 15/15, ruff clean,
+  pyright 0 errors**.
+
 ### Wave 167 — I-workstream engine coverage: RagCapability result/instruction formatters (Python; verified; pushed)
 
 - **Engine coverage (Python)**: added `tests/test_rag_capability_format.py` (7 tests) for the two untested pure
