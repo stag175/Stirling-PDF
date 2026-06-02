@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 142 — I-workstream engine coverage: MathAuditorAgent._fallback_summary (Python; verified; pushed)
+
+- **Engine coverage (Python)**: added `tests/ledger/test_fallback_summary.py` (7 tests) for the untested pure
+  `MathAuditorAgent._fallback_summary(error_count, warning_count, pages_examined, unauditable_pages)` — the
+  deterministic, model-free summary string the math-ledger auditor falls back to (distinct from the
+  same-named `contradiction.detector._fallback_summary`, which has a different signature/wording). Pinned: the
+  all-clear sentence when errors+warnings are both zero (`"No mathematical errors found across 3 pages."`);
+  singular vs plural error/warning wording (`1 error` vs `2 errors`); the warning-only branch correctly skipping
+  both the all-clear and error segments; errors+warnings space-joined; **1-indexed** unauditable-page list
+  (`[2,4]` → `"Pages 3, 5 could not be audited (OCR unavailable)."`); and errors+unauditable combined. Exercised
+  directly on the class (`@staticmethod`). Verified: **pytest 7/7, ruff clean, pyright 0 errors**.
+
 ### Wave 141 — I-workstream engine coverage: PdfCommentAgent._map_to_instructions (Python defence-in-depth; verified; pushed)
 
 - **Engine coverage (Python, defence-in-depth)**: added `tests/pdf_comment/test_map_to_instructions.py` (6 tests)
