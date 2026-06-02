@@ -11,6 +11,7 @@
  */
 import type { WrappedPdfiumModule } from "@embedpdf/pdfium";
 import { pdfiumMemoryBuffer } from "@app/services/pdfiumService";
+import { rgbaToBgra } from "@app/utils/pixelSwizzleUtils";
 
 /** FPDF_ANNOT_LINK */
 export const FPDF_ANNOT_LINK = 4;
@@ -50,13 +51,7 @@ export function copyRgbaToBgraHeap(
 
   if (stride === rowBytes) {
     // Fast path: no padding — single bulk copy after swizzle
-    const bgra = new Uint8Array(rgba.length);
-    for (let i = 0; i < rgba.length; i += 4) {
-      bgra[i] = rgba[i + 2]; // B
-      bgra[i + 1] = rgba[i + 1]; // G
-      bgra[i + 2] = rgba[i]; // R
-      bgra[i + 3] = rgba[i + 3]; // A
-    }
+    const bgra = rgbaToBgra(rgba);
     new Uint8Array(pdfiumMemoryBuffer(m)).set(bgra, bufferPtr);
   } else {
     // Stride has padding — swizzle + copy row by row

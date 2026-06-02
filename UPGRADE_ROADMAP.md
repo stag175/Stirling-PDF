@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 106 — B4 pixelSwizzleUtils pure-extraction (frontend; verified; pushed)
+
+- **B4 pure-extraction (frontend)**: lifted the RGBA→BGRA byte-swizzle out of `copyRgbaToBgraHeap` in the
+  PDFium-WASM-coupled `pdfiumBitmapUtils.ts` into a pure, WASM-free `pixelSwizzleUtils.ts` (`rgbaToBgra`), so
+  the error-prone pixel byte-reordering (swap R/B, keep G/A) is unit-testable without the WASM heap. The
+  fast-path in `copyRgbaToBgraHeap` now delegates to it. Added `pixelSwizzleUtils.test.ts` (6 tests):
+  single/multi-pixel swizzle, alpha preservation (opaque/transparent), `Uint8ClampedArray` (canvas ImageData)
+  input, empty input, fresh-buffer/source-untouched, and length invariance. Behaviour-preserving. Verified:
+  **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 6/6 green**.
+
 ### Wave 105 — B4 pdfTextEditorUtils grouping edge-path coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: extended `pdfTextEditorUtils.test.ts` (+4 tests, 30 total) for
