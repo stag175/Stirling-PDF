@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 125 — C2 de-reflection: ClusterConfig.validate (backend common, I2-adjacent; verified; pushed)
+
+- **C2 de-reflection (backend `common`)**: `ClusterConfigValidationTest` (4 cases — disabled passes, Valkey
+  enabled-without-URL throws `IllegalStateException`, Valkey enabled-with-URL passes, in-process passes) routed
+  every check through an `invokeValidate` helper that reflectively called `ClusterConfig.validate()` and unwrapped
+  `InvocationTargetException` to rethrow the `RuntimeException` cause. **`validate()` was already package-private**
+  — the reflection was pure, unnecessary cruft. Replaced all 4 call sites with the direct same-package call
+  `config.validate()` inside the existing `assertDoesNotThrow`/`assertThrows`, deleted the `invokeValidate` helper
+  entirely, and dropped the `java.lang.reflect.Method` import. **No production change required** (the I2 Valkey
+  config validation surface is unchanged). Behaviour-preserving, test-only. Verified: **gradle `:common:test
+  --tests ClusterConfigValidationTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the
+  project-wide threshold, not a test failure).
+
 ### Wave 124 — C2 de-reflection: TempFileCleanupService.cleanupDirectoryStreaming (backend common; verified; pushed)
 
 - **C2 de-reflection (backend `common`)**: `TempFileCleanupServiceTest`'s `invokeCleanupDirectoryStreaming`
