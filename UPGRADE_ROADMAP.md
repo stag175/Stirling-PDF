@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 99 — C2 EditTableOfContentsController.createOutlineItem de-reflection (backend; verified; pushed)
+
+- **C2 de-reflection (backend)**: `EditTableOfContentsControllerTest` invoked `createOutlineItem(PDDocument,
+  BookmarkItem)` **via reflection**. Made the method package-private and replaced the reflection block with a
+  direct compile-checked call (`editTableOfContentsController.createOutlineItem(mockDocument, bookmark)`),
+  removing the unused `java.lang.reflect.Method` import. Same assertions (outline item created + page resolved
+  for the bookmark's 1-indexed page). Behaviour-preserving (visibility-only source change). Verified:
+  `:stirling-pdf:test` BUILD SUCCESSFUL with `EditTableOfContentsControllerTest` green.
+
 ### Wave 98 — C2 MergeController.addTableOfContents de-reflection (backend; verified; pushed)
 
 - **C2 de-reflection (backend)**: `MergeControllerTest` invoked `addTableOfContents(PDDocument, MultipartFile[])`
