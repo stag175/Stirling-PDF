@@ -2,7 +2,6 @@ package stirling.software.common.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,16 +9,10 @@ import org.junit.jupiter.api.Test;
 
 class ProcessExecutorTest {
 
-    // Use reflection to test private validateCommand method
-    private void invokeValidateCommand(ProcessExecutor executor, List<String> command)
-            throws Exception {
-        Method method = ProcessExecutor.class.getDeclaredMethod("validateCommand", List.class);
-        method.setAccessible(true);
-        try {
-            method.invoke(executor, command);
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            throw (Exception) e.getCause();
-        }
+    // validateCommand is package-private: call it directly (no reflection). Any
+    // IllegalArgumentException it throws propagates unwrapped.
+    private void invokeValidateCommand(ProcessExecutor executor, List<String> command) {
+        executor.validateCommand(command);
     }
 
     private ProcessExecutor getExecutor() {
@@ -85,7 +78,7 @@ class ProcessExecutorTest {
     }
 
     @Test
-    void testValidateCommand_validSimpleCommand() throws Exception {
+    void testValidateCommand_validSimpleCommand() {
         // Simple command names (no path) should pass validation
         invokeValidateCommand(getExecutor(), List.of("echo", "hello"));
     }

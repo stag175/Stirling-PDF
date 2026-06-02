@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 122 — C2 de-reflection: ProcessExecutor.validateCommand (backend common; verified; pushed)
+
+- **C2 de-reflection (backend `common`)**: `ProcessExecutorTest` (9 security-guard cases — null/empty command,
+  null/null-byte/newline/carriage-return arguments, path traversal, blank executable, valid command) drove the
+  private `validateCommand(List)` through a reflective `invokeValidateCommand` helper that unwrapped
+  `InvocationTargetException` to rethrow the real cause. Made `validateCommand` package-private (was `private`);
+  the helper now simply calls `executor.validateCommand(command)` directly, so the `IllegalArgumentException`
+  guards propagate unwrapped to `assertThrows` with no reflection plumbing. Dropped the
+  `java.lang.reflect.Method`/`InvocationTargetException` usage and the no-longer-needed `throws Exception`
+  clauses. Behaviour-preserving. Verified: **gradle `:common:test --tests ProcessExecutorTest` BUILD SUCCESSFUL**
+  (single-class run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 121 — C2 de-reflection: InvertFullColorStrategy private methods (backend common; verified; pushed)
 
 - **C2 de-reflection (backend `common`)**: `InvertFullColorStrategyTest` reflectively invoked two private

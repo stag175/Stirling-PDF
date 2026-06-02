@@ -488,7 +488,9 @@ public class ProcessExecutor {
         return stripped;
     }
 
-    private void validateCommand(List<String> command) {
+    // Package-private (not private) so ProcessExecutorTest can exercise the command-validation
+    // guards via a direct, compile-checked call instead of reflection.
+    void validateCommand(List<String> command) {
         if (command == null || command.isEmpty()) {
             throw new IllegalArgumentException("Command must not be empty");
         }
