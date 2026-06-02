@@ -696,6 +696,20 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 120 — C2 de-reflection: CustomColorReplaceStrategy method + fields (backend common; verified; pushed)
+
+- **C2 de-reflection (backend `common`)**: `CustomColorReplaceStrategyTest` reached into the strategy via
+  reflection on two fronts — `getDeclaredMethod("checkSupportedFontForCharacter", String.class)` +
+  `setAccessible` + `invoke`, and `getDeclaredField("textColor"/"backgroundColor")` + `setAccessible` + `get`
+  (to assert the colours resolved by `HIGH_CONTRAST_COLOR`). Made `checkSupportedFontForCharacter` and the
+  `textColor`/`backgroundColor` fields package-private (were `private`); the same-package test now calls the
+  method directly (`strategy.checkSupportedFontForCharacter("A")`, result typed as `Object` so no `PDFont`
+  import) and reads the fields directly (`highContrastStrategy.textColor`). Dropped the unused
+  `java.lang.reflect.Method` import, the `java.lang.reflect.Field` reflective reads, and the now-redundant
+  `try/catch … fail(e)` wrapper around the field assertions. Behaviour-preserving. Verified: **gradle
+  `:common:test --tests CustomColorReplaceStrategyTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate
+  FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 119 — C2 de-reflection: CropController.CropBounds.fromPixels (backend; verified; pushed)
 
 - **C2 de-reflection (backend)**: `CropControllerTest`'s `CropBoundsTests` exercised the pixel→PDF coordinate
