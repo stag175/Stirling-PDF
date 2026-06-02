@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 70 — C2 ScannerEffectGrayscaleUtils pure-extraction (verified; pushed)
+
+- **C2 pure-extraction**: lifted `convertToGrayscale` out of `ScannerEffectController` into a pure
+  `ScannerEffectGrayscaleUtils`, factoring the per-pixel transform into a pure `toGrayPacked(int)` (int→int,
+  testable without an image) that `convertToGrayscale(BufferedImage)` applies in place. Controller delegates.
+  Added `ScannerEffectGrayscaleUtilsTest` (5 tests): per-channel averaging of pure colours, black/white/
+  mid-gray, integer-truncation behaviour, alpha-bits ignored, and an in-place `TYPE_INT_RGB` round-trip.
+  Verified: `:stirling-pdf:test` BUILD SUCCESSFUL (5 new; controller recompiles, behaviour identical).
+
 ### Wave 69 — C2 ScannerEffectResolutionUtils pure-extraction (verified; pushed)
 
 - **C2 pure-extraction (OOM/DoS guard)**: lifted `calculateSafeResolution` out of `ScannerEffectController`

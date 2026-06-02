@@ -88,22 +88,10 @@ public class ScannerEffectController {
         g.dispose();
 
         if (colorspace == ScannerEffectRequest.Colorspace.grayscale) {
-            convertToGrayscale(result);
+            ScannerEffectGrayscaleUtils.convertToGrayscale(result);
         }
 
         return result;
-    }
-
-    private static void convertToGrayscale(BufferedImage image) {
-        int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-        for (int i = 0; i < pixels.length; i++) {
-            int rgb = pixels[i];
-            int r = (rgb >> 16) & 0xFF;
-            int g = (rgb >> 8) & 0xFF;
-            int b = rgb & 0xFF;
-            int gray = (r + g + b) / 3;
-            pixels[i] = (gray << 16) | (gray << 8) | gray;
-        }
     }
 
     private static GradientConfig createRandomGradient() {
