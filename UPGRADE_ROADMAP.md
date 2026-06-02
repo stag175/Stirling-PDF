@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 68 — C2 CompressionLevelUtils pure-extraction (verified; pushed)
+
+- **C2 pure-extraction**: lifted the four compression-level tuning helpers (`getScaleFactorForLevel`,
+  `getJpegQualityForLevel`, `determineOptimizeLevel`, `incrementOptimizeLevel`) out of `CompressController`
+  into a pure `CompressionLevelUtils` (its own `@Slf4j` logger preserves the one ratio `log.info`), so the
+  level→scale / level→quality maps and the adaptive level-selection ladder are unit-testable. Controller
+  delegates at all 4 call sites. Added `CompressionLevelUtilsTest` (8 tests): per-level scale + default,
+  monotonic-shrink invariant, per-level JPEG quality + default, the full ratio→level ladder with
+  strict-`>` boundary behaviour, oversize-ratio jump sizing, the cap at level 9, and the `targetSize==0`
+  edge (double division → `Infinity`, no exception). Verified: `:stirling-pdf:test` BUILD SUCCESSFUL (8 new;
+  `CompressController` recompiles, behaviour identical — no `CompressControllerTest` exists to regress).
+
 ### Wave 67 — C2 ScalePagesSizeUtils pure-extraction (verified; pushed)
 
 - **C2 pure-extraction**: lifted the named-page-size resolution (`getSizeMap` + the size lookup / landscape

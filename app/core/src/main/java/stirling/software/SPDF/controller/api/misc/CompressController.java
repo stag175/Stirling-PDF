@@ -865,64 +865,6 @@ public class CompressController {
         }
     }
 
-    // Scale factors for different optimization levels (lower => smaller)
-    private static double getScaleFactorForLevel(int optimizeLevel) {
-        return switch (optimizeLevel) {
-            case 1 -> 0.98; // negligible resizing
-            case 2 -> 0.95;
-            case 3 -> 0.88;
-            case 4 -> 0.78;
-            case 5 -> 0.68;
-            case 6 -> 0.58;
-            case 7 -> 0.48;
-            case 8 -> 0.38;
-            case 9 -> 0.28;
-            default -> 1.0;
-        };
-    }
-
-    // JPEG quality for different optimization levels (lower => smaller)
-    private static float getJpegQualityForLevel(int optimizeLevel) {
-        return switch (optimizeLevel) {
-            case 1 -> 0.92f; // very light
-            case 2 -> 0.88f;
-            case 3 -> 0.85f;
-            case 4 -> 0.80f;
-            case 5 -> 0.72f;
-            case 6 -> 0.65f;
-            case 7 -> 0.55f;
-            case 8 -> 0.45f;
-            case 9 -> 0.35f; // aggressive
-            default -> 0.75f;
-        };
-    }
-
-    // Pick optimization level based on target size
-    private static int determineOptimizeLevel(double sizeReductionRatio) {
-        if (sizeReductionRatio > 0.9) return 1;
-        if (sizeReductionRatio > 0.8) return 2;
-        if (sizeReductionRatio > 0.7) return 3;
-        if (sizeReductionRatio > 0.6) return 4;
-        if (sizeReductionRatio > 0.3) return 5;
-        if (sizeReductionRatio > 0.2) return 6;
-        if (sizeReductionRatio > 0.15) return 7;
-        if (sizeReductionRatio > 0.1) return 8;
-        return 9;
-    }
-
-    // Increment optimization level if we need more compression
-    private static int incrementOptimizeLevel(int currentLevel, long currentSize, long targetSize) {
-        double currentRatio = currentSize / (double) targetSize;
-        log.info("Current compression ratio: {}", String.format(Locale.ROOT, "%.2f", currentRatio));
-
-        if (currentRatio > 2.0) {
-            return Math.min(9, currentLevel + 3);
-        } else if (currentRatio > 1.5) {
-            return Math.min(9, currentLevel + 2);
-        }
-        return Math.min(9, currentLevel + 1);
-    }
-
     @AutoJobPostMapping(
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             value = "/compress-pdf",
@@ -976,7 +918,7 @@ public class CompressController {
         try {
             if (autoMode) {
                 double sizeReductionRatio = expectedOutputSize / (double) inputFileSize;
-                optimizeLevel = determineOptimizeLevel(sizeReductionRatio);
+                optimizeLevel = CompressionLevelUtils.determineOptimizeLevel(sizeReductionRatio);
             }
 
             if (Boolean.TRUE.equals(convertToLineArt)) {
@@ -1045,9 +987,10 @@ public class CompressController {
                 if ((optimizeLevel >= 4 || Boolean.TRUE.equals(convertToGrayscale))
                         && !imageCompressionApplied) {
                     // Use different scale factors based on level
-                    double scaleFactor = getScaleFactorForLevel(optimizeLevel);
+                    double scaleFactor =
+                            CompressionLevelUtils.getScaleFactorForLevel(optimizeLevel);
                     // Use JPEG quality settings based on optimization level
-                    float jpegQuality = getJpegQualityForLevel(optimizeLevel);
+                    float jpegQuality = CompressionLevelUtils.getJpegQualityForLevel(optimizeLevel);
 
                     log.info(
                             "Applying image compression with scale factor: {} and JPEG quality: {}",
@@ -1071,7 +1014,7 @@ public class CompressController {
                     sizeMet = true;
                 } else {
                     int newOptimizeLevel =
-                            incrementOptimizeLevel(
+                            CompressionLevelUtils.incrementOptimizeLevel(
                                     optimizeLevel, outputFileSize, expectedOutputSize);
 
                     // Check if we can't increase the level further
