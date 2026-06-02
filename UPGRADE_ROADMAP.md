@@ -455,6 +455,23 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   `dependency_overrides.pop` teardown was deleting another module's *module-level* overrides → switched to
   snapshot/restore.) Full engine suite **281 passed**, gate PASS at 81.21%.
 
+### Wave 29 — D5 S3 deployment guardrails (security/ops docs; verified-by-grounding; pushed)
+
+- **D5 DONE** (workstream D, security/ops). Added `docs/s3-deployment-guardrails.md` — the bucket/IAM-side
+  hardening the app *cannot* set for you, templated and **grounded in the actual S3 code** (not generic AWS
+  boilerplate). Read `cluster/s3/{S3FileStore,S3Clients}.java` + `storage/provider/S3StorageProvider.java` +
+  the `storage.s3.*` properties to establish the facts, then documented: (1) **encryption** must be enforced
+  at the bucket because the code sets **no** `serverSideEncryption` on `PutObject` (default-encryption +
+  deny-insecure-transport policy + block-public-access, since sharing uses presigned URLs); (2) **least-
+  privilege IAM** scoped to the operations actually issued — verified by grepping every `s3Client.*` call:
+  only `PutObject`/`GetObject`/`HeadObject`/`DeleteObject` exist, **no `ListObjects` anywhere**, so the
+  minimal policy is `PutObject`+`GetObject`+`DeleteObject` (HeadObject⊂GetObject), with `ListBucket`
+  *recommended* only for clean 404-on-HEAD semantics — and prefer `DefaultCredentialsProvider` (IAM role/
+  IRSA) over static keys; (3) **lifecycle expiry scoped to `transient/` only** (the ephemeral `S3FileStore`
+  prefix) since persistent user files live at the bucket root and must not be reaped. Also documented the
+  existing endpoint-SSRF guard (`allow-private-endpoints`) and a `storage.s3.*` config reference. Pure docs
+  → no build to run; correctness is in the grounding (every claim cites a file/operation).
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -468,9 +485,10 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   C3 (streaming I/O — correctness-critical, needs load testing), the *stateful* remainder of C1
   (needs characterization tests on real PDFs first). Security hardening: **D2 done** (Wave 24);
   **D4 unit-testable validation portion done** (Wave 26 — `isValidURL` contract fix + SSRF regression
-  guard; its TOCTOU/rebinding remainder is integration-level and was spawned as a follow-up task); D1 (Tauri
-  OAuth nonce audit), D3 (Java↔engine mTLS), D5 (S3 deployment guardrails) need a running app / real
-  providers / deployment to verify. (B1 is now **done** — see Wave 5.)
+  guard; its TOCTOU/rebinding remainder is integration-level and was spawned as a follow-up task);
+  **D5 done** (Wave 29 — S3 deployment-guardrails doc, grounded in the store code); D1 (Tauri OAuth nonce
+  audit) and D3 (Java↔engine mTLS) need a running app / real providers / deployment to verify. (B1 is now
+  **done** — see Wave 5.)
 
 ---
 
@@ -594,6 +612,10 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **D5. S3 backend deployment guardrails.** New S3 store is reasonably tested in-repo, but document
   and template bucket encryption, least-privilege IAM, and lifecycle/expiry for `transient/` keys.
   *Effort:* S–M. *Risk:* med.
+  ✅ **DONE (Wave 29)**: `docs/s3-deployment-guardrails.md` — bucket default-encryption (code sets no SSE),
+  least-privilege IAM grounded in the exact operations (`Put`/`Get`/`Delete`; no `ListObjects`; prefer IAM
+  role over static keys), and `transient/`-scoped lifecycle expiry, plus the endpoint-SSRF guard + a
+  `storage.s3.*` config reference.
 
 ### Workstream E — Supply chain & dependencies
 
