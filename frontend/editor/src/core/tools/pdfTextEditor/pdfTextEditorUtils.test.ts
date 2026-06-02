@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  PdfJsonDocument,
   PdfJsonImageElement,
   PdfJsonPage,
+  PdfJsonTextElement,
 } from "@app/tools/pdfTextEditor/pdfTextEditorTypes";
 import {
+  cloneImageElement,
+  cloneTextElement,
+  deepCloneDocument,
   getImageBounds,
   pageDimensions,
   valueOr,
@@ -13,6 +18,8 @@ import {
 const img = (e: Partial<PdfJsonImageElement>): PdfJsonImageElement =>
   e as PdfJsonImageElement;
 const page = (p: Partial<PdfJsonPage>): PdfJsonPage => p as PdfJsonPage;
+const txt = (e: Partial<PdfJsonTextElement>): PdfJsonTextElement =>
+  e as PdfJsonTextElement;
 
 describe("valueOr", () => {
   it("returns the value when it is a real number (including 0 and negatives)", () => {
@@ -89,5 +96,54 @@ describe("pageDimensions", () => {
       width: 612,
       height: 792,
     });
+  });
+});
+
+describe("cloneTextElement", () => {
+  it("copies textMatrix into an independent array", () => {
+    const original = txt({ text: "hello", textMatrix: [1, 2, 3, 4, 5, 6] });
+    const clone = cloneTextElement(original);
+    expect(clone).toEqual(original);
+    expect(clone.textMatrix).not.toBe(original.textMatrix); // distinct array
+    clone.textMatrix![0] = 99;
+    expect(original.textMatrix![0]).toBe(1); // mutation isolated
+  });
+
+  it("normalizes a null/undefined textMatrix to undefined", () => {
+    expect(cloneTextElement(txt({ text: "x", textMatrix: null })).textMatrix).toBeUndefined();
+    expect(cloneTextElement(txt({ text: "x" })).textMatrix).toBeUndefined();
+  });
+});
+
+describe("cloneImageElement", () => {
+  it("copies transform into an independent array", () => {
+    const original = img({ transform: [1, 0, 0, 1, 10, 20] });
+    const clone = cloneImageElement(original);
+    expect(clone).toEqual(original);
+    expect(clone.transform).not.toBe(original.transform);
+    clone.transform![4] = 999;
+    expect(original.transform![4]).toBe(10);
+  });
+
+  it("normalizes a null/undefined transform to undefined", () => {
+    expect(cloneImageElement(img({ transform: null })).transform).toBeUndefined();
+    expect(cloneImageElement(img({})).transform).toBeUndefined();
+  });
+});
+
+describe("deepCloneDocument", () => {
+  it("produces a deep copy whose nested mutations do not affect the original", () => {
+    const original = {
+      pages: [{ width: 100, height: 200, textElements: [{ text: "a" }] }],
+    } as unknown as PdfJsonDocument;
+    const clone = deepCloneDocument(original);
+    expect(clone).toEqual(original);
+    expect(clone.pages).not.toBe(original.pages);
+
+    // mutate deeply nested data in the clone
+    (clone.pages as unknown as { width: number }[])[0].width = 555;
+    expect(
+      (original.pages as unknown as { width: number }[])[0].width,
+    ).toBe(100);
   });
 });

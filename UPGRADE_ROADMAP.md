@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 74 — B4 pdfTextEditorUtils clone-semantics coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: extended `pdfTextEditorUtils.test.ts` (+5 tests, 15 total) to
+  pin the deep-copy semantics of three more pure exported functions: `cloneTextElement` (copies `textMatrix`
+  into an **independent** array; mutation isolation verified; null/undefined → `undefined`), `cloneImageElement`
+  (same for `transform`), and `deepCloneDocument` (full structuredClone/JSON deep copy — nested page mutation
+  in the clone leaves the original intact). These pin the mutation-isolation contract the editor relies on
+  (clones are edited without corrupting source state). Pure value-add, zero source change. Verified: **core
+  `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 15/15 green**.
+
 ### Wave 73 — B4 pdfTextEditorUtils coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: `pdfTextEditorUtils.ts` is a 1,561-line **untested** utils
