@@ -696,6 +696,24 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 194 — B4 frontend coverage: core base-path + saas base-url helpers (frontend core & saas layers; verified; pushed)
+
+- **B4 coverage (frontend, core + saas layers — the `constants/app.ts` overlay pair)**: added
+  `core/constants/app.test.ts` (6 tests) and `saas/constants/app.test.ts` (4 tests).
+  - core `app.ts`: `BASE_PATH` never carries a trailing slash; `withBasePath` prefixes `BASE_PATH` and
+    guarantees exactly one leading slash on the path (so `withBasePath("tools") === withBasePath("/tools")`);
+    `absoluteWithBasePath` is precisely the `window.location.origin`-qualified form of `withBasePath`, with
+    the same leading-slash normalisation. Assertions are pinned **relative to** `BASE_PATH`/`origin` rather
+    than a hard-coded value, so they hold under any runner base URL. The two annotation-timing constants
+    (50 ms / 100 ms) are pinned.
+  - saas `app.ts`: `getBaseUrl` returns `window.__STIRLING_PDF_BASE_URL__` when set and falls back to the
+    window origin otherwise (an **empty** configured value is treated as unset → origin); `setBaseUrl` writes
+    that window-global; and the `export *` overlay genuinely re-exports the core base-path helpers through the
+    saas module. The window-global is reset between tests.
+  - Verified through **both** layers' toolchains: **`tsc --project src/core/tsconfig.json` and
+    `src/saas/tsconfig.json` 0 errors each, `eslint --max-warnings=0` clean, `vitest` 10/10 green** (6 under
+    `core`, 4 under `saas`).
+
 ### Wave 193 — B4 frontend coverage: core logo-variant + auth-route helpers (frontend core layer; verified; pushed)
 
 - **B4 coverage (frontend, core layer — two small constants helpers)**: added `logo.test.ts` (6 tests) and
