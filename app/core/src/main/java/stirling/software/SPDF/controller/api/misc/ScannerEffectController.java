@@ -11,7 +11,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Callable;
@@ -151,52 +150,20 @@ public class ScannerEffectController {
         int width = image.getWidth() + 2 * borderPx;
         int height = image.getHeight() + 2 * borderPx;
 
-        int[] gradientLUT = createGradientLUT(width, height, gradient);
+        int[] gradientLUT =
+                ScannerEffectGradientUtils.createGradientLUT(
+                        width, height, gradient.vertical, gradient.startColor, gradient.endColor);
         BufferedImage result = new BufferedImage(width, height, image.getType());
         int[] pixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
 
-        fillWithGradient(pixels, width, height, gradientLUT, gradient.vertical);
+        ScannerEffectGradientUtils.fillWithGradient(
+                pixels, width, height, gradientLUT, gradient.vertical);
 
         Graphics2D g = result.createGraphics();
         g.drawImage(image, borderPx, borderPx, null);
         g.dispose();
 
         return result;
-    }
-
-    private static int[] createGradientLUT(int width, int height, GradientConfig gradient) {
-        int size = gradient.vertical ? height : width;
-        int[] lut = new int[size];
-
-        int rStart = gradient.startColor.getRed();
-        int gStart = gradient.startColor.getGreen();
-        int bStart = gradient.startColor.getBlue();
-        int rDiff = gradient.endColor.getRed() - rStart;
-        int gDiff = gradient.endColor.getGreen() - gStart;
-        int bDiff = gradient.endColor.getBlue() - bStart;
-
-        for (int i = 0; i < size; i++) {
-            float frac = (float) i / Math.max(1, size - 1);
-            int r = Math.round(rStart + rDiff * frac);
-            int g = Math.round(gStart + gDiff * frac);
-            int b = Math.round(bStart + bDiff * frac);
-            lut[i] = (r << 16) | (g << 8) | b;
-        }
-
-        return lut;
-    }
-
-    private static void fillWithGradient(
-            int[] pixels, int width, int height, int[] gradientLUT, boolean vertical) {
-        if (vertical) {
-            for (int y = 0; y < height; y++) {
-                Arrays.fill(pixels, y * width, (y + 1) * width, gradientLUT[y]);
-            }
-        } else {
-            for (int y = 0; y < height; y++) {
-                System.arraycopy(gradientLUT, 0, pixels, y * width, width);
-            }
-        }
     }
 
     private static double calculateRotation(int baseRotation, int rotateVariance) {
@@ -244,8 +211,11 @@ public class ScannerEffectController {
             int width, int height, int imageType, GradientConfig gradient) {
         BufferedImage background = new BufferedImage(width, height, imageType);
         int[] pixels = ((DataBufferInt) background.getRaster().getDataBuffer()).getData();
-        int[] gradientLUT = createGradientLUT(width, height, gradient);
-        fillWithGradient(pixels, width, height, gradientLUT, gradient.vertical);
+        int[] gradientLUT =
+                ScannerEffectGradientUtils.createGradientLUT(
+                        width, height, gradient.vertical, gradient.startColor, gradient.endColor);
+        ScannerEffectGradientUtils.fillWithGradient(
+                pixels, width, height, gradientLUT, gradient.vertical);
         return background;
     }
 
@@ -336,8 +306,8 @@ public class ScannerEffectController {
         int[] dstPixels = ((DataBufferInt) output.getRaster().getDataBuffer()).getData();
 
         int[] gradientLUT =
-                createGradientLUT(
-                        width, height, new GradientConfig(vertical, startColor, endColor));
+                ScannerEffectGradientUtils.createGradientLUT(
+                        width, height, vertical, startColor, endColor);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int dx = Math.min(x, width - 1 - x);

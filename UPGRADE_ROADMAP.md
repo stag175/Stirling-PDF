@@ -696,6 +696,23 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 65 — C2 ScannerEffectGradientUtils pure-extraction + C3 evidence (verified; pushed)
+
+- **C2 pure-extraction**: lifted the gradient lookup-table maths (`createGradientLUT`, `fillWithGradient`) out
+  of `ScannerEffectController` into a pure `ScannerEffectGradientUtils`, so the RGB interpolation + per-row
+  pixel fill are unit-testable without constructing AWT images. Subtlety handled: `GradientConfig` is a
+  **nestmate record** of the controller, so its private fields are accessed field-style *only within* the
+  controller — moving the methods to a top-level util would break that, so the util takes **decomposed params**
+  (`vertical, startColor, endColor`) instead. Added `ScannerEffectGradientUtilsTest` (6 tests): vertical
+  black→white interpolation (incl. half-up rounding 127.5→128), horizontal single-channel, the size-1
+  no-divide-by-zero edge, exact end-colour at the last entry, and vertical/horizontal fill layouts. Verified:
+  `:stirling-pdf:test` BUILD SUCCESSFUL (6 new; controller recompiles + behaviour identical).
+- **C3 evidence (no code change)**: `ScannerEffectController` — despite being an image converter — is **pure
+  Java2D/PDFBox** (no native tool; the `Runtime` call is just thread-pool sizing) and **already streams** its
+  response via `pdfDocToWebResponse(doc, name, tempFileManager)` (the Resource overload). So my earlier
+  "native-tool converter" label was wrong for it. The genuinely native buffering converters remain
+  ebook/img/video; C3's pure-Java surface is already on the streaming path.
+
 ### Wave 64 — C2 EditTextMatchUtils pure-extraction + C3 evidence (verified; pushed)
 
 - **C2 pure-extraction (highest-complexity yet)**: lifted the find/replace text-splicing logic
