@@ -641,6 +641,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   `:stirling-pdf:test` BUILD SUCCESSFUL. The Testcontainers half (DB-backed endpoints, and convert/OCR
   needing native tools) genuinely needs Docker, which is absent here.
 
+### Wave 44 — A3/C2 rotate-endpoint logic extracted + real-PDFBox tested (verified; pushed)
+
+- **A3 + C2 continued**: thinned `RotationController` by extracting its page-rotation loop into a
+  package-private static `applyRotation(PDDocument, int)` (validation kept before-load to preserve exact
+  behaviour), and added 3 **real-PDFBox** tests of it (adds angle to every page; accumulates onto existing
+  rotation 90+180=270; negative angle 90−90=0) — a second stateless top-PDF endpoint covered by direct
+  PDFBox tests, no Docker. Verified: `:stirling-pdf:test` BUILD SUCCESSFUL with all 5 RotationController
+  tests (the 2 pre-existing + 3 new) green.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license

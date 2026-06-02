@@ -48,7 +48,8 @@ public class RotationController {
         MultipartFile pdfFile = request.getFileInput();
         Integer angle = request.getAngle();
 
-        // Validate the angle is a multiple of 90
+        // Validate the angle is a multiple of 90 (before loading, so an invalid request is
+        // rejected without parsing the PDF).
         if (angle % 90 != 0) {
             throw ExceptionUtils.createIllegalArgumentException(
                     "error.angleNotMultipleOf90", "Angle must be a multiple of 90");
@@ -57,18 +58,27 @@ public class RotationController {
         // Load the PDF document with proper resource management
         try (PDDocument document = pdfDocumentFactory.load(request)) {
 
-            // Get the list of pages in the document
-            PDPageTree pages = document.getPages();
-
-            for (PDPage page : pages) {
-                page.setRotation(page.getRotation() + angle);
-            }
+            applyRotation(document, angle);
 
             // Return the rotated PDF as a response
             return WebResponseUtils.pdfDocToWebResponse(
                     document,
                     GeneralUtils.generateFilename(pdfFile.getOriginalFilename(), "_rotated.pdf"),
                     tempFileManager);
+        }
+    }
+
+    /**
+     * Add a relative rotation (degrees; expected to be a multiple of 90 — the caller validates) to
+     * every page of {@code document}. The rotation is <em>added</em> to each page's current
+     * rotation, mirroring PDFBox's {@link PDPage#setRotation(int)} semantics. Package-private +
+     * static so the rotation logic can be tested directly against real PDFBox documents without the
+     * HTTP/response machinery (roadmap C2/A3 — thinning the controller + testing the core logic).
+     */
+    static void applyRotation(PDDocument document, int angle) {
+        PDPageTree pages = document.getPages();
+        for (PDPage page : pages) {
+            page.setRotation(page.getRotation() + angle);
         }
     }
 }

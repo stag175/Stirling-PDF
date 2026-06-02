@@ -100,4 +100,48 @@ public class RotationControllerTest {
                         () -> rotationController.rotatePDF(request));
         assertEquals("Angle must be a multiple of 90", exception.getMessage());
     }
+
+    // --- applyRotation: real-PDFBox tests of the extracted rotation logic (roadmap C2/A3)
+    // ---------
+
+    @Test
+    void applyRotation_addsAngleToEveryPage() throws IOException {
+        try (PDDocument doc = new PDDocument()) {
+            doc.addPage(new PDPage());
+            doc.addPage(new PDPage());
+            doc.addPage(new PDPage());
+
+            RotationController.applyRotation(doc, 90);
+
+            for (PDPage page : doc.getPages()) {
+                assertEquals(90, page.getRotation());
+            }
+        }
+    }
+
+    @Test
+    void applyRotation_accumulatesOntoExistingRotation() throws IOException {
+        try (PDDocument doc = new PDDocument()) {
+            PDPage page = new PDPage();
+            page.setRotation(90);
+            doc.addPage(page);
+
+            RotationController.applyRotation(doc, 180);
+
+            assertEquals(270, doc.getPage(0).getRotation());
+        }
+    }
+
+    @Test
+    void applyRotation_negativeAngleSubtracts() throws IOException {
+        try (PDDocument doc = new PDDocument()) {
+            PDPage page = new PDPage();
+            page.setRotation(90);
+            doc.addPage(page);
+
+            RotationController.applyRotation(doc, -90);
+
+            assertEquals(0, doc.getPage(0).getRotation());
+        }
+    }
 }
