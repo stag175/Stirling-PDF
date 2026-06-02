@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 113 — B4 scriptLoader coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `scriptLoader.test.ts` (4 tests) for `loadScript`/
+  `isScriptLoaded` — the external-script injector with promise-based load caching. Covers: unknown script →
+  not loaded; a script already present in the DOM resolves immediately + is marked loaded; the full inject →
+  configure (src/async) → `onload` (resolve + `onLoad` callback + mark loaded) lifecycle followed by a
+  **cache-hit dedup** (a repeat load injects no second element); and `onerror` → rejection. jsdom doesn't fetch
+  injected scripts, so `onload`/`onerror` are fired manually; unique ids avoid the module-level cache leaking
+  between tests. Pure value-add, zero source change. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0`
+  clean, `vitest` 4/4 green**.
+
 ### Wave 112 — B4 viewTransition coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `viewTransition.test.ts` (2 tests) for
