@@ -2,8 +2,6 @@ package stirling.software.proprietary.security.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.reflect.Field;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,38 +13,8 @@ import org.junit.jupiter.api.Test;
  */
 class AttemptCounterTest {
 
-    // --- Helper functions for reflection access to private fields ---
-
-    private static void setPrivateLong(Object target, String fieldName, long value) {
-        try {
-            Field f = target.getClass().getDeclaredField(fieldName);
-            f.setAccessible(true);
-            f.setLong(target, value);
-        } catch (Exception e) {
-            fail("Could not set field '" + fieldName + "': " + e.getMessage());
-        }
-    }
-
-    private static void setPrivateInt(Object target, String fieldName, int value) {
-        try {
-            Field f = target.getClass().getDeclaredField(fieldName);
-            f.setAccessible(true);
-            f.setInt(target, value);
-        } catch (Exception e) {
-            fail("Could not set field '" + fieldName + "': " + e.getMessage());
-        }
-    }
-
-    private static long getPrivateLong(Object target, String fieldName) {
-        try {
-            Field f = target.getClass().getDeclaredField(fieldName);
-            f.setAccessible(true);
-            return f.getLong(target);
-        } catch (Exception e) {
-            fail("Could not read field '" + fieldName + "': " + e.getMessage());
-            return -1L; // unreachable
-        }
-    }
+    // AttemptCounter's attemptCount/lastAttemptTime fields are package-private, so tests in this
+    // package seed and read them directly (no reflection helpers needed).
 
     // --- Tests ---
 
@@ -125,7 +93,7 @@ class AttemptCounterTest {
             // window so elapsed < window is reliably true despite scheduling/clock granularity.
             // Changed: Reason for change -> eliminate timing flakiness that caused sporadic
             // failures.
-            setPrivateLong(counter, "lastAttemptTime", now);
+            counter.lastAttemptTime = now;
 
             // Purpose: Inside the window -> no reset
             assertFalse(counter.shouldReset(window), "Within the window, no reset should occur");
@@ -139,7 +107,7 @@ class AttemptCounterTest {
             long now = System.currentTimeMillis();
 
             // Simulate: last action was exactly 'window' ms ago
-            setPrivateLong(counter, "lastAttemptTime", now - window);
+            counter.lastAttemptTime = now - window;
 
             // Purpose: Equality -> reset should occur because the window has fully elapsed
             assertTrue(
@@ -155,7 +123,7 @@ class AttemptCounterTest {
             long now = System.currentTimeMillis();
 
             // Simulate: last action was (window + 1) ms ago
-            setPrivateLong(counter, "lastAttemptTime", now - (window + 1));
+            counter.lastAttemptTime = now - (window + 1);
 
             // Purpose: Outside the window -> reset
             assertTrue(counter.shouldReset(window), "Outside the window, reset should occur");
@@ -172,7 +140,7 @@ class AttemptCounterTest {
             AttemptCounter counter = new AttemptCounter();
             // Set lastAttemptTime == now to avoid timing flakiness
             long now = System.currentTimeMillis();
-            setPrivateLong(counter, "lastAttemptTime", now);
+            counter.lastAttemptTime = now;
 
             // Assumption/Documentation: current implementation uses 'elapsed >=
             // attemptIncrementTime'
@@ -185,7 +153,7 @@ class AttemptCounterTest {
         void shouldReset_shouldReturnTrueWhenWindowIsNegative() {
             AttemptCounter counter = new AttemptCounter();
             long now = System.currentTimeMillis();
-            setPrivateLong(counter, "lastAttemptTime", now);
+            counter.lastAttemptTime = now;
 
             // Assumption/Documentation: Negative window is treated as already elapsed.
             assertTrue(
@@ -258,7 +226,7 @@ class AttemptCounterTest {
         AttemptCounter counter = new AttemptCounter();
 
         // Set counter close to Integer.MAX_VALUE and increment()
-        setPrivateInt(counter, "attemptCount", Integer.MAX_VALUE - 1);
+        counter.attemptCount = Integer.MAX_VALUE - 1;
         counter.increment(); // -> MAX_VALUE
         assertEquals(
                 Integer.MAX_VALUE,
@@ -274,12 +242,12 @@ class AttemptCounterTest {
     }
 
     @Test
-    @DisplayName("Reflection: getPrivateLong reads the actual lastAttemptTime")
-    void reflectionGetter_shouldReturnInternalValue() {
+    @DisplayName("Getter: getLastAttemptTime matches the backing field")
+    void getter_shouldReturnInternalValue() {
         AttemptCounter counter = new AttemptCounter();
         long expected = counter.getLastAttemptTime();
-        long reflected = getPrivateLong(counter, "lastAttemptTime");
+        long fieldValue = counter.lastAttemptTime;
 
-        assertEquals(expected, reflected, "Reflection getter should match the field value");
+        assertEquals(expected, fieldValue, "Lombok getter should match the backing field value");
     }
 }

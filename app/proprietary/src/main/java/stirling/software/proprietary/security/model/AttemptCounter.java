@@ -4,8 +4,10 @@ import lombok.Getter;
 
 @Getter
 public class AttemptCounter {
-    private int attemptCount;
-    private long lastAttemptTime;
+    // Package-private (not private) so AttemptCounterTest can seed these fields directly in the
+    // same package instead of via reflection. Public read access stays through Lombok @Getter.
+    int attemptCount;
+    long lastAttemptTime;
 
     public AttemptCounter() {
         this.attemptCount = 0;

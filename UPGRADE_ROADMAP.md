@@ -696,6 +696,23 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 130 — C2 de-reflection: AttemptCounter field access (backend proprietary; verified; pushed)
+
+- **C2 de-reflection (backend `proprietary`)**: `AttemptCounterTest` carried three reflective field helpers
+  (`setPrivateLong`, `setPrivateInt`, `getPrivateLong`) used at 7 sites to seed/read the private
+  `attemptCount`/`lastAttemptTime` fields (for window-expiry and overflow scenarios). Made both fields
+  package-private (were `private`; public *read* access still flows through Lombok `@Getter`); the same-package
+  test now seeds them directly (`counter.lastAttemptTime = now - window`, `counter.attemptCount =
+  Integer.MAX_VALUE - 1`) and reads `counter.lastAttemptTime` directly. Deleted all three helper methods and the
+  `java.lang.reflect.Field` import, and corrected a now-misleading `@DisplayName`/test name that still said
+  "Reflection: getPrivateLong…" (it now reads "Getter: getLastAttemptTime matches the backing field"). The
+  window/overflow assertions are unchanged. Behaviour-preserving. Verified: **gradle `:proprietary:test --tests
+  AttemptCounterTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide threshold,
+  not a test failure).
+- Note: `LoginAttemptServiceTest` also reflects on `AttemptCounter.attemptCount`, but **cross-package**
+  (`…security.service` vs `…security.model`), so package-private access does not reach it; that one needs a
+  different approach (or stays reflective) and is left for a later, separate pass rather than forced here.
+
 ### Wave 129 — C2 de-reflection: TotpService.generateCode (backend proprietary; verified; pushed)
 
 - **C2 de-reflection (backend `proprietary`, first in this module)**: `TotpServiceTest`'s `isValidCode…` test
