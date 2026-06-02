@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 57 — C2 SplitRangeUtils pure-extraction (verified; pushed)
+
+- **C2/A3 pure-extraction**: lifted the by-page-count and by-document-count partition arithmetic out of
+  `SplitPdfBySizeController` into a new pure `SplitRangeUtils` (`pageCountRanges`/`docCountRanges`/
+  `buildRange`) that takes `int totalPages` instead of a loaded `PdfDocument`, so the integer math is
+  unit-testable without a PDF. Controller now delegates (the by-size path reuses `SplitRangeUtils.buildRange`
+  too). Added `SplitRangeUtilsTest` (14 tests): hand-computed ranges for even/remainder/oversized/
+  single/zero-page cases, front-loaded extra-page distribution, more-docs-than-pages skip, non-positive
+  throws, plus a `partitionsCoverEveryPageExactlyOnce` invariant sweep over totals 0–13 × docs 1–6.
+  Behaviour-preserving — verified: `:stirling-pdf:test` BUILD SUCCESSFUL with the new `SplitRangeUtilsTest`
+  and the existing `SplitPdfBySizeControllerTest` both green.
+
 ### Wave 56 — C3 streaming-I/O plan (grounded; pushed)
 
 - **C3 plan DONE**: `docs/streaming-io-plan.md`. Key finding from reading `WebResponseUtils.java`: the

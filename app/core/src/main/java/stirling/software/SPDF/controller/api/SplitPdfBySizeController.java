@@ -213,7 +213,7 @@ public class SplitPdfBySizeController {
                         rangeEnd = pageIndex - 1;
                         pageIndex--;
                     }
-                    ranges.add(buildRange(rangeStart, rangeEnd));
+                    ranges.add(SplitRangeUtils.buildRange(rangeStart, rangeEnd));
                     rangeStart = rangeEnd + 1;
                     rangeEnd = rangeStart - 1;
                 } else if (pageIndex < totalPages - 1 && actualSize < maxBytes * 0.75) {
@@ -231,7 +231,7 @@ public class SplitPdfBySizeController {
             }
         }
         if (rangeEnd >= rangeStart) {
-            ranges.add(buildRange(rangeStart, rangeEnd));
+            ranges.add(SplitRangeUtils.buildRange(rangeStart, rangeEnd));
         }
         return ranges;
     }
@@ -266,50 +266,10 @@ public class SplitPdfBySizeController {
     }
 
     private List<int[]> computePageCountRanges(PdfDocument sourceDoc, int pageCount) {
-        if (pageCount <= 0) {
-            throw ExceptionUtils.createIllegalArgumentException(
-                    "error.invalidArgument", "Invalid argument: {0}", "page count: " + pageCount);
-        }
-        int totalPages = sourceDoc.pageCount();
-        List<int[]> ranges = new ArrayList<>();
-        int start = 0;
-        while (start < totalPages) {
-            int end = Math.min(start + pageCount - 1, totalPages - 1);
-            ranges.add(buildRange(start, end));
-            start = end + 1;
-        }
-        return ranges;
+        return SplitRangeUtils.pageCountRanges(sourceDoc.pageCount(), pageCount);
     }
 
     private List<int[]> computeDocCountRanges(PdfDocument sourceDoc, int documentCount) {
-        if (documentCount <= 0) {
-            throw ExceptionUtils.createIllegalArgumentException(
-                    "error.invalidArgument",
-                    "Invalid argument: {0}",
-                    "document count: " + documentCount);
-        }
-        int totalPages = sourceDoc.pageCount();
-        int pagesPerDocument = totalPages / documentCount;
-        int extraPages = totalPages % documentCount;
-        List<int[]> ranges = new ArrayList<>();
-        int cursor = 0;
-        for (int i = 0; i < documentCount; i++) {
-            int pagesToAdd = pagesPerDocument + (i < extraPages ? 1 : 0);
-            if (pagesToAdd == 0) {
-                continue;
-            }
-            int end = cursor + pagesToAdd - 1;
-            ranges.add(buildRange(cursor, end));
-            cursor = end + 1;
-        }
-        return ranges;
-    }
-
-    private static int[] buildRange(int start, int end) {
-        int[] range = new int[end - start + 1];
-        for (int i = 0; i < range.length; i++) {
-            range[i] = start + i;
-        }
-        return range;
+        return SplitRangeUtils.docCountRanges(sourceDoc.pageCount(), documentCount);
     }
 }
