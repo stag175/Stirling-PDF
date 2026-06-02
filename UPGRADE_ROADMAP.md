@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 84 — I-workstream engine escape-guard + label coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: two focused test files.
+  (1) `tests/contradiction/test_capability_escape.py` (6 cases) for `_escape_for_xml_tag` — the
+  **prompt-injection guard** that escapes `<`/`>` so an untrusted filename can't close the XML-style tag it's
+  interpolated into (tested with the docstring's `foo.pdf"></file_name>…` attack; confirms `&` is *not*
+  escaped, so no entity double-escaping).
+  (2) `tests/agents/test_chunked_mapper_label.py` (4 cases) for `_page_range_label` (empty→`pages=?`,
+  single→`pages=N`, multi→`pages=first-last` using endpoints only).
+  Pure value-add, zero source change. Verified via the engine venv: **pytest 10/10 passed, ruff clean, pyright
+  0 errors**.
+
 ### Wave 83 — I-workstream engine chunker-helper coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: `chunk_text` is covered by `test_documents.py`, but its pure
