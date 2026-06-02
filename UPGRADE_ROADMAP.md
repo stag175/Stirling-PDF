@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 90 — I-workstream engine page-chunking coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/test_build_page_chunks.py` (7 tests) for the
+  pure `_build_page_chunks` helper in the `pdf_to_markdown` agent, which groups `PageLayout`s into chunks
+  bounded by `_MAX_CHUNK_PAGES` (10) and `_MAX_CHUNK_FRAGMENTS` (1000). Covers empty→[], single page, the
+  page-count split (23 pages → `[10, 10, 3]`), exactly-10 → one chunk, 11 → `[10, 1]`, the fragment-count
+  split (via `monkeypatch` to a small limit → `[2, 2, 1]`), and the edge that a lone page exceeding the
+  fragment limit is still kept whole (never split). Pure value-add, zero source change. Verified via the
+  engine venv: **pytest 7/7 passed, ruff clean, pyright 0 errors**.
+
 ### Wave 89 — I-workstream engine NDJSON frame-serializer coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/test_serialize_frame.py` (3 tests) for
