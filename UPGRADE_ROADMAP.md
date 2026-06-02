@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 104 — B4 pdfTextEditorUtils.createMergedElement coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: pivoted back to frontend. Extended `pdfTextEditorUtils.test.ts`
+  (+5 tests, 26 total) for `createMergedElement(group)` — the text-merge helper that builds one element from a
+  `TextGroup`: uses the first original element as a clone template, sets the sanitized merged text (newlines
+  stripped), copies a 6-element `textMatrix` into an **independent** array (mutation isolation verified),
+  clears glyph hints (`charCodes`), and treats empty text as `""`. Pure value-add, zero source change.
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 26/26 green**.
+
 ### Wave 103 — C2 TauriProcessMonitor de-reflection (backend; verified; pushed)
 
 - **C2 de-reflection (backend)**: `TauriProcessMonitorTest` used two generic `invokePrivate(target, "name", …)`

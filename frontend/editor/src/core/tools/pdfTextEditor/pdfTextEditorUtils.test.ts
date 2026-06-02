@@ -5,10 +5,12 @@ import {
   PdfJsonImageElement,
   PdfJsonPage,
   PdfJsonTextElement,
+  TextGroup,
 } from "@app/tools/pdfTextEditor/pdfTextEditorTypes";
 import {
   cloneImageElement,
   cloneTextElement,
+  createMergedElement,
   deepCloneDocument,
   extractDocumentImages,
   extractPageImages,
@@ -22,6 +24,7 @@ const img = (e: Partial<PdfJsonImageElement>): PdfJsonImageElement =>
 const page = (p: Partial<PdfJsonPage>): PdfJsonPage => p as PdfJsonPage;
 const txt = (e: Partial<PdfJsonTextElement>): PdfJsonTextElement =>
   e as PdfJsonTextElement;
+const group = (g: Partial<TextGroup>): TextGroup => g as TextGroup;
 
 describe("valueOr", () => {
   it("returns the value when it is a real number (including 0 and negatives)", () => {
@@ -199,5 +202,54 @@ describe("extractDocumentImages", () => {
     expect(result).toHaveLength(2);
     expect(result[0].map((i) => i.id)).toEqual(["a", "page-0-image-1"]);
     expect(result[1]).toEqual([]);
+  });
+});
+
+describe("createMergedElement", () => {
+  it("uses the first original element as the template and sets the merged text", () => {
+    const reference = txt({ text: "original", textMatrix: [1, 2, 3, 4, 5, 6] });
+    const merged = createMergedElement(
+      group({ originalElements: [reference], text: "merged text" }),
+    );
+    expect(merged.text).toBe("merged text");
+    expect(merged).not.toBe(reference); // it's a clone
+    expect(reference.text).toBe("original"); // source untouched
+  });
+
+  it("strips newlines from the merged text", () => {
+    const merged = createMergedElement(
+      group({
+        originalElements: [txt({ text: "x" })],
+        text: "line1\nline2\r\nline3",
+      }),
+    );
+    expect(merged.text).toBe("line1line2line3");
+  });
+
+  it("copies a 6-element textMatrix into an independent array", () => {
+    const reference = txt({ text: "x", textMatrix: [1, 0, 0, 1, 10, 20] });
+    const merged = createMergedElement(
+      group({ originalElements: [reference], text: "y" }),
+    );
+    expect(merged.textMatrix).toEqual([1, 0, 0, 1, 10, 20]);
+    merged.textMatrix![4] = 999;
+    expect(reference.textMatrix![4]).toBe(10); // mutation isolated
+  });
+
+  it("clears glyph hints (charCodes) on the merged element", () => {
+    const merged = createMergedElement(
+      group({
+        originalElements: [txt({ text: "x", charCodes: [10, 20, 30] })],
+        text: "y",
+      }),
+    );
+    expect(merged.charCodes).toBeUndefined();
+  });
+
+  it("treats empty group text as empty string", () => {
+    const merged = createMergedElement(
+      group({ originalElements: [txt({ text: "x" })], text: "" }),
+    );
+    expect(merged.text).toBe("");
   });
 });
