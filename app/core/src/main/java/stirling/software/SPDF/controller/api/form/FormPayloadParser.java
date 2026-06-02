@@ -168,7 +168,9 @@ final class FormPayloadParser {
         return record;
     }
 
-    private static String normalizeFieldValue(JsonNode valueNode) {
+    // Package-private (not private) so FormPayloadParserValueTest can pin the array/object/scalar
+    // normalisation directly.
+    static String normalizeFieldValue(JsonNode valueNode) {
         if (valueNode == null || valueNode.isNull()) {
             return null;
         }
@@ -193,7 +195,8 @@ final class FormPayloadParser {
         return coerceScalarToString(valueNode);
     }
 
-    private static String coerceScalarToString(JsonNode node) {
+    // Package-private (not private) so FormPayloadParserValueTest can pin the scalar coercion.
+    static String coerceScalarToString(JsonNode node) {
         if (node == null || node.isNull()) {
             return null;
         }

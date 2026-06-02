@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 181 — A1 coverage: FormPayloadParser value normalisation (backend core; verified; pushed)
+
+- **A1 coverage (backend `core`)**: made `FormPayloadParser.normalizeFieldValue(JsonNode)` and
+  `coerceScalarToString(JsonNode)` package-private (were `private static`) and added
+  `FormPayloadParserValueTest` (9 tests, real Jackson-3 nodes). Pinned the value-side contract that complements
+  Wave 180's name-side: `coerceScalarToString` → null for null/JSON-null, trims textual values, stringifies
+  numbers/booleans (`42`, `3.14`, `true`/`false`); `normalizeFieldValue` → null for null/JSON-null, **joins array
+  scalars with commas** (`["a","b"]`→`a,b`, `[1,2,3]`→`1,2,3`), **drops nulls before joining**
+  (`["a",null,"b"]`→`a,b`), preserves objects as their **JSON string** (`{"k":"v"}`), and coerces plain scalars.
+  Behaviour-preserving (modifier-only source change). Verified: **gradle `:stirling-pdf:test --tests
+  FormPayloadParserValueTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide
+  threshold, not a test failure).
+
 ### Wave 180 — A1 coverage: FormPayloadParser.extractName key precedence (backend core; verified; pushed)
 
 - **A1 coverage (backend `core`)**: made `FormPayloadParser.extractName(JsonNode)` and its helper
