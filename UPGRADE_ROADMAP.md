@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 77 — B4 thumbnailScaleUtils pure-extraction (frontend; verified; pushed)
+
+- **B4 pure-extraction (frontend)**: resolved the Wave 76 deferral — `calculateScaleFromFileSize` lived in
+  `thumbnailUtils.ts`, which import-pulls the PDFium WASM service, so it couldn't be unit-tested directly.
+  Extracted the pure file-size→scale ladder into a WASM-free `thumbnailScaleUtils.ts`; `thumbnailUtils`
+  imports + **re-exports** it (backwards-compatible — internal call sites unchanged). Added
+  `thumbnailScaleUtils.test.ts` (4 tests): full-quality under 10 MB, the tier step-downs, strict-`<` boundary
+  behaviour (exact thresholds fall to the next tier), and a monotonic-non-increasing + always-positive
+  invariant sweep. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 4/4 green** —
+  behaviour-preserving.
+
 ### Wave 76 — B4 sidebarUtils coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `sidebarUtils.test.ts` (6 tests) for the untested
