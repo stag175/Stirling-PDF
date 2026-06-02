@@ -326,7 +326,9 @@ public class CropController {
         }
     }
 
-    private record CropBounds(float x, float y, float width, float height) {
+    // Package-private (not private) so CropControllerTest can exercise fromPixels via a direct,
+    // compile-checked call instead of reflection.
+    record CropBounds(float x, float y, float width, float height) {
 
         static CropBounds fromPixels(int[] pixelBounds, float scaleX, float scaleY) {
             if (pixelBounds.length != 4) {

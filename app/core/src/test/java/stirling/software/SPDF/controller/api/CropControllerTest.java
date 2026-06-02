@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -467,33 +466,20 @@ class CropControllerTest {
     @DisplayName("CropBounds Conversion")
     class CropBoundsTests {
 
-        private Class<?> cropBoundsClass;
-        private Method fromPixelsMethod;
-
-        @BeforeEach
-        void setUp() throws ClassNotFoundException, NoSuchMethodException {
-            cropBoundsClass =
-                    Class.forName(
-                            "stirling.software.SPDF.controller.api.CropController$CropBounds");
-            fromPixelsMethod =
-                    cropBoundsClass.getDeclaredMethod(
-                            "fromPixels", int[].class, float.class, float.class);
-            fromPixelsMethod.setAccessible(true);
-        }
-
         @Test
         @DisplayName("Should convert pixel bounds to PDF coordinates correctly")
-        void shouldConvertPixelBoundsToPdfCoordinates() throws Exception {
+        void shouldConvertPixelBoundsToPdfCoordinates() {
             int[] pixelBounds = {10, 20, 110, 120};
             float scaleX = 0.5f;
             float scaleY = 0.5f;
 
-            Object bounds = fromPixelsMethod.invoke(null, pixelBounds, scaleX, scaleY);
+            CropController.CropBounds bounds =
+                    CropController.CropBounds.fromPixels(pixelBounds, scaleX, scaleY);
 
-            assertThat(getFloatField(bounds, "x")).isCloseTo(5.0f, within(0.01f));
-            assertThat(getFloatField(bounds, "y")).isCloseTo(10.0f, within(0.01f));
-            assertThat(getFloatField(bounds, "width")).isCloseTo(50.0f, within(0.01f));
-            assertThat(getFloatField(bounds, "height")).isCloseTo(50.0f, within(0.01f));
+            assertThat(bounds.x()).isCloseTo(5.0f, within(0.01f));
+            assertThat(bounds.y()).isCloseTo(10.0f, within(0.01f));
+            assertThat(bounds.width()).isCloseTo(50.0f, within(0.01f));
+            assertThat(bounds.height()).isCloseTo(50.0f, within(0.01f));
         }
 
         @ParameterizedTest
@@ -504,14 +490,15 @@ class CropControllerTest {
         })
         @DisplayName("Should handle various scale factors")
         void shouldHandleVariousScaleFactors(
-                int x1, int y1, int x2, int y2, float scaleX, float scaleY) throws Exception {
+                int x1, int y1, int x2, int y2, float scaleX, float scaleY) {
             int[] pixelBounds = {x1, y1, x2, y2};
 
-            Object bounds = fromPixelsMethod.invoke(null, pixelBounds, scaleX, scaleY);
+            CropController.CropBounds bounds =
+                    CropController.CropBounds.fromPixels(pixelBounds, scaleX, scaleY);
 
             assertThat(bounds).isNotNull();
-            assertThat(getFloatField(bounds, "width")).isGreaterThan(0);
-            assertThat(getFloatField(bounds, "height")).isGreaterThan(0);
+            assertThat(bounds.width()).isGreaterThan(0);
+            assertThat(bounds.height()).isGreaterThan(0);
         }
 
         @Test
@@ -519,16 +506,10 @@ class CropControllerTest {
         void shouldThrowExceptionForInvalidArray() {
             int[] invalidBounds = {10, 20, 30};
 
-            assertThatThrownBy(() -> fromPixelsMethod.invoke(null, invalidBounds, 1.0f, 1.0f))
-                    .isInstanceOf(Exception.class)
-                    .hasCauseInstanceOf(IllegalArgumentException.class)
-                    .cause()
+            assertThatThrownBy(
+                            () -> CropController.CropBounds.fromPixels(invalidBounds, 1.0f, 1.0f))
+                    .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("pixelBounds array must contain exactly 4 elements");
-        }
-
-        private float getFloatField(Object obj, String fieldName) throws Exception {
-            Method getter = cropBoundsClass.getDeclaredMethod(fieldName);
-            return (Float) getter.invoke(obj);
         }
     }
 
