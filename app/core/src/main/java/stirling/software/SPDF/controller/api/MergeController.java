@@ -253,7 +253,8 @@ public class MergeController {
         return 0L;
     }
 
-    private static int indexOfByOriginalFilename(List<MultipartFile> list, String name) {
+    // Package-private (not private) so MergeControllerIndexOfTest can pin the first-match search.
+    static int indexOfByOriginalFilename(List<MultipartFile> list, String name) {
         for (int i = 0; i < list.size(); i++) {
             MultipartFile f = list.get(i);
             if (name.equals(f.getOriginalFilename())) return i;

@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 178 — A1 coverage: MergeController.indexOfByOriginalFilename first-match search (backend core; verified; pushed)
+
+- **A1 coverage (backend `core`)**: made `MergeController.indexOfByOriginalFilename(List<MultipartFile>, String)`
+  package-private (was `private static`) and added `MergeControllerIndexOfTest` (5 tests, using Spring
+  `MockMultipartFile`). Pinned the linear first-match search: returns the index of the first file whose
+  `getOriginalFilename()` matches (0/middle/last), `-1` when none match, `-1` for an empty list, the **first**
+  index when filenames are duplicated, and that matching is **case-sensitive** (`Doc.pdf` ≠ `doc.pdf`).
+  Behaviour-preserving (modifier-only source change). Verified: **gradle `:stirling-pdf:test --tests
+  MergeControllerIndexOfTest` BUILD SUCCESSFUL** (single-class run's JaCoCo aggregate FAIL is the project-wide
+  threshold, not a test failure).
+
 ### Wave 177 — A1 coverage: ScannerEffectController.calculateRotation variance envelope (backend core; verified; pushed)
 
 - **A1 coverage (backend `core`)**: made `ScannerEffectController.calculateRotation(baseRotation, rotateVariance)`
