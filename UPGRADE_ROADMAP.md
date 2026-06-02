@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 72 — B4 adjustPixelUtils pure-extraction (frontend; verified; pushed)
+
+- **B4 pure-extraction (frontend)**: lifted the per-pixel colour-adjustment maths out of the canvas-bound
+  `applyAdjustmentsToCanvas` (`adjustContrast/utils.ts`) into a pure, DOM-free
+  `adjustPixelUtils.ts`: `adjustPixel(r,g,b,adj)` runs channel multipliers → contrast (centred at 128) →
+  brightness → saturation (HSL round-trip) with 0..255 clamping. The canvas function now builds the
+  `ChannelAdjustments` once and delegates per pixel, so the colour maths is unit-testable without a canvas.
+  Added `adjustPixelUtils.test.ts` (8 tests, hand-traced through the HSL conversion): grayscale-endpoint and
+  colour identity (lossless round-trip), contrast-0 → mid-gray, brightness-0 → black, channel-zero → channel
+  removed, saturation-0 → HSL-lightness gray, and high/low clamping at 255/0. Verified: **core `tsc` 0 errors,
+  `eslint --max-warnings=0` clean, `vitest` 8/8 green** — behaviour-preserving.
+
 ### Wave 71 — B4 imageToPdfLayoutUtils pure-extraction (frontend; verified; pushed)
 
 - **B4 pure-extraction (frontend)**: pivoted from backend (common/proprietary statics are already
