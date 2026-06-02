@@ -696,6 +696,15 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 108 — B4 urlMapping routing-contract coverage (frontend; verified; pushed)
+
+- **B4 coverage-add (frontend, no refactor)**: added `urlMapping.test.ts` (5 tests) for the `URL_TO_TOOL_MAP`
+  routing table (URL → tool id) — pins canonical mappings, the split/convert alias clusters all resolving to
+  one tool, the legacy sitemap mappings (`/pdf-organizer`→`reorganizePages`, `/stamp`→`addStamp`,
+  `/auto-redact`→`redact`), and structural invariants (every key is a whitespace-free absolute path, every
+  value a non-empty tool id). A mis-mapping silently breaks deep-link navigation. Pure value-add, zero source
+  change. Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 5/5 green**.
+
 ### Wave 107 — B4 fileDialogUtils coverage (frontend; verified; pushed)
 
 - **B4 coverage-add (frontend, no refactor)**: added `fileDialogUtils.test.ts` (3 tests) for the pure,
