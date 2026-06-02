@@ -434,6 +434,22 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   coverage: 81.06%"*. The cross-tier *single* kill switch + frontend/Java opt-out docs remain (need the
   Java/frontend runtime to verify); the engine gate is real and locked.
 
+### Wave 28 — I3 engine contract & failure-mode documentation (verified; pushed)
+
+- **I3 DONE** (workstream I). The engine had **no** documentation (not even a README). Added
+  `engine/CONTRACT.md`: the full typed HTTP surface (11 functional endpoints — 1 `GET /health`, the
+  streaming `POST /api/v1/orchestrator`, the unary agent routes, and the idempotent
+  `DELETE /api/v1/documents/{id}`), the `X-User-Id` convention, and a rigorous **failure-mode** section —
+  exactly I3's ask ("typed in/typed out, what happens when the model/provider is down or returns malformed
+  structured output"): 422 on Pydantic validation, the lone hand-written 400 (math-auditor `tolerance`),
+  the **no-global-handler → opaque 500** reality for unary routes (provider `ModelHTTPError`,
+  `UnexpectedModelBehavior` after output-validator retries exhaust, `UsageLimitExceeded`, domain
+  `ValueError`/`RuntimeError`), and the streaming orchestrator's distinct **200-then-`error`-frame** model.
+  Documented the fail-fast startup and the telemetry opt-out, and flagged the "all errors collapse to 500"
+  gap as a future global-exception-handler improvement. **Grounded + verified, not prose:** every endpoint
+  was cross-checked against the live `app.routes` (the check *caught a real omission* — the `DELETE` route I'd
+  initially missed — which I then added), and the doc's own verification command is confirmed runnable.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -629,6 +645,10 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   rate-limit key expiry; the in-process impl is well-tested but the external path less so. *Effort:* M. *Risk:* med.
 - **I3. Document the engine contract & failure modes** (typed in/typed out, what happens when the
   model/provider is down or returns malformed structured output). *Effort:* S–M. *Risk:* low.
+  ✅ **DONE (Wave 28)**: `engine/CONTRACT.md` — full typed endpoint table (verified against live
+  `app.routes`), failure-mode taxonomy (422 / 400 / opaque-500 for provider+schema+usage+domain errors /
+  streaming 200-then-error-frame), fail-fast startup, telemetry opt-out. Flags the "all errors → 500" gap
+  as a future global-handler improvement.
 
 ---
 
