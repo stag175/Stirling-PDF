@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 174 — B4 frontend coverage: fileContext id/extract/guard helpers (frontend; verified; pushed)
+
+- **B4 coverage (frontend)**: added `fileContext.test.ts` (10 tests) for four untested pure helpers in
+  `types/fileContext.ts`. `getFormFillFileId` keys a file for form-fill caching: pinned `null`/`undefined`→null,
+  StirlingFile→`stirling-<fileId>`, plain File→`file-<name>-<size>-<lastModified>` (`doc.pdf`/3 bytes/12345 →
+  `file-doc.pdf-3-12345`), and non-File Blob→`blob-<size||0>` (`blob-2`, empty→`blob-0`). `extractFileIds` returns
+  each file's `fileId` in order; `extractFiles` returns the same array (identity cast). `isFileObject` is the
+  structural File/StirlingFile guard — true for real `File`/`StirlingFile` and a file-shaped object, false when a
+  required member is missing (`arrayBuffer`) or wrong-typed (`size` as string), and for `null`/primitives/`{}`.
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 10/10 green**.
+
 ### Wave 173 — B4 frontend coverage: workbench type guards (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `workbench.test.ts` (5 tests) for the untested `types/workbench.ts` guards.
