@@ -696,6 +696,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 183 — A1 coverage: GetInfoOnPDF.getPageModeDescription slash-strip (backend core; verified; pushed)
+
+- **A1 coverage (backend `core`)**: made `GetInfoOnPDF.getPageModeDescription(String)` package-private (was
+  `private static`) and added `GetInfoOnPDFPageModeTest` (5 tests) for the PDF page-mode label in the info
+  report. Pinned: `null` → `"Unknown"`; a leading slash is stripped (PDF names arrive as `/UseNone` →
+  `UseNone`, `/FullScreen` → `FullScreen`); a value without a slash is unchanged (`UseOutlines`); and — the
+  subtle bit — **only the first slash is removed** (`a/b/c` → `ab/c`, `/` → `""`) since it uses `replaceFirst`
+  against the `/` pattern; empty stays empty. Behaviour-preserving (modifier-only source change). Verified:
+  **gradle `:stirling-pdf:test --tests GetInfoOnPDFPageModeTest` BUILD SUCCESSFUL** (single-class run's JaCoCo
+  aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 182 — A1 coverage: ScannerEffectController.blendColors per-channel RGB blend (backend core; verified; pushed)
 
 - **A1 coverage (backend `core`)**: made `ScannerEffectController.blendColors(int fg, int bg, float alpha)`

@@ -1180,7 +1180,9 @@ public class GetInfoOnPDF {
         int uniqueImages;
     }
 
-    private static String getPageModeDescription(String pageMode) {
+    // Package-private (not private) so GetInfoOnPDFPageModeTest can pin the null/slash-strip
+    // handling.
+    static String getPageModeDescription(String pageMode) {
         if (pageMode == null) return "Unknown";
         return RegexPatternUtils.getInstance()
                 .getPageModePattern()
