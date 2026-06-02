@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 87 — I-workstream engine layout-formatter coverage (Python; verified; pushed)
+
+- **Engine coverage-add (Python, no refactor)**: added `tests/test_format_layout.py` (7 tests) for the pure
+  `_format_layout` helper in the `pdf_to_markdown` agent, which renders `PageLayout` lines/fragments into the
+  diagnostic layout string the LLM sees. Pins: empty→`None`, the per-fragment
+  `text@(x,y) fs=N` form with `:.0f` integer rounding of coordinates/font-size, bold fragments wrapped in
+  `**…**`, space-joined fragments within a line, newline-joined lines within a page, and blank-line-joined
+  `--- Page N ---` page blocks. Pure value-add, zero source change. Verified via the engine venv: **pytest 7/7
+  passed, ruff clean, pyright 0 errors**.
+
 ### Wave 86 — I-workstream engine arithmetic-evaluator coverage (Python; verified; pushed)
 
 - **Engine coverage-add (Python, no refactor)**: added `tests/ledger/test_eval_expression.py` (16 tests) for
