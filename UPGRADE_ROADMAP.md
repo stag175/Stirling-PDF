@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 159 — B4 frontend coverage: CONVERSION_MATRIX routability (frontend; verified; pushed)
+
+- **B4 coverage (frontend, cross-registry consistency)**: extended `convertConstants.test.ts` (+3 tests, 8 total)
+  with a `CONVERSION_MATRIX` routability guard — the matrix is what the UI *offers* the user, so every offered
+  `(from → to)` conversion must actually be routable via `EXTENSION_TO_ENDPOINT[from][to]`, else the user picks a
+  conversion with no backend endpoint. Pinned: every offered pair has a route (reports any `from -> to` that
+  doesn't); every source offers ≥1 target; and no target list has duplicate formats. Confirms the UI's offered
+  conversions and the backend routing table can't silently drift apart. Verified empirically (all green).
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 8/8 green**.
+
 ### Wave 158 — B4 frontend coverage: convert endpoint registry cross-consistency (frontend; verified; pushed)
 
 - **B4 coverage (frontend, cross-registry consistency)**: added `convertConstants.test.ts` (5 tests) guarding the

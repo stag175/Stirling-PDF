@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   CONVERSION_ENDPOINTS,
+  CONVERSION_MATRIX,
   ENDPOINT_NAMES,
   EXTENSION_TO_ENDPOINT,
 } from "@app/constants/convertConstants";
@@ -49,5 +50,42 @@ describe("convert endpoint registries", () => {
       }
     }
     expect(empty).toEqual([]);
+  });
+});
+
+// The UI offers conversions from CONVERSION_MATRIX; each offered (from -> to) must actually be
+// routable via EXTENSION_TO_ENDPOINT, or the user picks a conversion that has no backend endpoint.
+describe("CONVERSION_MATRIX routability", () => {
+  it("every offered (from -> to) conversion has an EXTENSION_TO_ENDPOINT route", () => {
+    const unroutable: string[] = [];
+    for (const [from, targets] of Object.entries(CONVERSION_MATRIX)) {
+      const routes = EXTENSION_TO_ENDPOINT[from];
+      for (const to of targets) {
+        if (!routes || !(to in routes)) {
+          unroutable.push(`${from} -> ${to}`);
+        }
+      }
+    }
+    expect(unroutable).toEqual([]);
+  });
+
+  it("every CONVERSION_MATRIX source offers at least one target format", () => {
+    const empty: string[] = [];
+    for (const [from, targets] of Object.entries(CONVERSION_MATRIX)) {
+      if (targets.length === 0) {
+        empty.push(from);
+      }
+    }
+    expect(empty).toEqual([]);
+  });
+
+  it("no CONVERSION_MATRIX target list contains duplicate formats", () => {
+    const dupes: string[] = [];
+    for (const [from, targets] of Object.entries(CONVERSION_MATRIX)) {
+      if (new Set(targets).size !== targets.length) {
+        dupes.push(from);
+      }
+    }
+    expect(dupes).toEqual([]);
   });
 });
