@@ -332,8 +332,6 @@ class CropControllerTest {
     @DisplayName("Content Bounds Detection")
     class ContentBoundsDetectionTests {
 
-        private Method detectContentBoundsMethod;
-
         private static BufferedImage createWhiteImage(int width, int height) {
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             for (int x = 0; x < width; x++) {
@@ -372,20 +370,12 @@ class CropControllerTest {
             }
         }
 
-        @BeforeEach
-        void setUp() throws NoSuchMethodException {
-            detectContentBoundsMethod =
-                    CropController.class.getDeclaredMethod(
-                            "detectContentBounds", BufferedImage.class);
-            detectContentBoundsMethod.setAccessible(true);
-        }
-
         @Test
         @DisplayName("Should detect full image bounds for all white image")
         void shouldDetectFullBoundsForWhiteImage() throws Exception {
             BufferedImage whiteImage = createWhiteImage(100, 100);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, whiteImage);
+            int[] bounds = CropController.detectContentBounds(whiteImage);
 
             assertThat(bounds).containsExactly(0, 0, 99, 99);
         }
@@ -396,7 +386,7 @@ class CropControllerTest {
             BufferedImage image = createWhiteImage(100, 100);
             drawBlackRectangle(image, 25, 25, 75, 75);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, image);
+            int[] bounds = CropController.detectContentBounds(image);
 
             assertThat(bounds).containsExactly(25, 25, 74, 74);
         }
@@ -410,7 +400,7 @@ class CropControllerTest {
             image.setRGB(0, 99, 0x000000);
             image.setRGB(99, 99, 0x000000);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, image);
+            int[] bounds = CropController.detectContentBounds(image);
 
             assertThat(bounds).containsExactly(0, 0, 99, 99);
         }
@@ -423,7 +413,7 @@ class CropControllerTest {
             image.setRGB(90, 90, 0xF0F0F0);
             drawBlackRectangle(image, 30, 30, 70, 70);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, image);
+            int[] bounds = CropController.detectContentBounds(image);
 
             assertThat(bounds).containsExactly(10, 9, 90, 89);
         }
@@ -434,7 +424,7 @@ class CropControllerTest {
             BufferedImage image = createImageFilledWith(50, 50, 0xF0F0F0);
             drawDarkerRectangle(image, 20, 20, 30, 30, 0xC0C0C0);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, image);
+            int[] bounds = CropController.detectContentBounds(image);
 
             assertThat(bounds).containsExactly(0, 0, 49, 49);
         }
@@ -444,40 +434,32 @@ class CropControllerTest {
     @DisplayName("White Pixel Detection")
     class WhitePixelDetectionTests {
 
-        private Method isWhiteMethod;
-
-        @BeforeEach
-        void setUp() throws NoSuchMethodException {
-            isWhiteMethod = CropController.class.getDeclaredMethod("isWhite", int.class, int.class);
-            isWhiteMethod.setAccessible(true);
-        }
-
         @Test
         @DisplayName("Should identify pure white pixels")
         void shouldIdentifyWhitePixels() throws Exception {
-            assertThat((Boolean) isWhiteMethod.invoke(null, 0xFFFFFFFF, 250)).isTrue();
-            assertThat((Boolean) isWhiteMethod.invoke(null, 0xFFF0F0F0, 240)).isTrue();
+            assertThat(CropController.isWhite(0xFFFFFFFF, 250)).isTrue();
+            assertThat(CropController.isWhite(0xFFF0F0F0, 240)).isTrue();
         }
 
         @Test
         @DisplayName("Should identify black pixels as non-white")
         void shouldIdentifyBlackPixels() throws Exception {
-            assertThat((Boolean) isWhiteMethod.invoke(null, 0xFF000000, 250)).isFalse();
-            assertThat((Boolean) isWhiteMethod.invoke(null, 0xFF101010, 250)).isFalse();
+            assertThat(CropController.isWhite(0xFF000000, 250)).isFalse();
+            assertThat(CropController.isWhite(0xFF101010, 250)).isFalse();
         }
 
         @ParameterizedTest
         @ValueSource(ints = {0xFFFFFFFF, 0xFFFAFAFA, 0xFFF5F5F5})
         @DisplayName("Should identify various white shades")
         void shouldIdentifyVariousWhiteShades(int pixelColor) throws Exception {
-            assertThat((Boolean) isWhiteMethod.invoke(null, pixelColor, 240)).isTrue();
+            assertThat(CropController.isWhite(pixelColor, 240)).isTrue();
         }
 
         @ParameterizedTest
         @ValueSource(ints = {0xFF000000, 0xFF101010, 0xFF808080})
         @DisplayName("Should identify various non-white shades")
         void shouldIdentifyNonWhiteShades(int pixelColor) throws Exception {
-            assertThat((Boolean) isWhiteMethod.invoke(null, pixelColor, 250)).isFalse();
+            assertThat(CropController.isWhite(pixelColor, 250)).isFalse();
         }
     }
 

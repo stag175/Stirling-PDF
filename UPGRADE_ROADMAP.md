@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 53 — C2/A3 CropController: package-private + de-reflected tests (verified; pushed)
+
+- **C2/A3 (test-quality)**: the auto-crop pixel-scan logic (`detectContentBounds`, `isWhite`) was already
+  comprehensively tested — but via brittle, non-compile-checked **reflection**
+  (`getDeclaredMethod(...).invoke(...)`). Made those two pure methods package-private (visibility-only,
+  behaviour-preserving, matching the RotationController pattern) and **de-reflected** the ~13 call sites in
+  `CropControllerTest` into direct `CropController.detectContentBounds(img)` / `CropController.isWhite(rgb,t)`
+  calls (removing 2 reflection fields + setups). The tests are now type-safe and refactor-safe. Verified:
+  `:stirling-pdf:test` BUILD SUCCESSFUL, all CropController tests green.
+
 ### Wave 52 — B4 useViewerReadAloud decomposition (verified; pushed)
 
 - **B4 continued (6th component)**: extracted 6 pure helpers from the `useViewerReadAloud.ts` hook
