@@ -542,6 +542,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
     Micrometer-tracing side and an OTLP collector — remains a deployment concern; the engine now does its
     half correctly and verifiably.)
 
+### Wave 34 — A2/A5/A6 testing-visibility items (verified; pushed)
+
+- **A6 DONE** — corrected AGENTS.md's stale/misleading test counts ("~314 backend / ~670 frontend") to the
+  real, grounded suite (438+ backend + 184+ frontend test files, 293 engine tests) and documented all
+  three enforced coverage gates (per-module JaCoCo / Vitest thresholds / engine pytest-cov), with an
+  explicit "this is **not** a lightly-tested codebase" note — exactly the misleading claim the item flagged.
+- **A5 DONE** — added a root `task coverage` that runs backend JaCoCo + frontend Vitest-v8 +
+  engine pytest-cov and prints each report location (Taskfile YAML validated; all three sub-tasks exist
+  and are independently verified). The single-PR-comment aggregation is the CI-side remainder.
+- **A2 DONE** (earlier) — Vitest `coverage.thresholds` are enforced + ratcheted; marked here for completeness.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -615,14 +626,21 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   *Evidence:* `build.gradle:371–397`. *Effort:* S to set, L to satisfy. *Risk:* low.
 - **A2. Add frontend coverage thresholds.** `vitest.config.ts` configures reporters but no
   enforced thresholds; 100 test files but no floor. *Effort:* S. *Risk:* low.
+  ✅ **DONE**: `vitest.config.ts` now has ratcheted `coverage.thresholds` (statements/lines 14.5,
+  branches 78, functions 46) — see the FE coverage waves.
 - **A3. Backend integration tests with Testcontainers** for the top PDF endpoints (merge, split,
   convert, OCR, sign) — bridges the gap between unit tests and Cucumber e2e. *Effort:* M. *Risk:* low.
 - **A4. Accessibility tests** (axe-core / jest-axe) — 399 aria/role usages, zero a11y assertions.
   Wire into CI as a regression gate. *Effort:* M. *Risk:* low.
 - **A5. Unified coverage reporting** across Java (JaCoCo) + TS (v8) + Python (pytest-cov),
   surfaced as a single PR comment. *Effort:* M. *Risk:* low.
+  ✅ **DONE (Wave 34)**: root `task coverage` runs all three tiers' coverage (JaCoCo + Vitest v8 +
+  pytest-cov) and reports each location. The single-PR-comment surfacing is the CI-side remainder.
 - **A6. Refresh AGENTS.md / DeveloperGuide** — the "no unit tests" claim is wrong and misleads
   both humans and agents. *Effort:* S. *Risk:* low.
+  ✅ **DONE (Wave 34)**: AGENTS.md Testing Strategy corrected — stale "~314/~670 tests" replaced with the
+  real suite (438+ backend / 184+ frontend test files, 293 engine tests) + all three enforced coverage
+  gates documented; added an explicit "not a lightly-tested codebase" note.
 
 ### Workstream B — Frontend architecture & consolidation
 
