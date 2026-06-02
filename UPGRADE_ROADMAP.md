@@ -696,6 +696,16 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 51 — B4 RulerOverlay decomposition (verified; pushed)
+
+- **B4 continued (5th component, first non-config)**: extracted **12 pure geometry/unit/scale helpers**
+  (`dist`/`midpoint`/`perpUnit`/`angleDeg`, metric+imperial formatters, `scaledCross` cross-system
+  conversion, `pickScale` viewport resolution) from the viewer's `RulerOverlay.tsx` (1,032→891 LoC) into a
+  tested `RulerOverlayUtils.ts` — **62 tests** covering unit-bucket boundaries, four-quadrant angles,
+  signed-zero, cross-system conversion, and `pickScale` containment edge cases (this measurement math was
+  error-prone + untested). DOM-bound helpers stayed in the component; types re-exported for the existing
+  `EmbedPdfViewer` consumer. Verified: core tsc 0, 62 tests, eslint clean.
+
 ### Wave 50 — B4 AdminGeneralSection decomposition (verified; pushed)
 
 - **B4 continued (4th component)**: extracted 5 pure helpers from `AdminGeneralSection.tsx` (1,336→1,174
