@@ -662,6 +662,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   `RearrangePagesPDFControllerTest` green. Highest-value C2 slice so far (real algorithm coverage, not just
   a getter).
 
+### Wave 46 — B4 AdminSecuritySection decomposition (verified; pushed)
+
+- **B4 continued**: extracted the pure save/fetch transforms from `AdminSecuritySection.tsx` (1,580→1,453
+  LoC) into a tested `adminSecuritySectionUtils.ts` — `buildSecuritySettingsSaveDelta` (always emits the
+  19 security/JWT/audit keys, preserving falsy `0`/`false`/`""`; conditional `html.urlSecurity.*`) and
+  `combineSecurityFetchData` (strip/merge `_pending` in order, conditional audit/html attach), plus reused
+  `SecuritySettingsLike` to drop a ~38-line duplicated interface. All network/`console.log` side effects
+  stay in the component. **22 tests** where the section had none. Verified: proprietary tsc 0, 22 tests,
+  eslint clean. (Recovered cleanly after an earlier `git restore` — done to clean backend spotless churn —
+  accidentally reverted the first attempt; this pass committed frontend-only with no backend run in between.)
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -776,8 +787,12 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
 - **B4. Decompose mega-components** — `PdfTextEditorView.tsx` (2,897), `pdfiumService.ts` (1,934),
   `AdminAdvancedSection.tsx` (1,790) into focused units; lazy-load per-tool UIs with `React.lazy`.
   *Effort:* M–L. *Risk:* low.
-  ⏳ **Started (Waves 40, 42)**: applied the proven pure-extraction pattern to **two** of the three named
-  mega-components. **Wave 40** — `PdfTextEditorView.tsx` (2,920→2,838 LoC): 6 pure font helpers →
+  ⏳ **Started (Waves 40, 42, 46)**: applied the proven pure-extraction pattern to the named mega-components
+  + the largest config sections. **Wave 46** — `AdminSecuritySection.tsx` (1,580→1,453 LoC): extracted
+  `buildSecuritySettingsSaveDelta` + `combineSecurityFetchData` (the pure save/fetch transforms, preserving
+  falsy values + the `html.urlSecurity` presence guard + `_pending` merge order) into a tested
+  `adminSecuritySectionUtils.ts` (**22 tests**; section had none), de-duplicating a ~38-line inline
+  interface. Earlier: **Wave 40** — `PdfTextEditorView.tsx` (2,920→2,838 LoC): 6 pure font helpers →
   `pdfTextEditorFontUtils.ts` (22 tests; view had none) + a `NormalizedFontFormat` union. **Wave 42** —
   `AdminAdvancedSection.tsx` (1,790→1,724 LoC): 5 pure helpers (save-delta builder, pending-merge,
   tessdata language diff/sanitize/download-link derivation) → `adminAdvancedSectionUtils.ts` (**31 tests**;
