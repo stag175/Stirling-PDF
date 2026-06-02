@@ -342,6 +342,26 @@ mockable-class headroom but trends toward Spring-context-dependent classes.
   raised: `:stirling-pdf`→0.39/0.38/0.32; `:proprietary` BRANCH→0.43.
 - **Cumulative backend (line):** `:common` 41.3, `:stirling-pdf` 38.4, `:proprietary` 46.0.
 
+### Wave 23 — backend coverage round 10 + saturation conclusion (verified; pushed)
+
+- **+269 DTO/model contract tests across 12 classes** (core request DTOs + `model/json`; proprietary
+  `AuditExportRequest`), all green, 0 fixes. But **JaCoCo line coverage was essentially flat** (core
+  38.42→38.43; proprietary unchanged): the scout has reached Lombok-generated DTO/model classes whose lines
+  JaCoCo already counted, so test *count* rises while *new-line* coverage does not. Floors unchanged.
+- **Saturation conclusion (the honest shape of the coverage curve):** after **10 frontend + 10 backend
+  unit-test rounds** (~5,000 tests added this session), the pool of clean, statement-heavy,
+  unit-testable-without-a-Spring-context (backend) / non-React-component (frontend) classes is **exhausted**.
+  Remaining untested surface is dominated by Spring controllers/`@SpringBootTest`-bound services, PDF/native-tool
+  services, and React components — all of which need **integration/render testing** (`MockMvc`,
+  `@testing-library` render), a distinct, heavier workstream rather than more unit-test swarms. Pushing more
+  unit rounds now would add test count for ~0 coverage, which would be padding, not progress.
+- **Env note:** a machine-level **disk-full** condition (0 bytes free, 924 GB used) halted the build
+  mid-round; reclaimed ~11 GB of regenerable temp + Gradle cache layers and restarted the daemon to recover.
+
+**Coverage outcome for the #1 finding (decorative gates):** frontend **6.96→14.64%** stmts (53.6→78.3 branch,
+25.5→46.3 func); backend line **`:common` 41.3 / `:stirling-pdf` 38.4 / `:proprietary` 46.0** — all promoted
+from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. This finding is resolved.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
