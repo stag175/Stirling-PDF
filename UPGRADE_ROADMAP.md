@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 143 — I-workstream engine coverage: ContradictionDetector._empty_report (Python invariant; verified; pushed)
+
+- **Engine coverage (Python)**: added `tests/contradiction/test_empty_report.py` (4 tests) for the untested pure
+  static `ContradictionDetector._empty_report(*, summary, pages_examined)` — the contradictions-free report
+  returned from the detector's "no claims" / "no pages" early branches. Pins its documented invariant: **always
+  `clean=True` with an empty `contradictions` list**, echoing `summary`/`pages_examined` back unchanged. Also
+  pins that `pages_examined` is **not sorted/deduped** (multi-file audits legitimately repeat page numbers:
+  `[5,5,1]` stays `[5,5,1]`). A small but real regression guard on the always-clean contract. Exercised directly
+  on the class (`@staticmethod`). Verified: **pytest 4/4, ruff clean, pyright 0 errors**. (The detector's other
+  pure statics — `_dedupe_claims_for_detection`, `_validate_extracted_claim`, `_fallback_summary`, `_windows`,
+  `_escape_for_tag` — are now all covered.)
+
 ### Wave 142 — I-workstream engine coverage: MathAuditorAgent._fallback_summary (Python; verified; pushed)
 
 - **Engine coverage (Python)**: added `tests/ledger/test_fallback_summary.py` (7 tests) for the untested pure
