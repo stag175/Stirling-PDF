@@ -203,21 +203,23 @@ public class SplitPdfBySectionsController {
         PDRectangle mediaBox = sourcePage.getMediaBox();
         float width = mediaBox.getWidth();
         float height = mediaBox.getHeight();
-        float subPageWidth = width / totalHoriz;
-        float subPageHeight = height / totalVert;
 
         PDFormXObject form = layerUtility.importPageAsForm(sourceDoc, pageIndex);
 
         for (int i = 0; i < totalHoriz; i++) {
             for (int j = 0; j < totalVert; j++) {
+                SectionGridGeometry geo =
+                        SectionGridGeometry.cell(width, height, totalHoriz, totalVert, i, j);
+                float subPageWidth = geo.subPageWidth();
+                float subPageHeight = geo.subPageHeight();
                 PDPage subPage = new PDPage(new PDRectangle(subPageWidth, subPageHeight));
                 targetDoc.addPage(subPage);
 
                 try (PDPageContentStream contentStream =
                         new PDPageContentStream(
                                 targetDoc, subPage, AppendMode.APPEND, true, true)) {
-                    float translateX = -subPageWidth * i;
-                    float translateY = -subPageHeight * (totalVert - 1 - j);
+                    float translateX = geo.translateX();
+                    float translateY = geo.translateY();
 
                     contentStream.saveGraphicsState();
                     contentStream.addRect(0, 0, subPageWidth, subPageHeight);
@@ -246,8 +248,16 @@ public class SplitPdfBySectionsController {
             throws IOException {
         PDPage sourcePage = sourceDoc.getPage(pageIndex);
         PDRectangle mediaBox = sourcePage.getMediaBox();
-        float subPageWidth = mediaBox.getWidth() / totalHoriz;
-        float subPageHeight = mediaBox.getHeight() / totalVert;
+        SectionGridGeometry geo =
+                SectionGridGeometry.cell(
+                        mediaBox.getWidth(),
+                        mediaBox.getHeight(),
+                        totalHoriz,
+                        totalVert,
+                        horizIndex,
+                        vertIndex);
+        float subPageWidth = geo.subPageWidth();
+        float subPageHeight = geo.subPageHeight();
 
         PDPage subPage = new PDPage(new PDRectangle(subPageWidth, subPageHeight));
         targetDoc.addPage(subPage);
@@ -256,8 +266,8 @@ public class SplitPdfBySectionsController {
 
         try (PDPageContentStream contentStream =
                 new PDPageContentStream(targetDoc, subPage, AppendMode.APPEND, true, true)) {
-            float translateX = -subPageWidth * horizIndex;
-            float translateY = -subPageHeight * (totalVert - 1 - vertIndex);
+            float translateX = geo.translateX();
+            float translateY = geo.translateY();
 
             contentStream.saveGraphicsState();
             contentStream.addRect(0, 0, subPageWidth, subPageHeight);

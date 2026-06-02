@@ -696,6 +696,19 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 58 — C2 SectionGridGeometry pure-extraction (verified; pushed)
+
+- **C2 pure-extraction + DRY**: lifted the grid-cell geometry (sub-page sizing + the bottom-left-origin
+  translate offsets) out of `SplitPdfBySectionsController`'s two near-identical methods
+  (`addSplitPageToTarget`, `addSingleSectionToTarget`) into a pure `SectionGridGeometry` record
+  (`cell(pageW, pageH, totalHoriz, totalVert, horizIndex, vertIndex)`), so both methods now delegate
+  (de-duped) and the off-by-one-prone math is unit-testable without PDFBox. Added `SectionGridGeometryTest`
+  (7 tests, hand-computed). **Verification earned its keep**: the first run failed and surfaced that my
+  Javadoc had the row direction inverted — `vertIndex` counts rows **top→bottom** (row 0 = top, most-negative
+  `translateY`; bottom row = `translateY 0`), per the `totalVert-1-vertIndex` term. Fixed the doc + tests to
+  the correct model. Behaviour-preserving — verified: `:stirling-pdf:test` BUILD SUCCESSFUL with the new
+  `SectionGridGeometryTest` (7) and the existing `SplitPdfBySectionsControllerTest` (10) both green.
+
 ### Wave 57 — C2 SplitRangeUtils pure-extraction (verified; pushed)
 
 - **C2/A3 pure-extraction**: lifted the by-page-count and by-document-count partition arithmetic out of
