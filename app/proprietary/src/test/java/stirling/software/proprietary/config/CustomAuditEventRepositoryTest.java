@@ -40,8 +40,8 @@ import tools.jackson.databind.ObjectMapper;
  *
  * <p>Collaborators ({@link PersistentAuditEventRepository} and the Jackson 3 {@link ObjectMapper}
  * from {@code tools.jackson}) are mocked with Mockito. No Spring context, database, file or network
- * IO is involved. The {@code @Async} annotation on {@code add} is a no-op when the method is invoked
- * directly (no Spring proxy), so the assertions run synchronously.
+ * IO is involved. The {@code @Async} annotation on {@code add} is a no-op when the method is
+ * invoked directly (no Spring proxy), so the assertions run synchronously.
  *
  * <p>{@link stirling.software.proprietary.util.SecretMasker#mask} is a {@code static} method and
  * therefore cannot be mocked; the tests exercise it with real input maps and assert on its observed
@@ -92,8 +92,7 @@ class CustomAuditEventRepositoryTest {
         @Test
         @DisplayName("returns an empty, immutable list and never touches the repository")
         void find_returnsEmptyList() {
-            List<AuditEvent> result =
-                    repository.find("principal", Instant.now(), "SOME_TYPE");
+            List<AuditEvent> result = repository.find("principal", Instant.now(), "SOME_TYPE");
 
             assertNotNull(result);
             assertTrue(result.isEmpty(), "Read side is intentionally inert");
@@ -307,11 +306,13 @@ class CustomAuditEventRepositoryTest {
     }
 
     @Test
-    @DisplayName("constructor wires the injected collaborators (sanity / Lombok @RequiredArgsConstructor)")
+    @DisplayName(
+            "constructor wires the injected collaborators (sanity / Lombok @RequiredArgsConstructor)")
     void constructor_storesCollaborators() {
         CustomAuditEventRepository instance = new CustomAuditEventRepository(repo, mapper);
-        assertSame(repo, fieldRepo(instance));
-        assertSame(mapper, fieldMapper(instance));
+        // repo/mapper are package-private: read them directly (no reflection).
+        assertSame(repo, instance.repo);
+        assertSame(mapper, instance.mapper);
     }
 
     // ---- helpers -----------------------------------------------------------------------------
@@ -319,23 +320,5 @@ class CustomAuditEventRepositoryTest {
     @SuppressWarnings("unchecked")
     private static ArgumentCaptor<Map<String, Object>> mapCaptor() {
         return ArgumentCaptor.forClass(Map.class);
-    }
-
-    private static Object fieldRepo(CustomAuditEventRepository instance) {
-        return readField(instance, "repo");
-    }
-
-    private static Object fieldMapper(CustomAuditEventRepository instance) {
-        return readField(instance, "mapper");
-    }
-
-    private static Object readField(Object target, String name) {
-        try {
-            java.lang.reflect.Field f = target.getClass().getDeclaredField(name);
-            f.setAccessible(true);
-            return f.get(target);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError("Unable to read field '" + name + "'", e);
-        }
     }
 }

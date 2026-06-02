@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 134 — C2 de-reflection: CustomAuditEventRepository collaborator fields (backend proprietary; verified; pushed)
+
+- **C2 de-reflection (backend `proprietary`)**: `CustomAuditEventRepositoryTest#constructor_storesCollaborators`
+  asserted the `@RequiredArgsConstructor`-wired collaborators by reading the private `repo`/`mapper` fields
+  through three reflective helpers (`fieldRepo` → `fieldMapper` → `readField` with
+  `getDeclaredField`/`setAccessible`/`get`). Made both fields package-private (were `private final`; kept
+  `final`); the same-package test now reads `instance.repo`/`instance.mapper` directly in the `assertSame`
+  checks. Deleted all three reflective helpers (the `java.lang.reflect.Field` was fully qualified, so no import
+  to drop). The constructor-wiring assertions and every `add(...)` branch test are unchanged. Behaviour-preserving.
+  Verified: **gradle `:proprietary:test --tests CustomAuditEventRepositoryTest` BUILD SUCCESSFUL** (single-class
+  run's JaCoCo aggregate FAIL is the project-wide threshold, not a test failure).
+
 ### Wave 133 — C2 de-reflection: ClusterStorageGate field setters (backend proprietary; verified; pushed)
 
 - **C2 de-reflection (backend `proprietary`)**: `ClusterStorageGateTest` carried two reflective field setters

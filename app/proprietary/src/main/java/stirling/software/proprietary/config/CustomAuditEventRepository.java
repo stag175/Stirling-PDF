@@ -27,8 +27,10 @@ import tools.jackson.databind.ObjectMapper;
 @Slf4j
 public class CustomAuditEventRepository implements AuditEventRepository {
 
-    private final PersistentAuditEventRepository repo;
-    private final ObjectMapper mapper;
+    // Package-private (not private) so CustomAuditEventRepositoryTest can assert the constructor
+    // wired these collaborators via direct field reads instead of reflection.
+    final PersistentAuditEventRepository repo;
+    final ObjectMapper mapper;
 
     /* ── READ side intentionally inert (endpoint disabled) ── */
     @Override
