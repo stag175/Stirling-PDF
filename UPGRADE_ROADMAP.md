@@ -553,6 +553,17 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   and are independently verified). The single-PR-comment aggregation is the CI-side remainder.
 - **A2 DONE** (earlier) — Vitest `coverage.thresholds` are enforced + ratcheted; marked here for completeness.
 
+### Wave 35 — A4 accessibility-testing foundation (verified; pushed)
+
+- **A4 foundation DONE** (workstream A). The repo had ~399 aria/role usages but **zero** automated a11y
+  assertions; I'd previously deferred this as "needs render testing" — but the frontend already has full
+  render-test infra (`@testing-library/react` + jsdom + existing `.test.tsx` render tests), so it's
+  verifiable here. Added `jest-axe` + `@types/jest-axe` (devDeps) and a first a11y test
+  (`ButtonSelector.a11y.test.tsx`) that renders the component and asserts **zero axe-core violations**
+  (layout-dependent rules like color-contrast are "incomplete" under jsdom, so the gate is stable).
+  Verified: the a11y test passes, core tsc clean, **full FE suite 185 files / 3952 tests green**, coverage
+  14.65/78.27/46.31 (above thresholds). The reusable pattern + a dedicated CI a11y gate remain.
+
 **Not yet done — and an honest statement of why:**
 - **Environment-blocked here (need a CI/Docker box):** release provenance + signing (E3), CI workflow
   consolidation (H2/H3), Docker/Tauri/multi-OS/AUR packaging, and *only the CI wiring* of the license
@@ -632,6 +643,10 @@ Each item: **What → Why → Evidence → Effort (S/M/L) → Risk**.
   convert, OCR, sign) — bridges the gap between unit tests and Cucumber e2e. *Effort:* M. *Risk:* low.
 - **A4. Accessibility tests** (axe-core / jest-axe) — 399 aria/role usages, zero a11y assertions.
   Wire into CI as a regression gate. *Effort:* M. *Risk:* low.
+  ⏳ **Foundation DONE (Wave 35)**: `jest-axe` (+ `@types/jest-axe`) added; first automated a11y assertion
+  (`ButtonSelector.a11y.test.tsx`) runs axe-core against the rendered component on the existing jsdom
+  infra (0 violations). The pattern is reusable per-component; broadening coverage + a dedicated CI gate
+  remain.
 - **A5. Unified coverage reporting** across Java (JaCoCo) + TS (v8) + Python (pytest-cov),
   surfaced as a single PR comment. *Effort:* M. *Risk:* low.
   ✅ **DONE (Wave 34)**: root `task coverage` runs all three tiers' coverage (JaCoCo + Vitest v8 +
