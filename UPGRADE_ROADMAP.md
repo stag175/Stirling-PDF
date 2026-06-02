@@ -696,6 +696,18 @@ from a decorative ~13% floor to **real, enforced, ratcheted** per-module gates. 
   eslint `--max-warnings=0` clean on all 99 files, full FE suite 209 files / 4048 tests green** — type-only,
   behaviour-preserving. (Other layers already enforce `@typescript-eslint/no-explicit-any: error`.)
 
+### Wave 158 — B4 frontend coverage: convert endpoint registry cross-consistency (frontend; verified; pushed)
+
+- **B4 coverage (frontend, cross-registry consistency)**: added `convertConstants.test.ts` (5 tests) guarding the
+  hand-maintained, mutually-referencing convert registries in `constants/convertConstants.ts`. Pinned:
+  `CONVERSION_ENDPOINTS` (id→URL) and `ENDPOINT_NAMES` (id→public name) share the **same internal endpoint id
+  set** (divergence desyncs URL lookup from name lookup); every `CONVERSION_ENDPOINTS` value is a
+  `/api/v1/convert/…` path; public endpoint names are unique; **every endpoint referenced by
+  `EXTENSION_TO_ENDPOINT` (ext→ext→name, ~50 entries) is a known public endpoint name** — a dangling reference
+  here would 404 a conversion at runtime (the test reports the offending `from->to => endpoint` if any); and
+  every source extension has ≥1 target. Verified empirically (all green) — confirms no current dangling/desync.
+  Verified: **core `tsc` 0 errors, `eslint --max-warnings=0` clean, `vitest` 5/5 green**.
+
 ### Wave 157 — B4 frontend coverage: split-method guard + registry completeness (frontend; verified; pushed)
 
 - **B4 coverage (frontend)**: added `splitConstants.test.ts` (14 tests) for the untested `isSplitMethod` type
