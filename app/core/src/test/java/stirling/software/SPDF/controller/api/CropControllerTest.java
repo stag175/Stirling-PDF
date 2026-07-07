@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -332,8 +331,6 @@ class CropControllerTest {
     @DisplayName("Content Bounds Detection")
     class ContentBoundsDetectionTests {
 
-        private Method detectContentBoundsMethod;
-
         private static BufferedImage createWhiteImage(int width, int height) {
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             for (int x = 0; x < width; x++) {
@@ -372,20 +369,12 @@ class CropControllerTest {
             }
         }
 
-        @BeforeEach
-        void setUp() throws NoSuchMethodException {
-            detectContentBoundsMethod =
-                    CropController.class.getDeclaredMethod(
-                            "detectContentBounds", BufferedImage.class);
-            detectContentBoundsMethod.setAccessible(true);
-        }
-
         @Test
         @DisplayName("Should detect full image bounds for all white image")
         void shouldDetectFullBoundsForWhiteImage() throws Exception {
             BufferedImage whiteImage = createWhiteImage(100, 100);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, whiteImage);
+            int[] bounds = CropController.detectContentBounds(whiteImage);
 
             assertThat(bounds).containsExactly(0, 0, 99, 99);
         }
@@ -396,7 +385,7 @@ class CropControllerTest {
             BufferedImage image = createWhiteImage(100, 100);
             drawBlackRectangle(image, 25, 25, 75, 75);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, image);
+            int[] bounds = CropController.detectContentBounds(image);
 
             assertThat(bounds).containsExactly(25, 25, 74, 74);
         }
@@ -410,7 +399,7 @@ class CropControllerTest {
             image.setRGB(0, 99, 0x000000);
             image.setRGB(99, 99, 0x000000);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, image);
+            int[] bounds = CropController.detectContentBounds(image);
 
             assertThat(bounds).containsExactly(0, 0, 99, 99);
         }
@@ -423,7 +412,7 @@ class CropControllerTest {
             image.setRGB(90, 90, 0xF0F0F0);
             drawBlackRectangle(image, 30, 30, 70, 70);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, image);
+            int[] bounds = CropController.detectContentBounds(image);
 
             assertThat(bounds).containsExactly(10, 9, 90, 89);
         }
@@ -434,7 +423,7 @@ class CropControllerTest {
             BufferedImage image = createImageFilledWith(50, 50, 0xF0F0F0);
             drawDarkerRectangle(image, 20, 20, 30, 30, 0xC0C0C0);
 
-            int[] bounds = (int[]) detectContentBoundsMethod.invoke(null, image);
+            int[] bounds = CropController.detectContentBounds(image);
 
             assertThat(bounds).containsExactly(0, 0, 49, 49);
         }
@@ -444,40 +433,32 @@ class CropControllerTest {
     @DisplayName("White Pixel Detection")
     class WhitePixelDetectionTests {
 
-        private Method isWhiteMethod;
-
-        @BeforeEach
-        void setUp() throws NoSuchMethodException {
-            isWhiteMethod = CropController.class.getDeclaredMethod("isWhite", int.class, int.class);
-            isWhiteMethod.setAccessible(true);
-        }
-
         @Test
         @DisplayName("Should identify pure white pixels")
         void shouldIdentifyWhitePixels() throws Exception {
-            assertThat((Boolean) isWhiteMethod.invoke(null, 0xFFFFFFFF, 250)).isTrue();
-            assertThat((Boolean) isWhiteMethod.invoke(null, 0xFFF0F0F0, 240)).isTrue();
+            assertThat(CropController.isWhite(0xFFFFFFFF, 250)).isTrue();
+            assertThat(CropController.isWhite(0xFFF0F0F0, 240)).isTrue();
         }
 
         @Test
         @DisplayName("Should identify black pixels as non-white")
         void shouldIdentifyBlackPixels() throws Exception {
-            assertThat((Boolean) isWhiteMethod.invoke(null, 0xFF000000, 250)).isFalse();
-            assertThat((Boolean) isWhiteMethod.invoke(null, 0xFF101010, 250)).isFalse();
+            assertThat(CropController.isWhite(0xFF000000, 250)).isFalse();
+            assertThat(CropController.isWhite(0xFF101010, 250)).isFalse();
         }
 
         @ParameterizedTest
         @ValueSource(ints = {0xFFFFFFFF, 0xFFFAFAFA, 0xFFF5F5F5})
         @DisplayName("Should identify various white shades")
         void shouldIdentifyVariousWhiteShades(int pixelColor) throws Exception {
-            assertThat((Boolean) isWhiteMethod.invoke(null, pixelColor, 240)).isTrue();
+            assertThat(CropController.isWhite(pixelColor, 240)).isTrue();
         }
 
         @ParameterizedTest
         @ValueSource(ints = {0xFF000000, 0xFF101010, 0xFF808080})
         @DisplayName("Should identify various non-white shades")
         void shouldIdentifyNonWhiteShades(int pixelColor) throws Exception {
-            assertThat((Boolean) isWhiteMethod.invoke(null, pixelColor, 250)).isFalse();
+            assertThat(CropController.isWhite(pixelColor, 250)).isFalse();
         }
     }
 
@@ -485,33 +466,20 @@ class CropControllerTest {
     @DisplayName("CropBounds Conversion")
     class CropBoundsTests {
 
-        private Class<?> cropBoundsClass;
-        private Method fromPixelsMethod;
-
-        @BeforeEach
-        void setUp() throws ClassNotFoundException, NoSuchMethodException {
-            cropBoundsClass =
-                    Class.forName(
-                            "stirling.software.SPDF.controller.api.CropController$CropBounds");
-            fromPixelsMethod =
-                    cropBoundsClass.getDeclaredMethod(
-                            "fromPixels", int[].class, float.class, float.class);
-            fromPixelsMethod.setAccessible(true);
-        }
-
         @Test
         @DisplayName("Should convert pixel bounds to PDF coordinates correctly")
-        void shouldConvertPixelBoundsToPdfCoordinates() throws Exception {
+        void shouldConvertPixelBoundsToPdfCoordinates() {
             int[] pixelBounds = {10, 20, 110, 120};
             float scaleX = 0.5f;
             float scaleY = 0.5f;
 
-            Object bounds = fromPixelsMethod.invoke(null, pixelBounds, scaleX, scaleY);
+            CropController.CropBounds bounds =
+                    CropController.CropBounds.fromPixels(pixelBounds, scaleX, scaleY);
 
-            assertThat(getFloatField(bounds, "x")).isCloseTo(5.0f, within(0.01f));
-            assertThat(getFloatField(bounds, "y")).isCloseTo(10.0f, within(0.01f));
-            assertThat(getFloatField(bounds, "width")).isCloseTo(50.0f, within(0.01f));
-            assertThat(getFloatField(bounds, "height")).isCloseTo(50.0f, within(0.01f));
+            assertThat(bounds.x()).isCloseTo(5.0f, within(0.01f));
+            assertThat(bounds.y()).isCloseTo(10.0f, within(0.01f));
+            assertThat(bounds.width()).isCloseTo(50.0f, within(0.01f));
+            assertThat(bounds.height()).isCloseTo(50.0f, within(0.01f));
         }
 
         @ParameterizedTest
@@ -522,14 +490,15 @@ class CropControllerTest {
         })
         @DisplayName("Should handle various scale factors")
         void shouldHandleVariousScaleFactors(
-                int x1, int y1, int x2, int y2, float scaleX, float scaleY) throws Exception {
+                int x1, int y1, int x2, int y2, float scaleX, float scaleY) {
             int[] pixelBounds = {x1, y1, x2, y2};
 
-            Object bounds = fromPixelsMethod.invoke(null, pixelBounds, scaleX, scaleY);
+            CropController.CropBounds bounds =
+                    CropController.CropBounds.fromPixels(pixelBounds, scaleX, scaleY);
 
             assertThat(bounds).isNotNull();
-            assertThat(getFloatField(bounds, "width")).isGreaterThan(0);
-            assertThat(getFloatField(bounds, "height")).isGreaterThan(0);
+            assertThat(bounds.width()).isGreaterThan(0);
+            assertThat(bounds.height()).isGreaterThan(0);
         }
 
         @Test
@@ -537,16 +506,10 @@ class CropControllerTest {
         void shouldThrowExceptionForInvalidArray() {
             int[] invalidBounds = {10, 20, 30};
 
-            assertThatThrownBy(() -> fromPixelsMethod.invoke(null, invalidBounds, 1.0f, 1.0f))
-                    .isInstanceOf(Exception.class)
-                    .hasCauseInstanceOf(IllegalArgumentException.class)
-                    .cause()
+            assertThatThrownBy(
+                            () -> CropController.CropBounds.fromPixels(invalidBounds, 1.0f, 1.0f))
+                    .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("pixelBounds array must contain exactly 4 elements");
-        }
-
-        private float getFloatField(Object obj, String fieldName) throws Exception {
-            Method getter = cropBoundsClass.getDeclaredMethod(fieldName);
-            return (Float) getter.invoke(obj);
         }
     }
 

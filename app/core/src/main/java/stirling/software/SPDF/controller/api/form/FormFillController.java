@@ -68,7 +68,8 @@ public class FormFillController {
         return WebResponseUtils.pdfDocToWebResponse(document, baseName + ".pdf", tempFileManager);
     }
 
-    private static String buildBaseName(MultipartFile file, String suffix) {
+    // Package-private (not private) so tests can call it directly instead of via reflection.
+    static String buildBaseName(MultipartFile file, String suffix) {
         String original = Filenames.toSimpleFileName(file.getOriginalFilename());
         if (original == null || original.isBlank()) {
             original = "document";
@@ -87,7 +88,9 @@ public class FormFillController {
         }
     }
 
-    private static String decodePart(byte[] payload) {
+    // Package-private (not private) so FormFillControllerDecodePartTest can pin the null/empty
+    // guards and the UTF-8 decoding.
+    static String decodePart(byte[] payload) {
         if (payload == null || payload.length == 0) {
             return null;
         }

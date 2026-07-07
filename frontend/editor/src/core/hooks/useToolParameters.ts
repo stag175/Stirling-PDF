@@ -26,7 +26,7 @@ export function useToolParameters(
 export function useToolParameter<T = any>(
   toolName: string,
   paramName: string,
-  definition: any,
+  definition: unknown,
 ): [T, (value: T) => void] {
   const [allParams, updateParams] = useToolParameters(toolName, {
     [paramName]: definition,

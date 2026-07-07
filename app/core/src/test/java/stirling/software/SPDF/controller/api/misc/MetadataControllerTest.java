@@ -49,24 +49,26 @@ class MetadataControllerTest {
     }
 
     @Test
-    void testCheckUndefined_returnsNullForUndefined() throws Exception {
-        var method = MetadataController.class.getDeclaredMethod("checkUndefined", String.class);
-        method.setAccessible(true);
-        assertNull(method.invoke(metadataController, "undefined"));
+    void testCheckUndefined_returnsNullForUndefined() {
+        assertNull(metadataController.checkUndefined("undefined"));
     }
 
     @Test
-    void testCheckUndefined_returnsValueForNonUndefined() throws Exception {
-        var method = MetadataController.class.getDeclaredMethod("checkUndefined", String.class);
-        method.setAccessible(true);
-        assertEquals("hello", method.invoke(metadataController, "hello"));
+    void testCheckUndefined_returnsValueForNonUndefined() {
+        assertEquals("hello", metadataController.checkUndefined("hello"));
     }
 
     @Test
-    void testCheckUndefined_returnsNullForNull() throws Exception {
-        var method = MetadataController.class.getDeclaredMethod("checkUndefined", String.class);
-        method.setAccessible(true);
-        assertNull(method.invoke(metadataController, (String) null));
+    void testCheckUndefined_returnsNullForNull() {
+        assertNull(metadataController.checkUndefined(null));
+    }
+
+    @Test
+    void testCheckUndefined_passesThroughEmptyWhitespaceAndDifferentCase() {
+        // only the exact lowercase string "undefined" is nulled; everything else passes through
+        assertEquals("", metadataController.checkUndefined(""));
+        assertEquals("   ", metadataController.checkUndefined("   "));
+        assertEquals("Undefined", metadataController.checkUndefined("Undefined"));
     }
 
     @Test

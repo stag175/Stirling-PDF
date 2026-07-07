@@ -1,8 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import type { FileId } from "@app/types/file";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { FileDocIcon } from "@app/components/shared/FileDocIcon";
 import { getFileDocVariant } from "@app/components/shared/filePreview/getFileTypeIcon";
 import { useLazyThumbnail } from "@app/hooks/useLazyThumbnail";
@@ -217,13 +216,17 @@ export function FileItem({
           type="button"
           aria-label={isViewedInViewer ? "Close viewer" : "Open in viewer"}
         >
-          <VisibilityOutlinedIcon
+          <LocalIcon
+            icon="visibility-rounded"
             className="file-sidebar-eye-open"
-            sx={{ fontSize: "1.1rem" }}
+            width="1.1rem"
+            height="1.1rem"
           />
-          <VisibilityOffOutlinedIcon
+          <LocalIcon
+            icon="visibility-off-rounded"
             className="file-sidebar-eye-closed"
-            sx={{ fontSize: "1.1rem" }}
+            width="1.1rem"
+            height="1.1rem"
           />
         </button>
       </div>

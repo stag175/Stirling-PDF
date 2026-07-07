@@ -118,6 +118,19 @@ tasks:
       - task: frontend:test
       - task: engine:test
 
+  coverage:
+    desc: "Unified coverage (A5): backend JaCoCo + frontend Vitest v8 + engine pytest-cov"
+    cmds:
+      # Each tier runs its own coverage + enforces its gate (per-module JaCoCo floors / Vitest
+      # thresholds / pytest-cov fail_under). Reports are written per tier:
+      #   backend : app/{common,stirling-pdf,proprietary}/build/reports/jacoco/test/html/index.html
+      #   frontend: frontend/editor/coverage/index.html
+      #   engine  : engine/coverage.xml  (+ terminal summary)
+      - task: backend:test
+      - task: frontend:test:coverage
+      - task: engine:test
+      - cmd: 'echo "Coverage reports written. backend=app/*/build/reports/jacoco/test/html frontend=frontend/editor/coverage engine=engine/coverage.xml"'
+
   # ============================================================
   # Lint & Format
   # ============================================================

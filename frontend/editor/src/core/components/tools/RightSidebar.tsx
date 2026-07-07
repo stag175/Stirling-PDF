@@ -20,9 +20,7 @@ import type { SubcategoryGroup } from "@app/hooks/useToolSections";
 import { ToolIcon } from "@app/components/shared/ToolIcon";
 import { Tooltip as AppTooltip } from "@app/components/shared/Tooltip";
 import { withViewTransition } from "@app/utils/viewTransition";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import CloseIcon from "@mui/icons-material/Close";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { ToolId } from "@app/types/toolId";
 import type { ToolRegistryEntry } from "@app/data/toolsTaxonomy";
 import {
@@ -202,7 +200,11 @@ export default function RightSidebar() {
               onClick={handleExpand}
               aria-label={t("toolPanel.expand", "Expand panel")}
             >
-              <ChevronLeftIcon sx={{ fontSize: "1.1rem" }} />
+              <LocalIcon
+                icon="chevron-left-rounded"
+                width="1.1rem"
+                height="1.1rem"
+              />
             </ActionIcon>
             <AgentsCollapsedButton onExpand={handleExpand} />
           </div>
@@ -299,7 +301,11 @@ export default function RightSidebar() {
                 }
                 className="tool-panel__expand-btn"
               >
-                <CloseIcon sx={{ fontSize: "1.1rem" }} />
+                <LocalIcon
+                  icon="close-rounded"
+                  width="1.1rem"
+                  height="1.1rem"
+                />
               </ActionIcon>
             ) : (
               <ActionIcon
@@ -310,7 +316,11 @@ export default function RightSidebar() {
                 aria-label={t("toolPanel.collapse", "Collapse panel")}
                 className="tool-panel__expand-btn"
               >
-                <ChevronRightIcon sx={{ fontSize: "1.1rem" }} />
+                <LocalIcon
+                  icon="chevron-right-rounded"
+                  width="1.1rem"
+                  height="1.1rem"
+                />
               </ActionIcon>
             )}
           </div>

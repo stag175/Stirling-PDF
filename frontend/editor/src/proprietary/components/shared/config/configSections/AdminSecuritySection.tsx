@@ -25,45 +25,11 @@ import { SettingsStickyFooter } from "@app/components/shared/config/SettingsStic
 import apiClient from "@app/services/apiClient";
 import { useLoginRequired } from "@app/hooks/useLoginRequired";
 import LoginRequiredBanner from "@app/components/shared/config/LoginRequiredBanner";
-
-interface SecuritySettingsData {
-  enableLogin?: boolean;
-  loginMethod?: string;
-  loginAttemptCount?: number;
-  loginResetTimeMinutes?: number;
-  xFrameOptions?: string;
-  jwt?: {
-    persistence?: boolean;
-    enableKeyRotation?: boolean;
-    enableKeyCleanup?: boolean;
-    tokenExpiryMinutes?: number;
-    desktopTokenExpiryMinutes?: number;
-    allowedClockSkewSeconds?: number;
-    refreshGraceMinutes?: number;
-    secureCookie?: boolean;
-  };
-  audit?: {
-    enabled?: boolean;
-    level?: number;
-    retentionDays?: number;
-    captureFileHash?: boolean;
-    capturePdfAuthor?: boolean;
-    captureOperationResults?: boolean;
-  };
-  html?: {
-    urlSecurity?: {
-      enabled?: boolean;
-      level?: string;
-      allowedDomains?: string[];
-      blockedDomains?: string[];
-      internalTlds?: string[];
-      blockPrivateNetworks?: boolean;
-      blockLocalhost?: boolean;
-      blockLinkLocal?: boolean;
-      blockCloudMetadata?: boolean;
-    };
-  };
-}
+import {
+  buildSecuritySettingsSaveDelta,
+  combineSecurityFetchData,
+  type SecuritySettingsLike,
+} from "@app/components/shared/config/configSections/adminSecuritySectionUtils";
 
 export default function AdminSecuritySection() {
   const { t } = useTranslation();
@@ -83,10 +49,10 @@ export default function AdminSecuritySection() {
     fetchSettings,
     saveSettings,
     isFieldPending,
-  } = useAdminSettings<SecuritySettingsData>({
+  } = useAdminSettings<SecuritySettingsLike>({
     sectionName: "security",
     fetchTransformer: async (): Promise<
-      SecuritySettingsData & { _pending?: Record<string, unknown> }
+      SecuritySettingsLike & { _pending?: Record<string, unknown> }
     > => {
       const [securityResponse, premiumResponse, systemResponse] =
         await Promise.all([
@@ -104,113 +70,20 @@ export default function AdminSecuritySection() {
       console.log("Premium:", JSON.parse(JSON.stringify(premiumData)));
       console.log("System:", JSON.parse(JSON.stringify(systemData)));
 
-      const { _pending: securityPending, ...securityActive } = securityData;
-      const { _pending: premiumPending, ...premiumActive } = premiumData;
-      const { _pending: systemPending, ...systemActive } = systemData;
-
       console.log("[AdminSecuritySection] Extracted pending blocks:", {
-        securityPending: JSON.parse(JSON.stringify(securityPending || {})),
-        premiumPending: JSON.parse(JSON.stringify(premiumPending || {})),
-        systemPending: JSON.parse(JSON.stringify(systemPending || {})),
+        securityPending: JSON.parse(
+          JSON.stringify(securityData._pending || {}),
+        ),
+        premiumPending: JSON.parse(JSON.stringify(premiumData._pending || {})),
+        systemPending: JSON.parse(JSON.stringify(systemData._pending || {})),
       });
 
-      const combined: SecuritySettingsData & {
-        _pending?: Record<string, unknown>;
-      } = {
-        ...securityActive,
-      };
-
-      // Only add audit if it exists (don't create defaults)
-      if (premiumActive.enterpriseFeatures?.audit) {
-        combined.audit = premiumActive.enterpriseFeatures.audit;
-      }
-
-      // Only add html if it exists (don't create defaults)
-      if (systemActive.html) {
-        combined.html = systemActive.html;
-      }
-
-      // Merge all _pending blocks
-      const mergedPending: Record<string, unknown> = {};
-      if (securityPending) {
-        Object.assign(mergedPending, securityPending);
-      }
-      if (premiumPending?.enterpriseFeatures?.audit) {
-        mergedPending.audit = premiumPending.enterpriseFeatures.audit;
-      }
-      if (systemPending?.html) {
-        mergedPending.html = systemPending.html;
-      }
-
-      if (Object.keys(mergedPending).length > 0) {
-        combined._pending = mergedPending;
-      }
-
-      return combined;
+      return combineSecurityFetchData(securityData, premiumData, systemData);
     },
-    saveTransformer: (settings: SecuritySettingsData) => {
-      const { audit, html, ...securitySettings } = settings;
-
-      const deltaSettings: Record<string, unknown> = {
-        // Security settings
-        "security.enableLogin": securitySettings.enableLogin,
-        "security.loginMethod": securitySettings.loginMethod,
-        "security.loginAttemptCount": securitySettings.loginAttemptCount,
-        "security.loginResetTimeMinutes":
-          securitySettings.loginResetTimeMinutes,
-        "security.xFrameOptions": securitySettings.xFrameOptions,
-        // JWT settings
-        "security.jwt.persistence": securitySettings.jwt?.persistence,
-        "security.jwt.enableKeyRotation":
-          securitySettings.jwt?.enableKeyRotation,
-        "security.jwt.enableKeyCleanup": securitySettings.jwt?.enableKeyCleanup,
-        "security.jwt.tokenExpiryMinutes":
-          securitySettings.jwt?.tokenExpiryMinutes,
-        "security.jwt.desktopTokenExpiryMinutes":
-          securitySettings.jwt?.desktopTokenExpiryMinutes,
-        "security.jwt.allowedClockSkewSeconds":
-          securitySettings.jwt?.allowedClockSkewSeconds,
-        "security.jwt.refreshGraceMinutes":
-          securitySettings.jwt?.refreshGraceMinutes,
-        "security.jwt.secureCookie": securitySettings.jwt?.secureCookie,
-        // Premium audit settings
-        "premium.enterpriseFeatures.audit.enabled": audit?.enabled,
-        "premium.enterpriseFeatures.audit.level": audit?.level,
-        "premium.enterpriseFeatures.audit.retentionDays": audit?.retentionDays,
-        "premium.enterpriseFeatures.audit.captureFileHash":
-          audit?.captureFileHash,
-        "premium.enterpriseFeatures.audit.capturePdfAuthor":
-          audit?.capturePdfAuthor,
-        "premium.enterpriseFeatures.audit.captureOperationResults":
-          audit?.captureOperationResults,
-      };
-
-      // System HTML settings
-      if (html?.urlSecurity) {
-        deltaSettings["system.html.urlSecurity.enabled"] =
-          html.urlSecurity.enabled;
-        deltaSettings["system.html.urlSecurity.level"] = html.urlSecurity.level;
-        deltaSettings["system.html.urlSecurity.allowedDomains"] =
-          html.urlSecurity.allowedDomains;
-        deltaSettings["system.html.urlSecurity.blockedDomains"] =
-          html.urlSecurity.blockedDomains;
-        deltaSettings["system.html.urlSecurity.internalTlds"] =
-          html.urlSecurity.internalTlds;
-        deltaSettings["system.html.urlSecurity.blockPrivateNetworks"] =
-          html.urlSecurity.blockPrivateNetworks;
-        deltaSettings["system.html.urlSecurity.blockLocalhost"] =
-          html.urlSecurity.blockLocalhost;
-        deltaSettings["system.html.urlSecurity.blockLinkLocal"] =
-          html.urlSecurity.blockLinkLocal;
-        deltaSettings["system.html.urlSecurity.blockCloudMetadata"] =
-          html.urlSecurity.blockCloudMetadata;
-      }
-
-      return {
-        sectionData: {},
-        deltaSettings,
-      };
-    },
+    saveTransformer: (settings: SecuritySettingsLike) => ({
+      sectionData: {},
+      deltaSettings: buildSecuritySettingsSaveDelta(settings),
+    }),
   });
 
   const { isDirty, resetToSnapshot, markSaved } = useSettingsDirty(

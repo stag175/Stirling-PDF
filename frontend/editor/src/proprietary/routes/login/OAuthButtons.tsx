@@ -113,7 +113,7 @@ export default function OAuthButtons({
             >
               <img
                 src={`${BASE_PATH}/Login/${p.file}`}
-                alt={p.label}
+                alt=""
                 className="oauth-icon-small"
               />
             </Button>
@@ -140,7 +140,7 @@ export default function OAuthButtons({
             >
               <img
                 src={`${BASE_PATH}/Login/${p.file}`}
-                alt={p.label}
+                alt=""
                 className="oauth-icon-medium"
               />
             </Button>
@@ -177,7 +177,7 @@ export default function OAuthButtons({
               <span className="oauth-icon-wrapper">
                 <img
                   src={`${BASE_PATH}/Login/${p.file}`}
-                  alt={p.label}
+                  alt=""
                   className="oauth-icon-tiny"
                 />
               </span>

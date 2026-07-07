@@ -1,8 +1,8 @@
 import React from "react";
 import { Trans } from "react-i18next";
 import { Button } from "@mantine/core";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import i18n from "@app/i18n";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { SlideConfig } from "@app/types/types";
 import { UNIFIED_CIRCLE_CONFIG } from "@app/components/onboarding/slides/unifiedBackgroundConfig";
 import styles from "@app/components/onboarding/InitialOnboardingModal/InitialOnboardingModal.module.css";
@@ -44,7 +44,9 @@ export default function AnalyticsChoiceSlide({
                 "_blank",
               )
             }
-            rightSection={<OpenInNewIcon style={{ fontSize: 16 }} />}
+            rightSection={
+              <LocalIcon icon="open-in-new-rounded" width={16} height={16} />
+            }
           >
             {i18n.t("analytics.learnMore", "Learn more about our analytics")}
           </Button>

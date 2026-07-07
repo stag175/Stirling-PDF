@@ -3,8 +3,24 @@
 from __future__ import annotations
 
 import json
+import logging
 
 from pydantic import BaseModel
+
+from stirling.context import current_request_id
+
+
+class RequestIdLogFilter(logging.Filter):
+    """Inject the current request correlation id into every log record (roadmap G2).
+
+    Attached to the engine's log handler so ``%(request_id)s`` in the formatter always resolves —
+    to the active :data:`~stirling.context.current_request_id` during a request, or ``"-"`` outside
+    one (startup, background tasks). Always returns ``True`` (never filters records out).
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.request_id = current_request_id.get() or "-"
+        return True
 
 
 class Pretty:

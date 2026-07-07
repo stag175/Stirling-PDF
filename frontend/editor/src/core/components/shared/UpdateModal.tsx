@@ -20,12 +20,7 @@ import {
   MachineInfo,
 } from "@app/services/updateService";
 import { Z_INDEX_OVER_CONFIG_MODAL } from "@app/styles/zIndex";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import DownloadIcon from "@mui/icons-material/Download";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface UpdateModalProps {
   opened: boolean;
@@ -191,9 +186,11 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
             }}
           >
             <Group gap="xs" wrap="nowrap" align="flex-start">
-              <InfoOutlinedIcon
+              <LocalIcon
+                icon="info-rounded"
+                width={18}
+                height={18}
                 style={{
-                  fontSize: 18,
                   color: "var(--mantine-color-blue-filled)",
                   marginTop: 2,
                 }}
@@ -219,9 +216,11 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
             }}
           >
             <Group gap="xs" wrap="nowrap" align="flex-start">
-              <WarningAmberIcon
+              <LocalIcon
+                icon="warning-rounded"
+                width={18}
+                height={18}
                 style={{
-                  fontSize: 18,
                   color: "var(--mantine-color-orange-filled)",
                   marginTop: 2,
                 }}
@@ -279,7 +278,11 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
                         variant="light"
                         size="xs"
                         rightSection={
-                          <OpenInNewIcon style={{ fontSize: 14 }} />
+                          <LocalIcon
+                            icon="open-in-new-rounded"
+                            width={14}
+                            height={14}
+                          />
                         }
                       >
                         {t("update.viewGuide", "View Guide")}
@@ -370,22 +373,30 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
                           size="xs"
                           onClick={(e) => e.stopPropagation()}
                           rightSection={
-                            <OpenInNewIcon style={{ fontSize: 14 }} />
+                            <LocalIcon
+                              icon="open-in-new-rounded"
+                              width={14}
+                              height={14}
+                            />
                           }
                         >
                           {t("update.releaseNotes", "Release Notes")}
                         </Button>
                         {isExpanded ? (
-                          <ExpandLessIcon
+                          <LocalIcon
+                            icon="expand-less-rounded"
+                            width={20}
+                            height={20}
                             style={{
-                              fontSize: 20,
                               color: "var(--mantine-color-gray-6)",
                             }}
                           />
                         ) : (
-                          <ExpandMoreIcon
+                          <LocalIcon
+                            icon="expand-more-rounded"
+                            width={20}
+                            height={20}
                             style={{
-                              fontSize: 20,
                               color: "var(--mantine-color-gray-6)",
                             }}
                           />
@@ -431,9 +442,11 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
                                 wrap="nowrap"
                                 mb="xs"
                               >
-                                <WarningAmberIcon
+                                <LocalIcon
+                                  icon="warning-rounded"
+                                  width={16}
+                                  height={16}
                                   style={{
-                                    fontSize: 16,
                                     color: "var(--mantine-color-orange-filled)",
                                     marginTop: 2,
                                   }}
@@ -463,7 +476,11 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
                                   color="orange"
                                   size="xs"
                                   rightSection={
-                                    <OpenInNewIcon style={{ fontSize: 14 }} />
+                                    <LocalIcon
+                                      icon="open-in-new-rounded"
+                                      width={14}
+                                      height={14}
+                                    />
                                   }
                                 >
                                   {t(
@@ -495,7 +512,9 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
             component="a"
             href="https://github.com/Stirling-Tools/Stirling-PDF/releases"
             target="_blank"
-            rightSection={<OpenInNewIcon style={{ fontSize: 16 }} />}
+            rightSection={
+              <LocalIcon icon="open-in-new-rounded" width={16} height={16} />
+            }
           >
             {t("update.viewAllReleases", "View All Releases")}
           </Button>
@@ -505,7 +524,9 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
               href={downloadUrl}
               target="_blank"
               color="green"
-              leftSection={<DownloadIcon style={{ fontSize: 16 }} />}
+              leftSection={
+                <LocalIcon icon="download-rounded" width={16} height={16} />
+              }
             >
               {t("update.downloadLatest", "Download Latest")}
             </Button>

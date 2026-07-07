@@ -135,8 +135,9 @@ public class InvertFullColorStrategy extends ReplaceAndInvertColorStrategy {
         }
     }
 
-    // Method to invert image colors
-    private void invertImageColors(BufferedImage image) {
+    // Method to invert image colors.
+    // Package-private (not private) so InvertFullColorStrategyTest can call it directly.
+    void invertImageColors(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
         int[] pixels = new int[width * height];
@@ -155,8 +156,9 @@ public class InvertFullColorStrategy extends ReplaceAndInvertColorStrategy {
         image.setRGB(0, 0, width, height, pixels, 0, width);
     }
 
-    // Helper method to convert BufferedImage to InputStream
-    private File convertToBufferedImageTpFile(BufferedImage image) throws IOException {
+    // Helper method to convert BufferedImage to InputStream.
+    // Package-private (not private) so InvertFullColorStrategyTest can call it directly.
+    File convertToBufferedImageTpFile(BufferedImage image) throws IOException {
         // Use Files.createTempFile instead of File.createTempFile for better security and modern
         // Java practices
         Path tempPath = Files.createTempFile("image", ".png");

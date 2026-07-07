@@ -9,22 +9,13 @@ import {
   Menu,
   Badge,
 } from "@mantine/core";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DownloadIcon from "@mui/icons-material/Download";
-import HistoryIcon from "@mui/icons-material/History";
-import RestoreIcon from "@mui/icons-material/Restore";
-import UnarchiveIcon from "@mui/icons-material/Unarchive";
-import CloseIcon from "@mui/icons-material/Close";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import CloudDoneIcon from "@mui/icons-material/CloudDone";
-import LinkIcon from "@mui/icons-material/Link";
 import { useTranslation } from "react-i18next";
 import { getFileSize, getFileDate } from "@app/utils/fileUtils";
 import { FileId, StirlingFileStub } from "@app/types/fileContext";
 import { useFileManagerContext } from "@app/contexts/FileManagerContext";
 import { zipFileService } from "@app/services/zipFileService";
 import ToolChain from "@app/components/shared/ToolChain";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { Z_INDEX_OVER_FILE_MANAGER_MODAL } from "@app/styles/zIndex";
 import { PrivateContent } from "@app/components/shared/PrivateContent";
 import { useFileManagement } from "@app/contexts/FileContext";
@@ -150,7 +141,7 @@ const FileListItem: React.FC<FileListItemProps> = ({
         shareLinks?: Array<{ token?: string }>;
       }>(`/api/v1/storage/files/${file.remoteStorageId}`, {
         suppressErrorToast: true,
-      } as any);
+      });
       const links = response.data?.shareLinks ?? [];
       const token = links[links.length - 1]?.token;
       if (!token) {
@@ -274,7 +265,9 @@ const FileListItem: React.FC<FileListItemProps> = ({
                   size="xs"
                   variant="light"
                   color="yellow"
-                  leftSection={<CloudUploadIcon style={{ fontSize: 12 }} />}
+                  leftSection={
+                    <LocalIcon icon="upload-rounded" width={12} height={12} />
+                  }
                 >
                   {t("fileManager.changesNotUploaded", "Changes not uploaded")}
                 </Badge>
@@ -283,7 +276,13 @@ const FileListItem: React.FC<FileListItemProps> = ({
                   size="xs"
                   variant="light"
                   color="teal"
-                  leftSection={<CloudDoneIcon style={{ fontSize: 12 }} />}
+                  leftSection={
+                    <LocalIcon
+                      icon="cloud-done-rounded"
+                      width={12}
+                      height={12}
+                    />
+                  }
                 >
                   {t("fileManager.synced", "Synced")}
                 </Badge>
@@ -334,7 +333,7 @@ const FileListItem: React.FC<FileListItemProps> = ({
                   pointerEvents: shouldShowHovered ? "auto" : "none",
                 }}
               >
-                <MoreVertIcon style={{ fontSize: 20 }} />
+                <LocalIcon icon="more-vert" width={20} height={20} />
               </ActionIcon>
             </Menu.Target>
 
@@ -343,7 +342,9 @@ const FileListItem: React.FC<FileListItemProps> = ({
               {isActive && (
                 <>
                   <Menu.Item
-                    leftSection={<CloseIcon style={{ fontSize: 16 }} />}
+                    leftSection={
+                      <LocalIcon icon="close-rounded" width={16} height={16} />
+                    }
                     onClick={(e) => {
                       e.stopPropagation();
                       removeFiles([file.id]);
@@ -357,7 +358,9 @@ const FileListItem: React.FC<FileListItemProps> = ({
 
               {canDownloadFile && (
                 <Menu.Item
-                  leftSection={<DownloadIcon style={{ fontSize: 16 }} />}
+                  leftSection={
+                    <LocalIcon icon="download-rounded" width={16} height={16} />
+                  }
                   onClick={(e) => {
                     e.stopPropagation();
                     onDownload?.();
@@ -369,7 +372,9 @@ const FileListItem: React.FC<FileListItemProps> = ({
 
               {canUpload && (
                 <Menu.Item
-                  leftSection={<CloudUploadIcon style={{ fontSize: 16 }} />}
+                  leftSection={
+                    <LocalIcon icon="upload-rounded" width={16} height={16} />
+                  }
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowUploadModal(true);
@@ -383,7 +388,9 @@ const FileListItem: React.FC<FileListItemProps> = ({
 
               {canShare && (
                 <Menu.Item
-                  leftSection={<LinkIcon style={{ fontSize: 16 }} />}
+                  leftSection={
+                    <LocalIcon icon="link-rounded" width={16} height={16} />
+                  }
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowShareModal(true);
@@ -395,7 +402,9 @@ const FileListItem: React.FC<FileListItemProps> = ({
 
               {canCopyShareLink && (
                 <Menu.Item
-                  leftSection={<LinkIcon style={{ fontSize: 16 }} />}
+                  leftSection={
+                    <LocalIcon icon="link-rounded" width={16} height={16} />
+                  }
                   onClick={(e) => {
                     e.stopPropagation();
                     void handleCopyShareLink();
@@ -407,7 +416,9 @@ const FileListItem: React.FC<FileListItemProps> = ({
 
               {canManageShare && (
                 <Menu.Item
-                  leftSection={<LinkIcon style={{ fontSize: 16 }} />}
+                  leftSection={
+                    <LocalIcon icon="link-rounded" width={16} height={16} />
+                  }
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowShareManageModal(true);
@@ -421,7 +432,13 @@ const FileListItem: React.FC<FileListItemProps> = ({
               {isLatestVersion && hasVersionHistory && (
                 <>
                   <Menu.Item
-                    leftSection={<HistoryIcon style={{ fontSize: 16 }} />}
+                    leftSection={
+                      <LocalIcon
+                        icon="history-rounded"
+                        width={16}
+                        height={16}
+                      />
+                    }
                     onClick={(e) => {
                       e.stopPropagation();
                       onToggleExpansion(leafFileId);
@@ -439,7 +456,13 @@ const FileListItem: React.FC<FileListItemProps> = ({
               {isHistoryFile && (
                 <>
                   <Menu.Item
-                    leftSection={<RestoreIcon style={{ fontSize: 16 }} />}
+                    leftSection={
+                      <LocalIcon
+                        icon="history-rounded"
+                        width={16}
+                        height={16}
+                      />
+                    }
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
@@ -454,7 +477,13 @@ const FileListItem: React.FC<FileListItemProps> = ({
               {isZipFile && !isHistoryFile && !isCBZ && !isCBR && (
                 <>
                   <Menu.Item
-                    leftSection={<UnarchiveIcon style={{ fontSize: 16 }} />}
+                    leftSection={
+                      <LocalIcon
+                        icon="unarchive-rounded"
+                        width={16}
+                        height={16}
+                      />
+                    }
                     onClick={(e) => {
                       e.stopPropagation();
                       onUnzipFile(file);
@@ -467,7 +496,9 @@ const FileListItem: React.FC<FileListItemProps> = ({
               )}
 
               <Menu.Item
-                leftSection={<DeleteIcon style={{ fontSize: 16 }} />}
+                leftSection={
+                  <LocalIcon icon="delete-rounded" width={16} height={16} />
+                }
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemove();

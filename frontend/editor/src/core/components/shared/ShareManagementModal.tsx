@@ -13,12 +13,9 @@ import {
   ScrollArea,
   Select,
 } from "@mantine/core";
-import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
-import DeleteIcon from "@mui/icons-material/Delete";
-import HistoryIcon from "@mui/icons-material/History";
-import LinkIcon from "@mui/icons-material/Link";
 import { useTranslation } from "react-i18next";
 
+import LocalIcon from "@app/components/shared/LocalIcon";
 import apiClient from "@app/services/apiClient";
 import { absoluteWithBasePath } from "@app/constants/app";
 import { alert } from "@app/components/toast";
@@ -216,7 +213,7 @@ const ShareManagementModal: React.FC<ShareManagementModalProps> = ({
           durationMs: 2500,
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to create share link:", error);
       setErrorMessage(
         t(
@@ -558,7 +555,9 @@ const ShareManagementModal: React.FC<ShareManagementModalProps> = ({
                   )}
                   <Group justify="flex-end" gap="sm">
                     <Button
-                      leftSection={<LinkIcon style={{ fontSize: 18 }} />}
+                      leftSection={
+                        <LocalIcon icon="link-rounded" width={18} height={18} />
+                      }
                       onClick={() => createShareLink()}
                       loading={isLoading}
                     >
@@ -729,7 +728,11 @@ const ShareManagementModal: React.FC<ShareManagementModalProps> = ({
                               size="xs"
                               color="red"
                               leftSection={
-                                <DeleteIcon style={{ fontSize: 16 }} />
+                                <LocalIcon
+                                  icon="delete-rounded"
+                                  width={16}
+                                  height={16}
+                                />
                               }
                               onClick={() =>
                                 setConfirmRemoveUser(user.username)
@@ -790,8 +793,10 @@ const ShareManagementModal: React.FC<ShareManagementModalProps> = ({
                                 variant="subtle"
                                 size="xs"
                                 leftSection={
-                                  <ContentCopyRoundedIcon
-                                    style={{ fontSize: 16 }}
+                                  <LocalIcon
+                                    icon="content-copy-rounded"
+                                    width={16}
+                                    height={16}
                                   />
                                 }
                                 onClick={() => handleCopyLink(link.token)}
@@ -851,7 +856,11 @@ const ShareManagementModal: React.FC<ShareManagementModalProps> = ({
                                 variant={isSelected ? "filled" : "light"}
                                 size="xs"
                                 leftSection={
-                                  <HistoryIcon style={{ fontSize: 16 }} />
+                                  <LocalIcon
+                                    icon="history-rounded"
+                                    width={16}
+                                    height={16}
+                                  />
                                 }
                                 onClick={() =>
                                   setSelectedActivityToken((prev) =>
@@ -896,7 +905,11 @@ const ShareManagementModal: React.FC<ShareManagementModalProps> = ({
                                   size="xs"
                                   color="red"
                                   leftSection={
-                                    <DeleteIcon style={{ fontSize: 16 }} />
+                                    <LocalIcon
+                                      icon="delete-rounded"
+                                      width={16}
+                                      height={16}
+                                    />
                                   }
                                   onClick={() =>
                                     setConfirmRevokeToken(link.token)

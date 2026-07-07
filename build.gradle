@@ -9,6 +9,8 @@ plugins {
     id "com.github.jk1.dependency-license-report" version "3.1.2"
     //id "nebula.lint" version "19.0.3"
     id "org.sonarqube" version "7.2.3.7755"
+    // CycloneDX SBOM generation (roadmap E2). Run `./gradlew cyclonedxBom` -> build/reports/.
+    id "org.cyclonedx.bom" version "3.1.0"
 }
 
 import com.github.jk1.license.render.*
@@ -149,6 +151,23 @@ tasks.register('writeVersion', WriteProperties) {
     property 'version', project.provider { project.version.toString() }
 }
 
+// Per-module JaCoCo coverage floors (regression ratchet). Modules not listed use the
+// conservative default that even the un-buildable `saas` module can meet, so the global
+// CI build is never broken. `app/common` (`:common`) is a well-tested utility module
+// measured at 41.3% line / 43.8% instruction / 37.0% branch, so its floor is pinned just
+// below actual — turning a decorative 13% gate into a meaningful one for this module.
+// Raise as coverage improves; never lower. (Per-module is the correct path here because a
+// single global floor is held down by `saas`, which can't be built without Stripe/Supabase.)
+def defaultCoverageFloor = [INSTRUCTION: 0.14, LINE: 0.13, BRANCH: 0.09]
+def perModuleCoverageFloors = [
+    // Pinned just below each module's measured full-suite coverage (JDK 25, green).
+    // `:saas` is intentionally absent — it can't be built/tested here (Stripe/Supabase),
+    // so it stays at defaultCoverageFloor and the CI build is never broken.
+    ':common'      : [INSTRUCTION: 0.42, LINE: 0.40, BRANCH: 0.35], // measured 43.83/41.30/36.96
+    ':stirling-pdf': [INSTRUCTION: 0.39, LINE: 0.38, BRANCH: 0.32], // measured 39.20/38.42/32.13
+    ':proprietary' : [INSTRUCTION: 0.46, LINE: 0.45, BRANCH: 0.43], // measured 46.84/45.97/43.13
+]
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'java-library'
@@ -259,6 +278,8 @@ subprojects {
         // options.compilerArgs.add("-Xlint:unchecked")
     }
 
+    def coverageFloor = perModuleCoverageFloors[project.path] ?: defaultCoverageFloor
+
     def jacocoReport = tasks.named("jacocoTestReport")
 
     tasks.withType(Test).configureEach {
@@ -291,9 +312,9 @@ subprojects {
             }
 
             def thresholds = [
-                    LINE       : 0.13,
-                    INSTRUCTION: 0.14,
-                    BRANCH     : 0.09
+                    LINE       : coverageFloor.LINE,
+                    INSTRUCTION: coverageFloor.INSTRUCTION,
+                    BRANCH     : coverageFloor.BRANCH
             ]
 
             def types = ["LINE", "INSTRUCTION", "BRANCH"]
@@ -378,19 +399,19 @@ subprojects {
                 limit {
                     counter = 'INSTRUCTION'
                     value = 'COVEREDRATIO'
-                    minimum = 0.14
+                    minimum = coverageFloor.INSTRUCTION
                 }
                 // wie viele Quellcode-Zeilen abgedeckt
                 limit {
                     counter = 'LINE'
                     value = 'COVEREDRATIO'
-                    minimum = 0.13
+                    minimum = coverageFloor.LINE
                 }
                 // Verzweigungen (if/else, switch) abgedeckt; misst Logik-Abdeckung
                 limit {
                     counter = 'BRANCH'
                     value = 'COVEREDRATIO'
-                    minimum = 0.09
+                    minimum = coverageFloor.BRANCH
                 }
             }
         }

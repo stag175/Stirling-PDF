@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -394,14 +393,8 @@ class EditTableOfContentsControllerTest {
         when(mockDocument.getPage(2)).thenReturn(mockPage1); // 0-indexed
 
         // When
-        Method createOutlineItemMethod =
-                EditTableOfContentsController.class.getDeclaredMethod(
-                        "createOutlineItem", PDDocument.class, BookmarkItem.class);
-        createOutlineItemMethod.setAccessible(true);
         PDOutlineItem result =
-                (PDOutlineItem)
-                        createOutlineItemMethod.invoke(
-                                editTableOfContentsController, mockDocument, bookmark);
+                editTableOfContentsController.createOutlineItem(mockDocument, bookmark);
 
         // Then
         assertNotNull(result);

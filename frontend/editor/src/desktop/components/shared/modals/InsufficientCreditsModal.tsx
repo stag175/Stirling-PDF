@@ -4,7 +4,7 @@ import { useSaaSBilling } from "@app/contexts/SaasBillingContext";
 import { useSaaSTeam } from "@app/contexts/SaaSTeamContext";
 import { Z_INDEX_OVER_CONFIG_MODAL } from "@app/styles/zIndex";
 import { useSaaSCheckout } from "@app/contexts/SaaSCheckoutContext";
-import WarningIcon from "@mui/icons-material/Warning";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useEnableMeteredBilling } from "@app/hooks/useEnableMeteredBilling";
 
 interface InsufficientCreditsModalProps {
@@ -51,8 +51,11 @@ export function InsufficientCreditsModal({
       zIndex={Z_INDEX_OVER_CONFIG_MODAL}
       title={
         <Group gap="xs">
-          <WarningIcon
-            sx={{ fontSize: 24, color: "var(--mantine-color-orange-6)" }}
+          <LocalIcon
+            icon="warning-rounded"
+            width={24}
+            height={24}
+            style={{ color: "var(--mantine-color-orange-6)" }}
           />
           <Text size="lg" fw={500}>
             {t("credits.insufficient.title", "Insufficient Credits")}
@@ -61,7 +64,12 @@ export function InsufficientCreditsModal({
       }
     >
       <Stack gap="md">
-        <Alert color="orange" icon={<WarningIcon />}>
+        <Alert
+          color="orange"
+          icon={
+            <LocalIcon icon="warning-rounded" width="1.5rem" height="1.5rem" />
+          }
+        >
           <Text size="sm">
             {requiredCredits
               ? t(

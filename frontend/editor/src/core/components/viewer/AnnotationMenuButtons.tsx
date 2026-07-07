@@ -8,11 +8,6 @@ import {
 } from "@mantine/core";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import CommentIcon from "@mui/icons-material/ChatBubbleOutlineRounded";
-import AddCommentIcon from "@mui/icons-material/AddCommentOutlined";
-import OpenInNewIcon from "@mui/icons-material/OpenInNewRounded";
 import LocalIcon from "@app/components/shared/LocalIcon";
 import type { FirstLinkTarget } from "@app/components/viewer/useAnnotationMenuHandlers";
 
@@ -50,7 +45,7 @@ export function DeleteButton({ onDelete }: { onDelete: () => void }) {
           },
         }}
       >
-        <DeleteIcon style={{ fontSize: 18 }} />
+        <LocalIcon icon="delete-rounded" width={18} height={18} />
       </ActionIcon>
     </Tooltip>
   );
@@ -67,7 +62,7 @@ export function EditTextButton({ onEdit }: { onEdit: () => void }) {
         onClick={onEdit}
         styles={commonButtonStyles}
       >
-        <EditIcon style={{ fontSize: 18 }} />
+        <LocalIcon icon="edit-rounded" width={18} height={18} />
       </ActionIcon>
     </Tooltip>
   );
@@ -100,7 +95,7 @@ export function AttachCommentButton({
         onClick={isInSidebar ? onView : onAdd}
         styles={isInSidebar ? undefined : commonButtonStyles}
       >
-        <AddCommentIcon style={{ fontSize: 18 }} />
+        <LocalIcon icon="add-comment-rounded" width={18} height={18} />
       </ActionIcon>
     </Tooltip>
   );
@@ -128,7 +123,7 @@ export function CommentButton({ hasContent, onClick }: CommentButtonProps) {
         onClick={onClick}
         styles={commonButtonStyles}
       >
-        <CommentIcon style={{ fontSize: 18 }} />
+        <LocalIcon icon="chat-bubble-outline-rounded" width={18} height={18} />
       </ActionIcon>
     </Tooltip>
   );
@@ -159,7 +154,7 @@ export function LinkButton({
           onClick={onGoToLink}
           styles={commonButtonStyles}
         >
-          <OpenInNewIcon style={{ fontSize: 18 }} />
+          <LocalIcon icon="open-in-new-rounded" width={18} height={18} />
         </ActionIcon>
       </Tooltip>
     );

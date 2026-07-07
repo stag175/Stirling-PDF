@@ -361,7 +361,8 @@ public class StampController {
      *   <li>@uuid - Short unique identifier (8 characters)
      * </ul>
      */
-    private String processStampText(
+    // Package-private (not private) so tests call it directly instead of via reflection.
+    String processStampText(
             String stampText,
             int currentPageNumber,
             int totalPages,
@@ -436,7 +437,7 @@ public class StampController {
         return result;
     }
 
-    private String processCustomDateFormat(String format, LocalDateTime now) {
+    String processCustomDateFormat(String format, LocalDateTime now) {
         if (format == null || format.length() > MAX_DATE_FORMAT_LENGTH) {
             return "[invalid format: too long]";
         }
@@ -525,7 +526,7 @@ public class StampController {
         };
     }
 
-    private float calculateImagePositionY(
+    float calculateImagePositionY(
             PDRectangle pageSize, int position, float imageHeight, float margin) {
         float lly = pageSize.getLowerLeftY();
         float pageHeight = pageSize.getHeight();

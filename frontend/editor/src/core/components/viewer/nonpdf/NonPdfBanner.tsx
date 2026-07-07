@@ -1,6 +1,6 @@
 import { Button } from "@mantine/core";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { useTranslation } from "react-i18next";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface NonPdfBannerProps {
   onConvertToPdf?: () => void;
@@ -16,7 +16,13 @@ export function NonPdfBanner({ onConvertToPdf }: NonPdfBannerProps) {
       size="xs"
       variant="light"
       color="orange"
-      leftSection={<PictureAsPdfIcon style={{ fontSize: "0.9rem" }} />}
+      leftSection={
+        <LocalIcon
+          icon="picture-as-pdf-rounded"
+          width="0.9rem"
+          height="0.9rem"
+        />
+      }
       onClick={onConvertToPdf}
       style={{
         position: "absolute",

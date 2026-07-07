@@ -13,7 +13,6 @@ import java.security.Security;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -108,24 +107,22 @@ public class TimestampController {
         Set<String> allowedUrls = new HashSet<>(ALLOWED_TSA_PRESET_URLS);
         if (tsConfig.getDefaultTsaUrl() != null
                 && !tsConfig.getDefaultTsaUrl().isBlank()
-                && isValidTsaUrlProtocol(tsConfig.getDefaultTsaUrl())) {
+                && TsaUrlUtils.isValidTsaUrlProtocol(tsConfig.getDefaultTsaUrl())) {
             allowedUrls.add(tsConfig.getDefaultTsaUrl());
         }
         List<String> customUrls = tsConfig.getCustomTsaUrls();
         if (customUrls != null) {
             customUrls.stream()
-                    .filter(u -> u != null && !u.isBlank() && isValidTsaUrlProtocol(u))
+                    .filter(u -> u != null && !u.isBlank() && TsaUrlUtils.isValidTsaUrlProtocol(u))
                     .forEach(allowedUrls::add);
         }
 
         // Normalize for case-insensitive comparison (TASK-12)
         Set<String> normalizedAllowed =
-                allowedUrls.stream()
-                        .map(TimestampController::normalizeTsaUrl)
-                        .collect(Collectors.toSet());
+                allowedUrls.stream().map(TsaUrlUtils::normalizeTsaUrl).collect(Collectors.toSet());
 
         // Validate TSA URL against allowed set to prevent SSRF
-        if (!normalizedAllowed.contains(normalizeTsaUrl(tsaUrl))) {
+        if (!normalizedAllowed.contains(TsaUrlUtils.normalizeTsaUrl(tsaUrl))) {
             throw new IllegalArgumentException(
                     "TSA URL is not in the allowed list. Contact your administrator to add it"
                             + " via settings.yml (security.timestamp.customTsaUrls).");
@@ -243,24 +240,6 @@ public class TimestampController {
             if (connection != null) {
                 connection.disconnect();
             }
-        }
-    }
-
-    private static boolean isValidTsaUrlProtocol(String url) {
-        String lower = url.toLowerCase(Locale.ROOT);
-        return lower.startsWith("http://") || lower.startsWith("https://");
-    }
-
-    private static String normalizeTsaUrl(String url) {
-        try {
-            URI uri = URI.create(url.trim());
-            String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
-            String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
-            int port = uri.getPort();
-            String path = uri.getPath() == null ? "" : uri.getPath();
-            return scheme + "://" + host + (port == -1 ? "" : ":" + port) + path;
-        } catch (Exception e) {
-            return url.toLowerCase(Locale.ROOT);
         }
     }
 

@@ -179,10 +179,8 @@ class Type3LibraryStrategyTest {
         return props;
     }
 
-    private void invokePostConstruct(Type3LibraryStrategy strategy) throws Exception {
-        java.lang.reflect.Method method =
-                Type3LibraryStrategy.class.getDeclaredMethod("loadConfiguration");
-        method.setAccessible(true);
-        method.invoke(strategy);
+    private void invokePostConstruct(Type3LibraryStrategy strategy) {
+        // Direct compile-checked call to the package-private helper (was reflection).
+        strategy.loadConfiguration();
     }
 }

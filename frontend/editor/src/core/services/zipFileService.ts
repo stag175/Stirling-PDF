@@ -13,7 +13,8 @@ interface CompressedObject {
 }
 
 const getData = (zipEntry: JSZipObject): CompressedObject | undefined => {
-  return (zipEntry as any)._data as CompressedObject;
+  // `_data` is a JSZip internal not exposed on the public `JSZipObject` type.
+  return (zipEntry as { _data?: CompressedObject })._data;
 };
 
 export interface ZipExtractionResult {
@@ -236,7 +237,9 @@ export class ZipFileService {
 
           // Create File object
           const extractedFile = new File(
-            [content as any],
+            // JSZip types the result as `Uint8Array<ArrayBufferLike>`; the
+            // runtime buffer is a plain (non-shared) ArrayBuffer.
+            [content as Uint8Array<ArrayBuffer>],
             this.sanitizeFilename(filename),
             {
               type: "application/pdf",

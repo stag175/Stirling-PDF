@@ -1,4 +1,8 @@
 import { getPdfiumModule, saveRawDocument } from "@app/services/pdfiumService";
+import {
+  calculateImagePlacement,
+  resolvePageDimensions,
+} from "@app/utils/imageToPdfLayoutUtils";
 import { copyRgbaToBgraHeap } from "@app/utils/pdfiumBitmapUtils";
 
 export interface ImageToPdfOptions {
@@ -6,12 +10,6 @@ export interface ImageToPdfOptions {
   pageFormat?: "keep" | "A4" | "letter";
   stretchToFit?: boolean;
 }
-
-// Standard page sizes in PDF points (72 dpi)
-const PAGE_SIZES = {
-  A4: [595.276, 841.89] as [number, number],
-  Letter: [612, 792] as [number, number],
-};
 
 /**
  * Convert an image file to a PDF file using PDFium WASM.
@@ -45,55 +43,20 @@ export async function convertImageToPdf(
 
     const { rgba, width: imageWidth, height: imageHeight } = decoded;
 
-    // Determine page dimensions
-    let pageWidth: number;
-    let pageHeight: number;
-
-    if (pageFormat === "keep") {
-      pageWidth = imageWidth;
-      pageHeight = imageHeight;
-    } else if (pageFormat === "letter") {
-      [pageWidth, pageHeight] = PAGE_SIZES.Letter;
-    } else {
-      [pageWidth, pageHeight] = PAGE_SIZES.A4;
-    }
-
-    // Adjust orientation to match image
-    if (pageFormat !== "keep") {
-      const imageIsLandscape = imageWidth > imageHeight;
-      const pageIsLandscape = pageWidth > pageHeight;
-      if (imageIsLandscape !== pageIsLandscape) {
-        [pageWidth, pageHeight] = [pageHeight, pageWidth];
-      }
-    }
-
-    // Calculate image placement
-    let drawX: number;
-    let drawY: number;
-    let drawWidth: number;
-    let drawHeight: number;
-
-    if (stretchToFit || pageFormat === "keep") {
-      drawX = 0;
-      drawY = 0;
-      drawWidth = pageWidth;
-      drawHeight = pageHeight;
-    } else {
-      const imageAspectRatio = imageWidth / imageHeight;
-      const pageAspectRatio = pageWidth / pageHeight;
-
-      if (imageAspectRatio > pageAspectRatio) {
-        drawWidth = pageWidth;
-        drawHeight = pageWidth / imageAspectRatio;
-        drawX = 0;
-        drawY = (pageHeight - drawHeight) / 2;
-      } else {
-        drawHeight = pageHeight;
-        drawWidth = pageHeight * imageAspectRatio;
-        drawY = 0;
-        drawX = (pageWidth - drawWidth) / 2;
-      }
-    }
+    // Determine page dimensions (size + orientation) and image placement
+    const { pageWidth, pageHeight } = resolvePageDimensions(
+      pageFormat,
+      imageWidth,
+      imageHeight,
+    );
+    const { drawX, drawY, drawWidth, drawHeight } = calculateImagePlacement(
+      pageWidth,
+      pageHeight,
+      imageWidth,
+      imageHeight,
+      stretchToFit,
+      pageFormat,
+    );
 
     // Create new PDF document
     const docPtr = m.FPDF_CreateNewDocument();

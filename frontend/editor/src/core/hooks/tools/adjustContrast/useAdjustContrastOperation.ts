@@ -15,6 +15,9 @@ import { getPdfiumModule, saveRawDocument } from "@app/services/pdfiumService";
 import { copyRgbaToBgraHeap } from "@app/utils/pdfiumBitmapUtils";
 
 async function renderPdfPageToCanvas(
+  // Typed as `any` because the PDF.js `page.render(...)` call below predates the
+  // current `RenderParameters` (which now requires a `canvas`); typing the proxy
+  // precisely surfaces that latent mismatch — out of scope for the cast cleanup.
   pdf: any,
   pageNumber: number,
   scale: number,

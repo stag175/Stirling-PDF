@@ -5,11 +5,22 @@
 import { FileId } from "@app/types/file";
 import {
   FileContextAction,
+  FileContextState,
   StirlingFileStub,
-  ProcessedFilePage,
 } from "@app/types/fileContext";
+import { collectRevocableBlobUrls } from "@app/contexts/file/fileLifecycleUtils";
 
 const DEBUG = process.env.NODE_ENV === "development";
+
+/**
+ * The cleanup helpers only read `state.files.byId`. Using a read-only,
+ * structurally-minimal ref (instead of the full `FileContextState` ref) keeps
+ * the parameter covariant so both the real context ref and lightweight test
+ * stubs satisfy it without `any`.
+ */
+type FileStateRef = {
+  readonly current: { files: Pick<FileContextState["files"], "byId"> };
+};
 
 /**
  * Resource tracking and cleanup utilities
@@ -39,7 +50,7 @@ export class FileLifecycleManager {
    */
   cleanupFile = (
     fileId: FileId,
-    stateRef?: React.MutableRefObject<any>,
+    stateRef?: FileStateRef,
   ): void => {
     // Use comprehensive cleanup (same as removeFiles)
     this.cleanupAllResourcesForFile(fileId, stateRef);
@@ -77,7 +88,7 @@ export class FileLifecycleManager {
   scheduleCleanup = (
     fileId: FileId,
     delay: number = 30000,
-    stateRef?: React.MutableRefObject<any>,
+    stateRef?: FileStateRef,
   ): void => {
     // Cancel existing timer
     const existingTimer = this.cleanupTimers.get(fileId);
@@ -116,7 +127,7 @@ export class FileLifecycleManager {
    */
   removeFiles = (
     fileIds: FileId[],
-    stateRef?: React.MutableRefObject<any>,
+    stateRef?: FileStateRef,
   ): void => {
     fileIds.forEach((fileId) => {
       // Clean up all resources for this file
@@ -132,7 +143,7 @@ export class FileLifecycleManager {
    */
   private cleanupAllResourcesForFile = (
     fileId: FileId,
-    stateRef?: React.MutableRefObject<any>,
+    stateRef?: FileStateRef,
   ): void => {
     // Remove from files ref
     this.filesRef.current.delete(fileId);
@@ -145,38 +156,16 @@ export class FileLifecycleManager {
     }
     this.fileGenerations.delete(fileId);
 
-    // Clean up blob URLs from file record if we have access to state
+    // Clean up blob URLs from file record if we have access to state.
+    // The pure decision of *which* URLs to revoke lives in
+    // collectRevocableBlobUrls; the side-effecting revocation stays here.
     if (stateRef) {
       const record = stateRef.current.files.byId[fileId];
-      if (record) {
-        // Clean up thumbnail blob URLs
-        if (record.thumbnailUrl && record.thumbnailUrl.startsWith("blob:")) {
-          try {
-            URL.revokeObjectURL(record.thumbnailUrl);
-          } catch {
-            // Ignore revocation errors
-          }
-        }
-
-        if (record.blobUrl && record.blobUrl.startsWith("blob:")) {
-          try {
-            URL.revokeObjectURL(record.blobUrl);
-          } catch {
-            // Ignore revocation errors
-          }
-        }
-
-        // Clean up processed file thumbnails
-        if (record.processedFile?.pages) {
-          record.processedFile.pages.forEach((page: ProcessedFilePage) => {
-            if (page.thumbnail && page.thumbnail.startsWith("blob:")) {
-              try {
-                URL.revokeObjectURL(page.thumbnail);
-              } catch {
-                // Ignore revocation errors
-              }
-            }
-          });
+      for (const url of collectRevocableBlobUrls(record)) {
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          // Ignore revocation errors
         }
       }
     }
@@ -188,7 +177,7 @@ export class FileLifecycleManager {
   updateStirlingFileStub = (
     fileId: FileId,
     updates: Partial<StirlingFileStub>,
-    stateRef?: React.MutableRefObject<any>,
+    stateRef?: FileStateRef,
   ): void => {
     // Guard against updating removed files (race condition protection)
     if (!this.filesRef.current.has(fileId)) {

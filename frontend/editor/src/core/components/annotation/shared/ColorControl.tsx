@@ -8,7 +8,7 @@ import {
   Group,
 } from "@mantine/core";
 import { useState, useCallback, useEffect } from "react";
-import ColorizeIcon from "@mui/icons-material/Colorize";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 // safari and firefox do not support the eye dropper API, only edge, chrome and opera do.
 // the button is hidden in the UI if the API is not supported.
@@ -119,7 +119,7 @@ export function ColorControl({
                   onClick={handleEyeDropper}
                   style={{ color: "var(--text-primary)" }}
                 >
-                  <ColorizeIcon style={{ fontSize: 16 }} />
+                  <LocalIcon icon="colorize-rounded" width={16} height={16} />
                 </ActionIcon>
               </Tooltip>
             </Group>

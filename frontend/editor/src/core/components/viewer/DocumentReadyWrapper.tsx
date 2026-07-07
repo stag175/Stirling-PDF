@@ -14,7 +14,7 @@ export function DocumentReadyWrapper({
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isLoading || !plugin) return;
+    if (isLoading || !plugin) return undefined;
 
     const checkActiveDocument = async () => {
       await ready;
@@ -33,8 +33,13 @@ export function DocumentReadyWrapper({
     // Subscribe to document changes
     const docManagerApi = plugin.provides?.();
     if (docManagerApi?.onDocumentOpened) {
-      const unsubscribe = docManagerApi.onDocumentOpened((event: any) => {
-        const docId = event?.documentId || event?.id || event?.document?.id;
+      const unsubscribe = docManagerApi.onDocumentOpened((event) => {
+        const e = event as {
+          documentId?: string;
+          id?: string;
+          document?: { id?: string };
+        };
+        const docId = e?.documentId || e?.id || e?.document?.id;
         if (docId) {
           setActiveDocumentId(docId);
         }
@@ -46,6 +51,8 @@ export function DocumentReadyWrapper({
         }
       };
     }
+
+    return undefined;
   }, [plugin, isLoading, ready]);
 
   if (!activeDocumentId) {

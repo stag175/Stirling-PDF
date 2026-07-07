@@ -127,7 +127,7 @@ export const AppConfigProvider: React.FC<AppConfigProviderProps> = ({
             {
               suppressErrorToast: true,
               skipAuthRedirect: true,
-            } as any,
+            },
           );
           const data = response.data;
 
@@ -141,8 +141,12 @@ export const AppConfigProvider: React.FC<AppConfigProviderProps> = ({
           setLoading(false);
           onConfigLoadedRef.current?.(data);
           return; // Success - exit function
-        } catch (err: any) {
-          const status = err?.response?.status;
+        } catch (err: unknown) {
+          const axiosErr = (err ?? {}) as {
+            message?: string;
+            response?: { status?: number; data?: { message?: string } };
+          };
+          const status = axiosErr.response?.status;
 
           // On 401 (not authenticated), use default config with login enabled
           // This allows the app to work even without authentication
@@ -167,7 +171,7 @@ export const AppConfigProvider: React.FC<AppConfigProviderProps> = ({
           if (shouldRetry) {
             console.warn(
               `[AppConfig] Attempt ${attempt + 1} failed (status ${status || "network error"}):`,
-              err.message,
+              axiosErr.message,
               "- will retry...",
             );
             continue;
@@ -175,8 +179,8 @@ export const AppConfigProvider: React.FC<AppConfigProviderProps> = ({
 
           // Final attempt failed or non-retryable error (4xx)
           const errorMessage =
-            err?.response?.data?.message ||
-            err?.message ||
+            axiosErr.response?.data?.message ||
+            axiosErr.message ||
             "Unknown error occurred";
           setError(errorMessage);
           console.error(

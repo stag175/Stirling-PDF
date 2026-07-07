@@ -13,10 +13,7 @@ import { useState } from "react";
 import type { TrackedAnnotation } from "@embedpdf/plugin-annotation";
 import type { PdfAnnotationObject } from "@embedpdf/models";
 import type { AnnotationPatch } from "@app/components/viewer/viewerTypes";
-import TuneIcon from "@mui/icons-material/Tune";
-import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
-import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
-import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 export type PropertiesAnnotationType = "text" | "note" | "shape";
 
@@ -110,21 +107,33 @@ export function PropertiesPopover({
             onClick={() => onUpdate({ textAlign: 0 })}
             size="md"
           >
-            <FormatAlignLeftIcon style={{ fontSize: 18 }} />
+            <LocalIcon
+              icon="format-align-left-rounded"
+              width={18}
+              height={18}
+            />
           </ActionIcon>
           <ActionIcon
             variant={currentAlign === "center" ? "filled" : "default"}
             onClick={() => onUpdate({ textAlign: 1 })}
             size="md"
           >
-            <FormatAlignCenterIcon style={{ fontSize: 18 }} />
+            <LocalIcon
+              icon="format-align-center-rounded"
+              width={18}
+              height={18}
+            />
           </ActionIcon>
           <ActionIcon
             variant={currentAlign === "right" ? "filled" : "default"}
             onClick={() => onUpdate({ textAlign: 2 })}
             size="md"
           >
-            <FormatAlignRightIcon style={{ fontSize: 18 }} />
+            <LocalIcon
+              icon="format-align-right-rounded"
+              width={18}
+              height={18}
+            />
           </ActionIcon>
         </Group>
       </div>
@@ -220,7 +229,7 @@ export function PropertiesPopover({
               },
             }}
           >
-            <TuneIcon style={{ fontSize: 18 }} />
+            <LocalIcon icon="tune-rounded" width={18} height={18} />
           </ActionIcon>
         </Tooltip>
       </Popover.Target>

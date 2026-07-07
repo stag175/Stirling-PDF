@@ -8,8 +8,7 @@ import {
   Group,
   TextInput,
 } from "@mantine/core";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import SearchIcon from "@mui/icons-material/Search";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { Z_INDEX_AUTOMATE_DROPDOWN } from "@app/styles/zIndex";
 
 export interface DropdownItem {
@@ -151,9 +150,11 @@ const DropdownListWithFooter: React.FC<DropdownListWithFooterProps> = ({
             <Text size="sm" style={{ flex: 1 }}>
               {getDisplayText()}
             </Text>
-            <UnfoldMoreIcon
+            <LocalIcon
+              icon="unfold-more-rounded"
+              width="1rem"
+              height="1rem"
               style={{
-                fontSize: "1rem",
                 color:
                   "light-dark(var(--mantine-color-gray-5), var(--mantine-color-dark-2))",
               }}
@@ -187,7 +188,13 @@ const DropdownListWithFooter: React.FC<DropdownListWithFooterProps> = ({
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  leftSection={<SearchIcon style={{ fontSize: "1rem" }} />}
+                  leftSection={
+                    <LocalIcon
+                      icon="search-rounded"
+                      width="1rem"
+                      height="1rem"
+                    />
+                  }
                   size="sm"
                   style={{ width: "100%" }}
                 />

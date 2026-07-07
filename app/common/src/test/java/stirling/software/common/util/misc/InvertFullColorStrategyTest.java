@@ -7,8 +7,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 
 import javax.imageio.ImageIO;
@@ -75,8 +73,7 @@ class InvertFullColorStrategyTest {
     }
 
     @Test
-    void testInvertImageColors()
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void testInvertImageColors() {
         // Create a test image with known colors
         BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
         java.awt.Graphics graphics = image.getGraphics();
@@ -87,14 +84,8 @@ class InvertFullColorStrategyTest {
         // Get the color of a pixel before inversion
         Color originalColor = new Color(image.getRGB(5, 5), true);
 
-        // Access private method using reflection
-        Method invertMethodRef =
-                InvertFullColorStrategy.class.getDeclaredMethod(
-                        "invertImageColors", BufferedImage.class);
-        invertMethodRef.setAccessible(true);
-
-        // Invoke the private method
-        invertMethodRef.invoke(strategy, image);
+        // Package-private method: call directly (no reflection).
+        strategy.invertImageColors(image);
 
         // Get the color of the same pixel after inversion
         Color invertedColor = new Color(image.getRGB(5, 5), true);
@@ -115,22 +106,12 @@ class InvertFullColorStrategyTest {
     }
 
     @Test
-    void testConvertToBufferedImageTpFile()
-            throws NoSuchMethodException,
-                    InvocationTargetException,
-                    IllegalAccessException,
-                    IOException {
+    void testConvertToBufferedImageTpFile() throws IOException {
         // Create a test image
         BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
 
-        // Access private method using reflection
-        Method convertMethodRef =
-                InvertFullColorStrategy.class.getDeclaredMethod(
-                        "convertToBufferedImageTpFile", BufferedImage.class);
-        convertMethodRef.setAccessible(true);
-
-        // Invoke the private method
-        File result = (File) convertMethodRef.invoke(strategy, image);
+        // Package-private method: call directly (no reflection).
+        File result = strategy.convertToBufferedImageTpFile(image);
 
         try {
             // Assert that the file exists and is not empty

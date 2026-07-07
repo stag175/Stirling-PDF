@@ -82,6 +82,7 @@ export default function ManualRedactionControls({
       }, 50);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [
     isRedacting,
     isAnnotationMode,

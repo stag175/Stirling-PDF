@@ -8,7 +8,7 @@ import {
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import LineWeightIcon from "@mui/icons-material/LineWeight";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface WidthControlProps {
   value: number;
@@ -52,7 +52,7 @@ export function WidthControl({
               },
             }}
           >
-            <LineWeightIcon style={{ fontSize: 18 }} />
+            <LocalIcon icon="line-weight-rounded" width={18} height={18} />
           </ActionIcon>
         </Tooltip>
       </Popover.Target>

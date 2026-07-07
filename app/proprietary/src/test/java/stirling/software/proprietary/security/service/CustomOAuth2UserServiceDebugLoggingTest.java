@@ -119,8 +119,11 @@ class CustomOAuth2UserServiceDebugLoggingTest {
                 .contains("Provider registrationId : demarest")
                 .contains("Configured useAsUsername: email")
                 .contains("preferred_username")
-                .contains("upn = jdoe@demarest.com.br")
+                // D2: the upn claim KEY is shown, but its PII value is redacted to first-char+length.
+                .contains("upn = j***(len=20)")
                 .contains("<NULL — this is why login fails>");
+        // D2: the raw PII value must NOT appear anywhere in the dump.
+        assertThat(combined).doesNotContain("jdoe@demarest.com.br");
         // The hint must include 'preferred_username' (a valid UsernameAttribute value present
         // in the claims) and MUST NOT include 'upn' (not in the UsernameAttribute enum).
         String hintLine =

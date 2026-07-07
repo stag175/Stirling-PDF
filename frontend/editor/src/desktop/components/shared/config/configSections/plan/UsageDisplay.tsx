@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Text, Stack, Group, Progress, Alert } from "@mantine/core";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useTranslation } from "react-i18next";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import type { BillingStatus } from "@app/services/saasBillingService";
 import { BILLING_CONFIG, getFormattedOveragePrice } from "@app/config/billing";
 
@@ -85,7 +85,7 @@ export function UsageDisplay({ tier, usage }: UsageDisplayProps) {
             <Alert
               color="blue"
               variant="light"
-              icon={<InfoOutlinedIcon sx={{ fontSize: 16 }} />}
+              icon={<LocalIcon icon="info-rounded" width={16} height={16} />}
             >
               <Text size="xs">
                 {t("settings.planBilling.credits.overageInfo", {

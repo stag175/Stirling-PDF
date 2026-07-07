@@ -14,7 +14,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { ActionIcon, Divider } from "@mantine/core";
-import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useToolWorkflow } from "@app/contexts/ToolWorkflowContext";
 import {
   useNavigationState,
@@ -198,7 +198,11 @@ const ActiveToolButton: React.FC<ActiveToolButtonProps> = ({
                 >
                   <span className="iconContainer">
                     {isBackHover ? (
-                      <ArrowBackRoundedIcon sx={{ fontSize: "1.875rem" }} />
+                      <LocalIcon
+                        icon="arrow-back-rounded"
+                        width="1.875rem"
+                        height="1.875rem"
+                      />
                     ) : (
                       indicatorTool.icon
                     )}

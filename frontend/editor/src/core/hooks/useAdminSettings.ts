@@ -112,7 +112,10 @@ export function useAdminSettings<T = any>(
       setSaving(true);
 
       // Compute delta: only include fields that changed from original
-      const delta = computeDelta(originalSettings, settings);
+      const delta = computeDelta(
+        originalSettings as Record<string, unknown>,
+        settings as Record<string, unknown>,
+      );
       console.log(
         `[useAdminSettings:${sectionName}] Delta (changed fields):`,
         JSON.stringify(delta, null, 2),
@@ -134,7 +137,10 @@ export function useAdminSettings<T = any>(
           saveTransformer(originalSettings);
 
         // Save section data (with delta applied) - compare transformed vs transformed
-        const sectionDelta = computeDelta(originalSectionData, sectionData);
+        const sectionDelta = computeDelta(
+          originalSectionData as Record<string, unknown>,
+          sectionData as Record<string, unknown>,
+        );
         if (Object.keys(sectionDelta).length > 0) {
           await apiClient.put(
             `/api/v1/admin/settings/section/${sectionName}`,
@@ -224,8 +230,11 @@ export function useAdminSettings<T = any>(
  * Compute delta between original and current settings.
  * Returns only fields that have changed.
  */
-function computeDelta(original: any, current: any): any {
-  const delta: any = {};
+function computeDelta(
+  original: Record<string, unknown>,
+  current: Record<string, unknown>,
+): Record<string, unknown> {
+  const delta: Record<string, unknown> = {};
 
   for (const key in current) {
     if (!Object.prototype.hasOwnProperty.call(current, key)) continue;
@@ -258,8 +267,10 @@ function computeDelta(original: any, current: any): any {
 /**
  * Check if value is a plain object (not array, not null, not Date, etc.)
  */
-function isPlainObject(value: any): boolean {
+function isPlainObject(value: unknown): value is Record<string, unknown> {
   return (
-    value !== null && typeof value === "object" && value.constructor === Object
+    value !== null &&
+    typeof value === "object" &&
+    (value as { constructor?: unknown }).constructor === Object
   );
 }

@@ -26,15 +26,8 @@ import {
 } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { useTranslation } from "react-i18next";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import CloseIcon from "@mui/icons-material/Close";
-import MergeTypeIcon from "@mui/icons-material/MergeType";
-import CallSplitIcon from "@mui/icons-material/CallSplit";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import UploadFileIcon from "@mui/icons-material/UploadFileOutlined";
 import { Rnd } from "react-rnd";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useNavigationGuard } from "@app/contexts/NavigationContext";
 
 import { useFileContext } from "@app/contexts/FileContext";
@@ -48,57 +41,17 @@ import {
   getImageBounds,
   pageDimensions,
 } from "@app/tools/pdfTextEditor/pdfTextEditorUtils";
+import {
+  buildFontFamilyName,
+  buildFontLookupKeys,
+  getFontFormatHint,
+  getFontMimeType,
+  normalizeFontFormat,
+  normalizePageNumber,
+} from "@app/tools/pdfTextEditor/pdfTextEditorFontUtils";
 
 const MAX_RENDER_WIDTH = 820;
 const MIN_BOX_SIZE = 18;
-
-const normalizeFontFormat = (format?: string | null): string => {
-  if (!format) {
-    return "ttf";
-  }
-  const lower = format.toLowerCase();
-  if (lower.includes("woff2")) {
-    return "woff2";
-  }
-  if (lower.includes("woff")) {
-    return "woff";
-  }
-  if (lower.includes("otf")) {
-    return "otf";
-  }
-  if (lower.includes("cff")) {
-    return "otf";
-  }
-  return "ttf";
-};
-
-const getFontMimeType = (format: string): string => {
-  switch (format) {
-    case "woff2":
-      return "font/woff2";
-    case "woff":
-      return "font/woff";
-    case "otf":
-      return "font/otf";
-    default:
-      return "font/ttf";
-  }
-};
-
-const getFontFormatHint = (format: string): string | null => {
-  switch (format) {
-    case "woff2":
-      return "woff2";
-    case "woff":
-      return "woff";
-    case "otf":
-      return "opentype";
-    case "ttf":
-      return "truetype";
-    default:
-      return null;
-  }
-};
 
 const decodeBase64ToUint8Array = (value: string): Uint8Array => {
   const binary = window.atob(value);
@@ -107,15 +60,6 @@ const decodeBase64ToUint8Array = (value: string): Uint8Array => {
     bytes[index] = binary.charCodeAt(index);
   }
   return bytes;
-};
-
-const buildFontFamilyName = (font: PdfJsonFont): string => {
-  const preferred = (font.baseName ?? "").trim();
-  const identifier =
-    preferred.length > 0
-      ? preferred
-      : (font.uid ?? font.id ?? "font").toString();
-  return `pdf-font-${identifier.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 };
 
 const getCaretOffset = (element: HTMLElement): number => {
@@ -239,39 +183,6 @@ const toCssBounds = (
     width: scaledWidth,
     height: scaledHeight,
   };
-};
-
-const normalizePageNumber = (
-  pageIndex: number | null | undefined,
-): number | null => {
-  if (
-    pageIndex === null ||
-    pageIndex === undefined ||
-    Number.isNaN(pageIndex)
-  ) {
-    return null;
-  }
-  return pageIndex + 1;
-};
-
-const buildFontLookupKeys = (
-  fontId: string,
-  font: PdfJsonFont | null | undefined,
-  pageIndex: number | null | undefined,
-): string[] => {
-  const keys: string[] = [];
-  const pageNumber = normalizePageNumber(pageIndex);
-  if (pageNumber !== null) {
-    keys.push(`${pageNumber}:${fontId}`);
-  }
-  if (font?.uid) {
-    keys.push(font.uid);
-  }
-  if (font?.pageNumber !== null && font?.pageNumber !== undefined && font?.id) {
-    keys.push(`${font.pageNumber}:${font.id}`);
-  }
-  keys.push(fontId);
-  return Array.from(new Set(keys.filter((value) => value && value.length > 0)));
 };
 
 /**
@@ -1596,7 +1507,7 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
             event.preventDefault();
           }}
         >
-          <CloseIcon style={{ fontSize: 12 }} />
+          <LocalIcon icon="close-rounded" width={12} height={12} />
         </ActionIcon>
       )}
     </Box>
@@ -1644,7 +1555,13 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
     >
       {errorMessage && (
         <Alert
-          icon={<WarningAmberIcon fontSize="small" />}
+          icon={
+            <LocalIcon
+              icon="warning-rounded"
+              width="1.25rem"
+              height="1.25rem"
+            />
+          }
           color="red"
           radius="md"
           mb="md"
@@ -1682,8 +1599,11 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
             }}
           >
             <Stack align="center" gap="md" style={{ pointerEvents: "none" }}>
-              <UploadFileIcon
-                sx={{ fontSize: 48, color: "var(--mantine-color-blue-5)" }}
+              <LocalIcon
+                icon="upload-file-rounded"
+                width={48}
+                height={48}
+                style={{ color: "var(--mantine-color-blue-5)" }}
               />
               <Text size="lg" fw={600}>
                 {t("pdfTextEditor.empty.title", "No document loaded")}
@@ -1735,7 +1655,12 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
                   </Group>
                 )}
               </div>
-              <AutorenewIcon sx={{ fontSize: 36 }} className="animate-spin" />
+              <LocalIcon
+                icon="autorenew-rounded"
+                width={36}
+                height={36}
+                className="animate-spin"
+              />
             </Group>
             <Progress
               value={conversionProgress?.percent || 0}
@@ -1792,7 +1717,11 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
             onClose={handleDismissWelcomeBanner}
             title={
               <Group gap="xs">
-                <InfoOutlinedIcon fontSize="small" />
+                <LocalIcon
+                  icon="info-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
                 <Text fw={600}>
                   {t(
                     "pdfTextEditor.welcomeBanner.title",
@@ -2134,7 +2063,11 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
                               )}
                               onClick={handleMergeSelection}
                             >
-                              <MergeTypeIcon fontSize="small" />
+                              <LocalIcon
+                                icon="merge-type-rounded"
+                                width="1.25rem"
+                                height="1.25rem"
+                              />
                             </ActionIcon>
                           </Tooltip>
                         )}
@@ -2155,7 +2088,11 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
                               )}
                               onClick={handleUngroupSelection}
                             >
-                              <CallSplitIcon fontSize="small" />
+                              <LocalIcon
+                                icon="call-split-rounded"
+                                width="1.25rem"
+                                height="1.25rem"
+                              />
                             </ActionIcon>
                           </Tooltip>
                         )}
@@ -2177,7 +2114,11 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
                               onMouseDown={(event) => event.stopPropagation()}
                               onClick={(event) => event.stopPropagation()}
                             >
-                              <MoreVertIcon fontSize="small" />
+                              <LocalIcon
+                                icon="more-vert"
+                                width="1.25rem"
+                                height="1.25rem"
+                              />
                             </ActionIcon>
                           </Menu.Target>
                           <Menu.Dropdown>
@@ -2854,11 +2795,12 @@ const PdfTextEditorView = ({ data }: PdfTextEditorViewProps) => {
                                         }
                                       }
                                     } else if (
-                                      (document as any).caretPositionFromPoint
+                                      document.caretPositionFromPoint
                                     ) {
-                                      const pos = (
-                                        document as any
-                                      ).caretPositionFromPoint(clickX, clickY);
+                                      const pos = document.caretPositionFromPoint(
+                                        clickX,
+                                        clickY,
+                                      );
                                       if (pos) {
                                         const range = document.createRange();
                                         range.setStart(

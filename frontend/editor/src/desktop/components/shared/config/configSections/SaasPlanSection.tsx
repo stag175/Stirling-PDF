@@ -8,10 +8,8 @@ import {
   Text,
   Flex,
 } from "@mantine/core";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useTranslation } from "react-i18next";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useSaaSBilling } from "@app/contexts/SaasBillingContext";
 import { useSaaSTeam } from "@app/contexts/SaaSTeamContext";
 import { useSaaSPlans } from "@app/hooks/useSaaSPlans";
@@ -101,7 +99,7 @@ export function SaasPlanSection() {
         <Alert
           color="blue"
           variant="light"
-          icon={<ErrorOutlineIcon sx={{ fontSize: 16 }} />}
+          icon={<LocalIcon icon="error-rounded" width={16} height={16} />}
         >
           <Text size="sm">
             {t(
@@ -148,7 +146,7 @@ export function SaasPlanSection() {
         <Alert
           color="red"
           variant="light"
-          icon={<ErrorOutlineIcon sx={{ fontSize: 16 }} />}
+          icon={<LocalIcon icon="error-rounded" width={16} height={16} />}
           title={t(
             "settings.planBilling.errors.fetchFailed",
             "Unable to fetch billing data",
@@ -158,7 +156,9 @@ export function SaasPlanSection() {
             <Text size="sm">{error}</Text>
             <Button
               variant="light"
-              leftSection={<RefreshIcon sx={{ fontSize: 16 }} />}
+              leftSection={
+                <LocalIcon icon="refresh-rounded" width={16} height={16} />
+              }
               onClick={refreshBilling}
               size="xs"
             >
@@ -207,7 +207,9 @@ export function SaasPlanSection() {
           subscription?.currentPeriodEnd && (
             <Alert
               color="blue"
-              icon={<AccessTimeIcon sx={{ fontSize: 16 }} />}
+              icon={
+                <LocalIcon icon="schedule-rounded" width={16} height={16} />
+              }
               mt="md"
               mb="md"
               title={t("settings.planBilling.trial.title", "Free Trial Active")}

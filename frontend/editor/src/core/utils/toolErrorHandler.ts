@@ -4,15 +4,26 @@
 
 import { normalizeAxiosErrorData } from "@app/services/errorUtils";
 
+/** Minimal view of the axios-style error shape these helpers read from. */
+interface ToolErrorLike {
+  message?: unknown;
+  response?: {
+    status?: number;
+    statusText?: string;
+    data?: unknown;
+  };
+}
+
 /**
  * Default error extractor that follows the standard pattern
  */
-export const extractErrorMessage = (error: any): string => {
-  if (error.response?.data && typeof error.response.data === "string") {
-    return error.response.data;
+export const extractErrorMessage = (error: unknown): string => {
+  const err = (error ?? {}) as ToolErrorLike;
+  if (err.response?.data && typeof err.response.data === "string") {
+    return err.response.data;
   }
-  if (error.message) {
-    return error.message;
+  if (typeof err.message === "string" && err.message) {
+    return err.message;
   }
   return "There was an error processing your request.";
 };
@@ -23,12 +34,13 @@ export const extractErrorMessage = (error: any): string => {
  * @returns Error handler function that follows the standard pattern
  */
 export const createStandardErrorHandler = (fallbackMessage: string) => {
-  return (error: any): string => {
-    if (error.response?.data && typeof error.response.data === "string") {
-      return error.response.data;
+  return (error: unknown): string => {
+    const err = (error ?? {}) as ToolErrorLike;
+    if (err.response?.data && typeof err.response.data === "string") {
+      return err.response.data;
     }
-    if (error.message) {
-      return error.message;
+    if (typeof err.message === "string" && err.message) {
+      return err.message;
     }
     return fallbackMessage;
   };
@@ -39,13 +51,14 @@ export const createStandardErrorHandler = (fallbackMessage: string) => {
  * and marks them in the UI. Returns true if IDs were found and handled, false otherwise.
  */
 export const handle422Error = async (
-  error: any,
+  error: unknown,
   markFileError: (fileId: string) => void,
 ): Promise<boolean> => {
-  const status = error?.response?.status;
+  const err = (error ?? {}) as ToolErrorLike;
+  const status = err.response?.status;
   if (typeof status !== "number" || status !== 422) return false;
 
-  const payload = error?.response?.data;
+  const payload = err.response?.data;
   let parsed: unknown = payload;
 
   if (typeof payload === "string") {
@@ -98,11 +111,12 @@ export const handle422Error = async (
  * @returns Error message string
  */
 export const handlePasswordError = async (
-  error: any,
+  error: unknown,
   incorrectPasswordMessage: string,
   fallbackMessage: string,
 ): Promise<string> => {
-  const status = error?.response?.status;
+  const err = (error ?? {}) as ToolErrorLike;
+  const status = err.response?.status;
 
   // Handle specific error cases with user-friendly messages
   // Backend returns 400 with PdfPasswordException for incorrect/missing PDF passwords
@@ -110,7 +124,7 @@ export const handlePasswordError = async (
     return incorrectPasswordMessage;
   }
   if (status === 400) {
-    const data = error?.response?.data;
+    const data = err.response?.data;
     // ProblemDetail JSON has type "/errors/pdf-password", blob needs parsing
     const isPasswordError = await (async () => {
       if (data instanceof Blob) {
@@ -121,8 +135,8 @@ export const handlePasswordError = async (
           return false;
         }
       }
-      const type = data?.type ?? "";
-      return type.includes("pdf-password");
+      const type = (data as { type?: unknown })?.type ?? "";
+      return typeof type === "string" && type.includes("pdf-password");
     })();
     if (isPasswordError) {
       return incorrectPasswordMessage;
@@ -130,11 +144,11 @@ export const handlePasswordError = async (
   }
 
   // For other errors, try to extract the message
-  const normalizedData = await normalizeAxiosErrorData(error?.response?.data);
+  const normalizedData = await normalizeAxiosErrorData(err.response?.data);
   const errorWithNormalizedData = {
-    ...error,
+    ...err,
     response: {
-      ...error?.response,
+      ...err.response,
       data: normalizedData,
     },
   };

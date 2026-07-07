@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Modal, Stack, Group, Button, ActionIcon } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import CloseIcon from "@mui/icons-material/Close";
 import LocalIcon from "@app/components/shared/LocalIcon";
 import AnimatedSlideBackground from "@app/components/onboarding/slides/AnimatedSlideBackground";
 import OnboardingStepper from "@app/components/onboarding/OnboardingStepper";
@@ -122,7 +121,7 @@ export function DesktopOnboardingModal() {
               },
             }}
           >
-            <CloseIcon fontSize="small" />
+            <LocalIcon icon="close-rounded" width="1.25rem" height="1.25rem" />
           </ActionIcon>
           <div className={styles.heroLogo} key={`logo-${step}`}>
             <div className={styles.heroLogoCircle}>

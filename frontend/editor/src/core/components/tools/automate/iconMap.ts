@@ -1,61 +1,32 @@
-import SettingsIcon from "@mui/icons-material/Settings";
-import CompressIcon from "@mui/icons-material/Compress";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
-import CropIcon from "@mui/icons-material/Crop";
-import TextFieldsIcon from "@mui/icons-material/TextFields";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FolderIcon from "@mui/icons-material/Folder";
-import CloudIcon from "@mui/icons-material/Cloud";
-import StorageIcon from "@mui/icons-material/Storage";
-import SearchIcon from "@mui/icons-material/Search";
-import DownloadIcon from "@mui/icons-material/Download";
-import UploadIcon from "@mui/icons-material/Upload";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import RotateLeftIcon from "@mui/icons-material/RotateLeft";
-import RotateRightIcon from "@mui/icons-material/RotateRight";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import ContentCutIcon from "@mui/icons-material/ContentCut";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import WorkIcon from "@mui/icons-material/Work";
-import BuildIcon from "@mui/icons-material/Build";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
-import CheckIcon from "@mui/icons-material/Check";
-import SecurityIcon from "@mui/icons-material/Security";
-import StarIcon from "@mui/icons-material/Star";
-
 export const iconMap = {
-  SettingsIcon,
-  CompressIcon,
-  SwapHorizIcon,
-  CleaningServicesIcon,
-  CropIcon,
-  TextFieldsIcon,
-  PictureAsPdfIcon,
-  EditIcon,
-  DeleteIcon,
-  FolderIcon,
-  CloudIcon,
-  StorageIcon,
-  SearchIcon,
-  DownloadIcon,
-  UploadIcon,
-  PlayArrowIcon,
-  RotateLeftIcon,
-  RotateRightIcon,
-  VisibilityIcon,
-  ContentCutIcon,
-  ContentCopyIcon,
-  WorkIcon,
-  BuildIcon,
-  AutoAwesomeIcon,
-  SmartToyIcon,
-  CheckIcon,
-  SecurityIcon,
-  StarIcon,
+  SettingsIcon: "settings-rounded",
+  CompressIcon: "compress-rounded",
+  SwapHorizIcon: "swap-horiz-rounded",
+  CleaningServicesIcon: "cleaning-services-rounded",
+  CropIcon: "crop-rounded",
+  TextFieldsIcon: "text-fields-rounded",
+  PictureAsPdfIcon: "picture-as-pdf-rounded",
+  EditIcon: "edit-rounded",
+  DeleteIcon: "delete-rounded",
+  FolderIcon: "folder-rounded",
+  CloudIcon: "cloud-rounded",
+  StorageIcon: "storage-rounded",
+  SearchIcon: "search-rounded",
+  DownloadIcon: "download-rounded",
+  UploadIcon: "upload-rounded",
+  PlayArrowIcon: "play-arrow-rounded",
+  RotateLeftIcon: "rotate-left-rounded",
+  RotateRightIcon: "rotate-right-rounded",
+  VisibilityIcon: "visibility-rounded",
+  ContentCutIcon: "content-cut-rounded",
+  ContentCopyIcon: "content-copy-rounded",
+  WorkIcon: "work-rounded",
+  BuildIcon: "build-rounded",
+  AutoAwesomeIcon: "auto-awesome-rounded",
+  SmartToyIcon: "smart-toy-rounded",
+  CheckIcon: "check-rounded",
+  SecurityIcon: "security-rounded",
+  StarIcon: "star-rounded",
 };
 
 export const iconOptions = [

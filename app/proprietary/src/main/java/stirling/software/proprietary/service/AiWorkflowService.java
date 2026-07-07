@@ -465,7 +465,9 @@ public class AiWorkflowService {
         return filesById.values().stream().map(MultipartFile::getOriginalFilename).toList();
     }
 
-    private static String toolTimeoutMessage(String endpointPath, InternalApiTimeoutException e) {
+    // Package-private (not private) so AiWorkflowServiceMessagesTest can pin the user-facing
+    // timeout/failure message wording.
+    static String toolTimeoutMessage(String endpointPath, InternalApiTimeoutException e) {
         return String.format(
                 "The %s tool did not respond within %d seconds and was aborted. The underlying"
                         + " operation may be hung; try again, run on a smaller file, or use a"
@@ -473,7 +475,7 @@ public class AiWorkflowService {
                 endpointPath, e.getReadTimeout().toSeconds());
     }
 
-    private static String toolFailureMessage(String endpointPath, Throwable cause) {
+    static String toolFailureMessage(String endpointPath, Throwable cause) {
         String reason =
                 cause.getMessage() != null ? cause.getMessage() : cause.getClass().getSimpleName();
         return String.format("The %s tool failed: %s", endpointPath, reason);

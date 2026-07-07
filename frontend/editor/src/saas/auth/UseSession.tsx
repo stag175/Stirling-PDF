@@ -636,6 +636,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                       fetchProfilePicture(newSession),
                     ]);
                   }
+                  return undefined;
                 })
                 .then(() => {
                   console.debug(

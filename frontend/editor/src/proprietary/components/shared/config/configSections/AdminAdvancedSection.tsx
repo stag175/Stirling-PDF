@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { isAxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 import {
@@ -25,6 +25,12 @@ import apiClient from "@app/services/apiClient";
 import { useLoginRequired } from "@app/hooks/useLoginRequired";
 import LoginRequiredBanner from "@app/components/shared/config/LoginRequiredBanner";
 import { Z_INDEX_OVER_CONFIG_MODAL } from "@app/styles/zIndex";
+import {
+  buildAdvancedSettingsSaveDelta,
+  buildManualTessdataDownloadLinks,
+  computeAvailableTessdataLanguages,
+  mergeAdvancedSettingsPending,
+} from "@app/components/shared/config/configSections/adminAdvancedSectionUtils";
 
 interface AdvancedSettingsData {
   enableAlphaFunctionality?: boolean;
@@ -124,87 +130,20 @@ export default function AdminAdvancedSection() {
       };
 
       // Merge pending blocks from both endpoints
-      const pendingBlock: Record<string, unknown> = {};
-      if (systemData._pending?.enableAlphaFunctionality !== undefined) {
-        pendingBlock.enableAlphaFunctionality =
-          systemData._pending.enableAlphaFunctionality;
-      }
-      if (systemData._pending?.maxDPI !== undefined) {
-        pendingBlock.maxDPI = systemData._pending.maxDPI;
-      }
-      if (systemData._pending?.enableUrlToPDF !== undefined) {
-        pendingBlock.enableUrlToPDF = systemData._pending.enableUrlToPDF;
-      }
-      if (systemData._pending?.tessdataDir !== undefined) {
-        pendingBlock.tessdataDir = systemData._pending.tessdataDir;
-      }
-      if (systemData._pending?.disableSanitize !== undefined) {
-        pendingBlock.disableSanitize = systemData._pending.disableSanitize;
-      }
-      if (systemData._pending?.tempFileManagement) {
-        pendingBlock.tempFileManagement =
-          systemData._pending.tempFileManagement;
-      }
-      if (processExecutorData._pending) {
-        pendingBlock.processExecutor = processExecutorData._pending;
-      }
-
-      if (Object.keys(pendingBlock).length > 0) {
+      const pendingBlock = mergeAdvancedSettingsPending(
+        systemData._pending,
+        processExecutorData._pending,
+      );
+      if (pendingBlock) {
         result._pending = pendingBlock;
       }
 
       return result;
     },
-    saveTransformer: (settings) => {
-      const deltaSettings: Record<string, unknown> = {
-        "system.enableAlphaFunctionality": settings.enableAlphaFunctionality,
-        "system.maxDPI": settings.maxDPI,
-        "system.enableUrlToPDF": settings.enableUrlToPDF,
-        "system.tessdataDir": settings.tessdataDir,
-        "system.disableSanitize": settings.disableSanitize,
-      };
-
-      // Add temp file management settings
-      if (settings.tempFileManagement) {
-        deltaSettings["system.tempFileManagement.baseTmpDir"] =
-          settings.tempFileManagement.baseTmpDir;
-        deltaSettings["system.tempFileManagement.libreofficeDir"] =
-          settings.tempFileManagement.libreofficeDir;
-        deltaSettings["system.tempFileManagement.systemTempDir"] =
-          settings.tempFileManagement.systemTempDir;
-        deltaSettings["system.tempFileManagement.prefix"] =
-          settings.tempFileManagement.prefix;
-        deltaSettings["system.tempFileManagement.maxAgeHours"] =
-          settings.tempFileManagement.maxAgeHours;
-        deltaSettings["system.tempFileManagement.cleanupIntervalMinutes"] =
-          settings.tempFileManagement.cleanupIntervalMinutes;
-        deltaSettings["system.tempFileManagement.startupCleanup"] =
-          settings.tempFileManagement.startupCleanup;
-        deltaSettings["system.tempFileManagement.cleanupSystemTemp"] =
-          settings.tempFileManagement.cleanupSystemTemp;
-      }
-
-      // Add process executor settings
-      if (settings.processExecutor?.sessionLimit) {
-        Object.entries(settings.processExecutor.sessionLimit).forEach(
-          ([key, value]) => {
-            deltaSettings[`processExecutor.sessionLimit.${key}`] = value;
-          },
-        );
-      }
-      if (settings.processExecutor?.timeoutMinutes) {
-        Object.entries(settings.processExecutor.timeoutMinutes).forEach(
-          ([key, value]) => {
-            deltaSettings[`processExecutor.timeoutMinutes.${key}`] = value;
-          },
-        );
-      }
-
-      return {
-        sectionData: {},
-        deltaSettings,
-      };
-    },
+    saveTransformer: (settings) => ({
+      sectionData: {},
+      deltaSettings: buildAdvancedSettingsSaveDelta(settings),
+    }),
   });
 
   useEffect(() => {
@@ -244,7 +183,7 @@ export default function AdminAdvancedSection() {
         const available = data.available || [];
         setTessdataLanguages(installed);
         setRemoteTessdataLanguages(
-          available.filter((lang) => !installed.includes(lang)),
+          computeAvailableTessdataLanguages(installed, available),
         );
         setTessdataDirWritable(data.writable !== false);
         setManualDownloadLinks([]);
@@ -277,7 +216,7 @@ export default function AdminAdvancedSection() {
         const available = data.available || [];
         setTessdataLanguages(installed);
         setRemoteTessdataLanguages(
-          available.filter((lang) => !installed.includes(lang)),
+          computeAvailableTessdataLanguages(installed, available),
         );
         setTessdataDirWritable(data.writable !== false);
         setManualDownloadLinks([]);
@@ -294,8 +233,6 @@ export default function AdminAdvancedSection() {
       }
     }
   };
-
-  const safeLangRegex = useMemo(() => new RegExp("[^A-Za-z0-9_+\\-]", "g"), []);
 
   const handleDownloadTessdataLanguages = async () => {
     if (!loginEnabled) return;
@@ -375,10 +312,7 @@ export default function AdminAdvancedSection() {
         );
         setTessdataDirWritable(false);
         setManualDownloadLinks(
-          selectedDownloadLanguages.map((lang) => {
-            const safeLang = lang.replace(safeLangRegex, "");
-            return `https://raw.githubusercontent.com/tesseract-ocr/tessdata/main/${safeLang}.traineddata`;
-          }),
+          buildManualTessdataDownloadLinks(selectedDownloadLanguages),
         );
         const message = t(
           "admin.settings.advanced.tessdataDir.downloadErrorPermission",

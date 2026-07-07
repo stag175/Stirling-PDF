@@ -26,7 +26,9 @@ const ExtractImagesSettings = ({
         value={parameters.format}
         onChange={(value) => {
           const allowedFormats = ["png", "jpg", "gif"] as const;
-          const format = allowedFormats.includes(value as any)
+          const format = (allowedFormats as readonly string[]).includes(
+            value ?? "",
+          )
             ? (value as (typeof allowedFormats)[number])
             : "png";
           onParameterChange("format", format);

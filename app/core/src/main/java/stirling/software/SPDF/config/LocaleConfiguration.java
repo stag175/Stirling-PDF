@@ -11,9 +11,11 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.common.model.ApplicationProperties;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class LocaleConfiguration implements WebMvcConfigurer {
@@ -50,8 +52,9 @@ public class LocaleConfiguration implements WebMvcConfigurer {
                 if (appLocaleEnv.equalsIgnoreCase(tempLanguageTag)) {
                     defaultLocale = tempLocale;
                 } else {
-                    System.err.println(
-                            "Invalid SYSTEM_DEFAULTLOCALE environment variable value. Falling back to default en-GB.");
+                    log.warn(
+                            "Invalid SYSTEM_DEFAULTLOCALE environment variable value '{}'. Falling back to default en-GB.",
+                            appLocaleEnv);
                 }
             }
         }

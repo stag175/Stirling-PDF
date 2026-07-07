@@ -257,7 +257,9 @@ public class ConvertWebsiteToPDF {
         return decoded.toString();
     }
 
-    private String convertURLToFileName(String url) {
+    // Package-private (not private) so ConvertWebsiteToPdfTest can exercise the filename
+    // sanitisation/truncation directly instead of via reflection.
+    String convertURLToFileName(String url) {
         String safeName = GeneralUtils.convertToFileName(url);
         if (safeName == null || safeName.isBlank()) {
             // Fallback: derive from URL host/path or use default

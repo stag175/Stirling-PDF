@@ -8,7 +8,7 @@ const Overview: React.FC = () => {
   const { t } = useTranslation();
   const { config, loading, error } = useAppConfig();
 
-  const renderConfigSection = (title: string, data: any) => {
+  const renderConfigSection = (title: string, data: unknown) => {
     if (!data || typeof data !== "object") return null;
 
     return (

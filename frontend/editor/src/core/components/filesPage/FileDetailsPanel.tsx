@@ -1,19 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActionIcon, Badge, Button, Menu, Tooltip } from "@mantine/core";
-import CloseIcon from "@mui/icons-material/Close";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import DriveFileMoveIcon from "@mui/icons-material/DriveFileMove";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DownloadIcon from "@mui/icons-material/Download";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import HistoryIcon from "@mui/icons-material/History";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import LinkIcon from "@mui/icons-material/Link";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { FileId, ToolOperation } from "@app/types/file";
 import { ToolId } from "@app/types/toolId";
 import { FolderRecord } from "@app/types/folder";
@@ -133,7 +122,7 @@ export function FileDetailsPanel({
           withinPortal
         >
           <ActionIcon variant="subtle" size="sm" onClick={onClose}>
-            <CloseIcon fontSize="small" />
+            <LocalIcon icon="close-rounded" width="1.25rem" height="1.25rem" />
           </ActionIcon>
         </Tooltip>
       </div>
@@ -145,8 +134,11 @@ export function FileDetailsPanel({
               {single.thumbnailUrl ? (
                 <img src={single.thumbnailUrl} alt="" />
               ) : (
-                <PictureAsPdfIcon
-                  style={{ fontSize: "3rem", color: "var(--text-muted)" }}
+                <LocalIcon
+                  icon="picture-as-pdf-rounded"
+                  width="3rem"
+                  height="3rem"
+                  style={{ color: "var(--text-muted)" }}
                 />
               )}
             </div>
@@ -248,7 +240,13 @@ export function FileDetailsPanel({
           style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}
         >
           <Button
-            leftSection={<OpenInNewIcon fontSize="small" />}
+            leftSection={
+              <LocalIcon
+                icon="open-in-new-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
+            }
             variant="filled"
             onClick={() => onAddToWorkspace(selectedFileIds)}
           >
@@ -262,7 +260,13 @@ export function FileDetailsPanel({
           </Button>
           {single && (
             <Button
-              leftSection={<VisibilityIcon fontSize="small" />}
+              leftSection={
+                <LocalIcon
+                  icon="visibility-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              }
               variant="subtle"
               onClick={() => onQuickView(single.id)}
             >
@@ -270,7 +274,13 @@ export function FileDetailsPanel({
             </Button>
           )}
           <Button
-            leftSection={<DownloadIcon fontSize="small" />}
+            leftSection={
+              <LocalIcon
+                icon="download-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
+            }
             variant="default"
             onClick={handleDownload}
             loading={downloading}
@@ -297,7 +307,13 @@ export function FileDetailsPanel({
               w={260}
             >
               <Button
-                leftSection={<LinkIcon fontSize="small" />}
+                leftSection={
+                  <LocalIcon
+                    icon="link-rounded"
+                    width="1.25rem"
+                    height="1.25rem"
+                  />
+                }
                 variant="default"
                 disabled={!sharingEnabled}
                 onClick={() => setShareModalOpen(true)}
@@ -313,7 +329,13 @@ export function FileDetailsPanel({
             </Tooltip>
           )}
           <Button
-            leftSection={<DriveFileMoveIcon fontSize="small" />}
+            leftSection={
+              <LocalIcon
+                icon="drive-file-move-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
+            }
             variant="default"
             onClick={() => onMove(selectedFileIds)}
           >
@@ -322,7 +344,13 @@ export function FileDetailsPanel({
           {/* Save to server; shown when any selected file is local-only. */}
           {onSaveToServer && localOnlyFiles.length > 0 && (
             <Button
-              leftSection={<CloudUploadIcon fontSize="small" />}
+              leftSection={
+                <LocalIcon
+                  icon="upload-rounded"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+              }
               variant="default"
               onClick={() => onSaveToServer(localOnlyFiles)}
             >
@@ -330,7 +358,13 @@ export function FileDetailsPanel({
             </Button>
           )}
           <Button
-            leftSection={<DeleteIcon fontSize="small" />}
+            leftSection={
+              <LocalIcon
+                icon="delete-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
+            }
             color="red"
             variant="light"
             onClick={() => onRemove(selectedFileIds)}
@@ -446,7 +480,7 @@ function VersionTimeline({
   return (
     <div className="files-page-details-version-timeline">
       <div className="files-page-details-version-timeline-label">
-        <HistoryIcon fontSize="small" />
+        <LocalIcon icon="history-rounded" width="1.25rem" height="1.25rem" />
         <span>{t("filesPage.field.versionHistory", "Version journey")}</span>
         <span className="files-page-details-version-timeline-count">
           {t("filesPage.versionsCount", "{{count}} versions", {
@@ -532,11 +566,13 @@ function VersionTimeline({
                     </span>
                   )}
                   <span className="files-page-details-version-timeline-spacer" />
-                  <KeyboardArrowDownIcon
+                  <LocalIcon
+                    icon="keyboard-arrow-down-rounded"
                     className={`files-page-details-version-timeline-chevron${
                       isExpanded ? " is-expanded" : ""
                     }`}
-                    fontSize="small"
+                    width="1.25rem"
+                    height="1.25rem"
                   />
                 </button>
                 <div className="files-page-details-version-timeline-meta-line">
@@ -563,18 +599,34 @@ function VersionTimeline({
                             )}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <MoreVertIcon fontSize="small" />
+                            <LocalIcon
+                              icon="more-vert"
+                              width="1.25rem"
+                              height="1.25rem"
+                            />
                           </ActionIcon>
                         </Menu.Target>
                         <Menu.Dropdown>
                           <Menu.Item
-                            leftSection={<VisibilityIcon fontSize="small" />}
+                            leftSection={
+                              <LocalIcon
+                                icon="visibility-rounded"
+                                width="1.25rem"
+                                height="1.25rem"
+                              />
+                            }
                             onClick={() => onQuickView(v.id)}
                           >
                             {t("filesPage.viewVersion", "View this version")}
                           </Menu.Item>
                           <Menu.Item
-                            leftSection={<OpenInNewIcon fontSize="small" />}
+                            leftSection={
+                              <LocalIcon
+                                icon="open-in-new-rounded"
+                                width="1.25rem"
+                                height="1.25rem"
+                              />
+                            }
                             onClick={() => onAddToWorkspace([v.id])}
                           >
                             {t(
@@ -583,7 +635,13 @@ function VersionTimeline({
                             )}
                           </Menu.Item>
                           <Menu.Item
-                            leftSection={<DownloadIcon fontSize="small" />}
+                            leftSection={
+                              <LocalIcon
+                                icon="download-rounded"
+                                width="1.25rem"
+                                height="1.25rem"
+                              />
+                            }
                             onClick={() => {
                               void downloadFileFromStorage(v);
                             }}
@@ -596,7 +654,13 @@ function VersionTimeline({
                           <Menu.Divider />
                           <Menu.Item
                             color="red"
-                            leftSection={<DeleteIcon fontSize="small" />}
+                            leftSection={
+                              <LocalIcon
+                                icon="delete-rounded"
+                                width="1.25rem"
+                                height="1.25rem"
+                              />
+                            }
                             onClick={() => onRemove([v.id])}
                           >
                             {t(

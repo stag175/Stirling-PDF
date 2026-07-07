@@ -66,9 +66,6 @@ public class AutoSplitPdfController {
     // Max total pixels before we downscale to avoid OOM on getRGB() allocation
     private static final long MAX_IMAGE_PIXELS = 100_000_000L; // ~10000x10000
 
-    // Number of evenly-spaced pixel samples used for the blank image check
-    private static final int BLANK_CHECK_SAMPLES = 20;
-
     private static final Map<DecodeHintType, Object> DECODE_HINTS;
 
     static {
@@ -105,23 +102,6 @@ public class AutoSplitPdfController {
         g.drawImage(image, 0, 0, newWidth, newHeight, null);
         g.dispose();
         return scaled;
-    }
-
-    /**
-     * Quick check whether an image appears to be blank (single solid colour). Samples pixels at
-     * evenly-spaced positions — if all samples match the first pixel the image is almost certainly
-     * blank (e.g. a masked image that returned solid white).
-     */
-    private static boolean isBlankImage(int[] pixels) {
-        if (pixels.length == 0) return true;
-        int first = pixels[0];
-        int step = Math.max(1, pixels.length / BLANK_CHECK_SAMPLES);
-        for (int i = step; i < pixels.length; i += step) {
-            if (pixels[i] != first) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -171,7 +151,7 @@ public class AutoSplitPdfController {
         bufferedImage.getRGB(0, 0, width, height, pixels, 0, width);
 
         // Skip blank images early (e.g. masked images that decode to solid white)
-        if (isBlankImage(pixels)) {
+        if (AutoSplitBlankImageUtils.isBlankImage(pixels)) {
             log.debug("Skipping blank {}x{} image", width, height);
             return null;
         }

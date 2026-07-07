@@ -1,14 +1,11 @@
 package stirling.software.proprietary.storage.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
 
@@ -107,8 +104,8 @@ class ClusterStorageGateTest {
         ApplicationProperties props = new ApplicationProperties();
         props.setStorage(null);
         ClusterStorageGate gate = new ClusterStorageGate(props, mockLicenseChecker(License.SERVER));
-        setClusterEnabled(gate, true);
-        setClusterArtifactStore(gate, "s3");
+        gate.clusterEnabled = true;
+        gate.clusterArtifactStore = "s3";
         assertThatCode(gate::validate).doesNotThrowAnyException();
     }
 
@@ -203,8 +200,8 @@ class ClusterStorageGateTest {
         props.setStorage(storage);
         LicenseKeyChecker checker = mockLicenseChecker(license);
         ClusterStorageGate gate = new ClusterStorageGate(props, checker);
-        setClusterEnabled(gate, clusterEnabled);
-        setClusterArtifactStore(gate, clusterArtifactStore);
+        gate.clusterEnabled = clusterEnabled;
+        gate.clusterArtifactStore = clusterArtifactStore;
         return gate;
     }
 
@@ -225,26 +222,5 @@ class ClusterStorageGateTest {
                     .requireProOrEnterprise(anyString());
         }
         return checker;
-    }
-
-    private static void setClusterEnabled(ClusterStorageGate gate, boolean enabled) {
-        try {
-            Field f = ClusterStorageGate.class.getDeclaredField("clusterEnabled");
-            f.setAccessible(true);
-            f.setBoolean(gate, enabled);
-            assertThat(f.getBoolean(gate)).isEqualTo(enabled);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError("Failed to set clusterEnabled via reflection", e);
-        }
-    }
-
-    private static void setClusterArtifactStore(ClusterStorageGate gate, String value) {
-        try {
-            Field f = ClusterStorageGate.class.getDeclaredField("clusterArtifactStore");
-            f.setAccessible(true);
-            f.set(gate, value);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError("Failed to set clusterArtifactStore via reflection", e);
-        }
     }
 }

@@ -9,9 +9,9 @@ import {
   Table,
   Text,
 } from "@mantine/core";
-import SortIcon from "@mui/icons-material/Sort";
 import { useTranslation } from "react-i18next";
 
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { formatFileSize } from "@app/utils/fileUtils";
 
 // ─── CSV parser ───────────────────────────────────────────────────────────────
@@ -210,9 +210,11 @@ export function CsvViewer({ file, isTsv }: CsvViewerProps) {
                     <Text size="xs" fw={600} truncate style={{ maxWidth: 200 }}>
                       {h || t("viewer.nonPdf.columnDefault", { index: i + 1 })}
                     </Text>
-                    <SortIcon
+                    <LocalIcon
+                      icon="sort-rounded"
+                      width="0.85rem"
+                      height="0.85rem"
                       style={{
-                        fontSize: "0.85rem",
                         opacity: sortCol === i ? 1 : 0.3,
                         color:
                           sortCol === i

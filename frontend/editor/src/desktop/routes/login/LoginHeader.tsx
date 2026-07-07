@@ -1,5 +1,5 @@
 import { ActionIcon } from "@mantine/core";
-import CloseIcon from "@mui/icons-material/Close";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useLogoAssets } from "@app/hooks/useLogoAssets";
 
 interface LoginHeaderProps {
@@ -66,7 +66,7 @@ export default function LoginHeader({
               outline: "none",
             }}
           >
-            <CloseIcon fontSize="small" />
+            <LocalIcon icon="close-rounded" width="1.25rem" height="1.25rem" />
           </ActionIcon>
         )}
       </div>

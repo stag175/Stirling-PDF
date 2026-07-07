@@ -5,8 +5,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +41,7 @@ class ExternalAppDepConfigTest {
 
     @Test
     void commandToGroupMappingIncludesRuntimePaths() throws Exception {
-        Map<String, List<String>> mapping = getCommandToGroupMapping();
+        Map<String, List<String>> mapping = config.commandToGroupMapping;
 
         assertEquals(List.of("Weasyprint"), mapping.get("/custom/weasyprint"));
         assertEquals(List.of("Unoconvert"), mapping.get("/custom/unoconvert"));
@@ -57,26 +55,23 @@ class ExternalAppDepConfigTest {
         Set<String> endpoints = new LinkedHashSet<>(List.of("pdf-to-html", "img-extract"));
         when(endpointConfiguration.getEndpointsForGroup("Ghostscript")).thenReturn(endpoints);
 
-        @SuppressWarnings("unchecked")
-        List<String> features =
-                (List<String>) invokePrivateMethod(config, "getAffectedFeatures", "Ghostscript");
+        List<String> features = config.getAffectedFeatures("Ghostscript");
 
         assertEquals(List.of("PDF To Html", "Image Extract"), features);
     }
 
     @Test
     void formatEndpointAsFeatureConvertsNames() throws Exception {
-        String formatted =
-                (String) invokePrivateMethod(config, "formatEndpointAsFeature", "pdf-img-extract");
+        String formatted = config.formatEndpointAsFeature("pdf-img-extract");
 
         assertEquals("PDF Image Extract", formatted);
     }
 
     @Test
     void capitalizeWordHandlesSpecialCases() throws Exception {
-        String pdf = (String) invokePrivateMethod(config, "capitalizeWord", "pdf");
-        String mixed = (String) invokePrivateMethod(config, "capitalizeWord", "tEsT");
-        String empty = (String) invokePrivateMethod(config, "capitalizeWord", "");
+        String pdf = config.capitalizeWord("pdf");
+        String mixed = config.capitalizeWord("tEsT");
+        String empty = config.capitalizeWord("");
 
         assertEquals("PDF", pdf);
         assertEquals("Test", mixed);
@@ -85,11 +80,9 @@ class ExternalAppDepConfigTest {
 
     @Test
     void isWeasyprintMatchesConfiguredCommands() throws Exception {
-        boolean directMatch =
-                (boolean) invokePrivateMethod(config, "isWeasyprint", "/custom/weasyprint");
-        boolean nameContains =
-                (boolean) invokePrivateMethod(config, "isWeasyprint", "/usr/bin/weasyprint-cli");
-        boolean differentCommand = (boolean) invokePrivateMethod(config, "isWeasyprint", "qpdf");
+        boolean directMatch = config.isWeasyprint("/custom/weasyprint");
+        boolean nameContains = config.isWeasyprint("/usr/bin/weasyprint-cli");
+        boolean differentCommand = config.isWeasyprint("qpdf");
 
         assertTrue(directMatch);
         assertTrue(nameContains);
@@ -105,81 +98,5 @@ class ExternalAppDepConfigTest {
         assertTrue(installed.compareTo(required) < 0);
         assertEquals(0, beta.compareTo(required));
         assertEquals("58.0.0", beta.toString());
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, List<String>> getCommandToGroupMapping() throws Exception {
-        Field field = ExternalAppDepConfig.class.getDeclaredField("commandToGroupMapping");
-        field.setAccessible(true);
-        return (Map<String, List<String>>) field.get(config);
-    }
-
-    private Object invokePrivateMethod(Object target, String methodName, Object... args)
-            throws Exception {
-        Method method = findMatchingMethod(methodName, args);
-        method.setAccessible(true);
-        return method.invoke(target, args);
-    }
-
-    private Method findMatchingMethod(String methodName, Object[] args)
-            throws NoSuchMethodException {
-        Method[] methods = ExternalAppDepConfig.class.getDeclaredMethods();
-        for (Method candidate : methods) {
-            if (!candidate.getName().equals(methodName)
-                    || candidate.getParameterCount() != args.length) {
-                continue;
-            }
-
-            Class<?>[] parameterTypes = candidate.getParameterTypes();
-            boolean matches = true;
-            for (int i = 0; i < parameterTypes.length; i++) {
-                if (!isParameterCompatible(parameterTypes[i], args[i])) {
-                    matches = false;
-                    break;
-                }
-            }
-
-            if (matches) {
-                return candidate;
-            }
-        }
-
-        throw new NoSuchMethodException(
-                "No matching method found for " + methodName + " with provided arguments");
-    }
-
-    private boolean isParameterCompatible(Class<?> parameterType, Object arg) {
-        if (arg == null) {
-            return !parameterType.isPrimitive();
-        }
-
-        Class<?> argumentClass = arg.getClass();
-        if (parameterType.isPrimitive()) {
-            return getWrapperType(parameterType).isAssignableFrom(argumentClass);
-        }
-
-        return parameterType.isAssignableFrom(argumentClass);
-    }
-
-    private Class<?> getWrapperType(Class<?> primitiveType) {
-        if (primitiveType == boolean.class) {
-            return Boolean.class;
-        } else if (primitiveType == byte.class) {
-            return Byte.class;
-        } else if (primitiveType == short.class) {
-            return Short.class;
-        } else if (primitiveType == int.class) {
-            return Integer.class;
-        } else if (primitiveType == long.class) {
-            return Long.class;
-        } else if (primitiveType == float.class) {
-            return Float.class;
-        } else if (primitiveType == double.class) {
-            return Double.class;
-        } else if (primitiveType == char.class) {
-            return Character.class;
-        }
-
-        throw new IllegalArgumentException("Type is not primitive: " + primitiveType);
     }
 }

@@ -39,6 +39,28 @@ export const PDF_FORM_FIELD_TYPE = {
 export type PDF_FORM_FIELD_TYPE =
   (typeof PDF_FORM_FIELD_TYPE)[keyof typeof PDF_FORM_FIELD_TYPE];
 
+/**
+ * Emscripten runtime heap fields that the @embedpdf/pdfium typings do not
+ * surface (`WasmExports` only declares `malloc`/`free`, and `PdfiumModule`
+ * extends an `EmscriptenModule` whose `@types/emscripten` HEAP views are not
+ * installed). These are stable parts of any Emscripten WASM runtime; we narrow
+ * to exactly the views we touch rather than fall back to `any`.
+ */
+interface PdfiumHeap {
+  HEAPF32: Float32Array<ArrayBuffer>;
+  HEAPU8: Uint8Array<ArrayBuffer>;
+}
+interface PdfiumMemory {
+  memory: WebAssembly.Memory;
+}
+function pdfiumHeap(m: WrappedPdfiumModule): PdfiumHeap {
+  return m.pdfium as unknown as PdfiumHeap;
+}
+/** Backing `ArrayBuffer` of the PDFium WASM linear memory. */
+export function pdfiumMemoryBuffer(m: WrappedPdfiumModule): ArrayBuffer {
+  return (m.pdfium.wasmExports as unknown as PdfiumMemory).memory.buffer;
+}
+
 let _initPromise: Promise<WrappedPdfiumModule> | null = null;
 let _module: WrappedPdfiumModule | null = null;
 
@@ -46,7 +68,7 @@ let _module: WrappedPdfiumModule | null = null;
  * Resolve the absolute WASM URL using the same pattern as LocalEmbedPDF.
  */
 function wasmUrl(): string {
-  const base = (import.meta as any).env?.BASE_URL ?? "/";
+  const base = import.meta.env.BASE_URL ?? "/";
   return `${base}pdfium/pdfium.wasm`.replace(/\/\//g, "/");
 }
 
@@ -61,7 +83,7 @@ export async function getPdfiumModule(): Promise<WrappedPdfiumModule> {
   if (!_initPromise) {
     _initPromise = init({
       locateFile: () => wasmUrl(),
-    } as any).then((m) => {
+    }).then((m) => {
       // Call PDFiumExt_Init to ensure extensions (form fill etc.) are set up
       try {
         m.PDFiumExt_Init();
@@ -110,7 +132,7 @@ export function readAnnotRectAdjusted(
   annotPtr: number,
   rectBuf: number,
 ): boolean {
-  const ext = (m as any).EPDFAnnot_GetRect;
+  const ext = m.EPDFAnnot_GetRect;
   if (typeof ext === "function") {
     return ext.call(m, annotPtr, rectBuf);
   }
@@ -186,15 +208,13 @@ export function readEffectivePageBox(
   let result: PageBox | null = null;
   try {
     // CropBox is the effective visible area
-    if (
-      (m as any).FPDFPage_GetCropBox(pagePtr, buf, buf + 4, buf + 8, buf + 12)
-    ) {
+    if (m.FPDFPage_GetCropBox(pagePtr, buf, buf + 4, buf + 8, buf + 12)) {
       result = read();
     }
     // Fall back to MediaBox
     if (
       !result &&
-      (m as any).FPDFPage_GetMediaBox(pagePtr, buf, buf + 4, buf + 8, buf + 12)
+      m.FPDFPage_GetMediaBox(pagePtr, buf, buf + 4, buf + 8, buf + 12)
     ) {
       result = read();
     }
@@ -226,7 +246,7 @@ function copyToWasmHeap(
   bytes: Uint8Array,
   ptr: number,
 ): void {
-  new Uint8Array((m.pdfium.wasmExports as any).memory.buffer).set(bytes, ptr);
+  new Uint8Array(pdfiumMemoryBuffer(m)).set(bytes, ptr);
 }
 
 /**
@@ -1338,7 +1358,7 @@ async function renderWidgetAppearance(
   formEnvPtr: number,
   dpr: number,
 ): Promise<ImageData | null> {
-  const pdfiumWasm = m.pdfium as any;
+  const pdfiumWasm = pdfiumHeap(m);
   const matrixPtr = m.pdfium.wasmExports.malloc(6 * 4);
   const matrixView = new Float32Array(pdfiumWasm.HEAPF32.buffer, matrixPtr, 6);
   const sx = wDev / pdfW;
@@ -1560,7 +1580,7 @@ export async function renderSignatureFieldAppearances(
           const hDev = Math.max(1, Math.round(pdfH * dpr));
           const stride = wDev * 4;
           const bytes = stride * hDev;
-          const pdfiumWasm = m.pdfium as any;
+          const pdfiumWasm = pdfiumHeap(m);
 
           const heapPtr = m.pdfium.wasmExports.malloc(bytes);
           const bitmapPtr = m.FPDFBitmap_CreateEx(

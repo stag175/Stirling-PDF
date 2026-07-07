@@ -49,7 +49,9 @@ public class CropController {
     private final CustomPDFDocumentFactory pdfDocumentFactory;
     private final TempFileManager tempFileManager;
 
-    private static int[] detectContentBounds(BufferedImage image) {
+    // Package-private (was private) so the pure pixel-scan content-detection logic can be tested
+    // directly with synthetic images (roadmap A3/C2). No behaviour change.
+    static int[] detectContentBounds(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
 
@@ -114,7 +116,7 @@ public class CropController {
         return new int[] {left, height - bottom - 1, right, height - top - 1};
     }
 
-    private static boolean isWhite(int rgb, int threshold) {
+    static boolean isWhite(int rgb, int threshold) {
         int r = (rgb >> 16) & 0xFF;
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
@@ -324,7 +326,9 @@ public class CropController {
         }
     }
 
-    private record CropBounds(float x, float y, float width, float height) {
+    // Package-private (not private) so CropControllerTest can exercise fromPixels via a direct,
+    // compile-checked call instead of reflection.
+    record CropBounds(float x, float y, float width, float height) {
 
         static CropBounds fromPixels(int[] pixelBounds, float scaleX, float scaleY) {
             if (pixelBounds.length != 4) {

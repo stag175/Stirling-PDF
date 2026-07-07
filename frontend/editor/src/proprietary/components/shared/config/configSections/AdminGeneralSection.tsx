@@ -33,6 +33,16 @@ import {
   toUnderscoreLanguages,
 } from "@app/i18n";
 import { Z_INDEX_CONFIG_MODAL } from "@app/styles/zIndex";
+import {
+  buildGeneralSettingsSaveDelta,
+  combineGeneralFetchData,
+  filterDefaultLocaleOptions,
+  parseWatchedFoldersInput,
+  validateWatchedFolders,
+  type RawPremiumSectionData,
+  type RawSystemSectionData,
+  type RawUiSectionData,
+} from "@app/components/shared/config/configSections/adminGeneralSectionUtils";
 
 interface GeneralSettingsData {
   ui: {
@@ -95,18 +105,6 @@ export default function AdminGeneralSection() {
         .sort((a, b) => a.label.localeCompare(b.label)),
     [],
   );
-  const parseWatchedFoldersInput = useCallback((value: string) => {
-    const paths = value
-      .split(/[\n,;]+/)
-      .map((entry) => entry.trim())
-      .filter(Boolean);
-
-    // Deduplicate paths (case-sensitive, exact match)
-    const uniquePaths = Array.from(new Set(paths));
-
-    return uniquePaths;
-  }, []);
-
   const {
     settings,
     setSettings,
@@ -126,123 +124,17 @@ export default function AdminGeneralSection() {
         apiClient.get("/api/v1/admin/settings/section/premium"),
       ]);
 
-      const ui = { ...(uiResponse.data || {}) };
-      const system = { ...(systemResponse.data || {}) };
-      const premium = { ...(premiumResponse.data || {}) };
-
-      ui.languages = Array.isArray(ui.languages)
-        ? toUnderscoreLanguages(ui.languages)
-        : [];
-
-      const pipelinePaths = system.customPaths?.pipeline || {};
-      const watchedFoldersDirs = Array.isArray(pipelinePaths.watchedFoldersDirs)
-        ? pipelinePaths.watchedFoldersDirs
-        : [];
-      const normalizedWatchedFoldersDirs =
-        watchedFoldersDirs.length > 0
-          ? watchedFoldersDirs
-          : pipelinePaths.watchedFoldersDir
-            ? [pipelinePaths.watchedFoldersDir]
-            : [];
-
-      const result: GeneralSettingsData & {
-        _pending?: Record<string, unknown>;
-      } = {
-        ui,
-        system,
-        customPaths: {
-          ...(system.customPaths || {}),
-          pipeline: {
-            ...pipelinePaths,
-            pipelineDir: pipelinePaths.pipelineDir || "",
-            watchedFoldersDir: pipelinePaths.watchedFoldersDir || "",
-            watchedFoldersDirs: normalizedWatchedFoldersDirs,
-            finishedFoldersDir: pipelinePaths.finishedFoldersDir || "",
-          },
-          operations: {
-            ...(system.customPaths?.operations || {}),
-            weasyprint: system.customPaths?.operations?.weasyprint || "",
-            unoconvert: system.customPaths?.operations?.unoconvert || "",
-          },
-        },
-        customMetadata: premium.proFeatures?.customMetadata || {
-          autoUpdateMetadata: false,
-          author: "",
-          creator: "",
-          producer: "",
-        },
-      };
-
-      // Merge pending blocks from all three endpoints
-      const pendingBlock: Record<string, unknown> = {};
-      if (ui._pending) {
-        pendingBlock.ui = ui._pending;
-      }
-      if (system._pending) {
-        pendingBlock.system = system._pending;
-      }
-      if (system._pending?.customPaths) {
-        pendingBlock.customPaths = system._pending.customPaths;
-      }
-      if (premium._pending?.proFeatures?.customMetadata) {
-        pendingBlock.customMetadata =
-          premium._pending.proFeatures.customMetadata;
-      }
-
-      if (Object.keys(pendingBlock).length > 0) {
-        result._pending = pendingBlock;
-      }
-
-      return result;
+      return combineGeneralFetchData(
+        uiResponse.data as RawUiSectionData | null | undefined,
+        systemResponse.data as RawSystemSectionData | null | undefined,
+        premiumResponse.data as RawPremiumSectionData | null | undefined,
+        toUnderscoreLanguages,
+      ) as GeneralSettingsData & { _pending?: Record<string, unknown> };
     },
-    saveTransformer: (settings: GeneralSettingsData) => {
-      const deltaSettings: Record<string, unknown> = {
-        // UI settings
-        "ui.appNameNavbar": settings.ui?.appNameNavbar,
-        "ui.languages": settings.ui?.languages,
-        "ui.logoStyle": settings.ui?.logoStyle,
-        "ui.hideDisabledTools.googleDrive":
-          settings.ui?.hideDisabledTools?.googleDrive,
-        "ui.hideDisabledTools.mobileQRScanner":
-          settings.ui?.hideDisabledTools?.mobileQRScanner,
-        // System settings
-        "system.defaultLocale": settings.system?.defaultLocale,
-        "system.showUpdate": settings.system?.showUpdate,
-        "system.showUpdateOnlyAdmin": settings.system?.showUpdateOnlyAdmin,
-        "system.customHTMLFiles": settings.system?.customHTMLFiles,
-        "system.fileUploadLimit": settings.system?.fileUploadLimit,
-        "system.frontendUrl": settings.system?.frontendUrl,
-        // Premium custom metadata
-        "premium.proFeatures.customMetadata.autoUpdateMetadata":
-          settings.customMetadata?.autoUpdateMetadata,
-        "premium.proFeatures.customMetadata.author":
-          settings.customMetadata?.author,
-        "premium.proFeatures.customMetadata.creator":
-          settings.customMetadata?.creator,
-        "premium.proFeatures.customMetadata.producer":
-          settings.customMetadata?.producer,
-      };
-
-      if (settings.customPaths) {
-        deltaSettings["system.customPaths.pipeline.pipelineDir"] =
-          settings.customPaths?.pipeline?.pipelineDir;
-        deltaSettings["system.customPaths.pipeline.watchedFoldersDir"] =
-          settings.customPaths?.pipeline?.watchedFoldersDir;
-        deltaSettings["system.customPaths.pipeline.watchedFoldersDirs"] =
-          settings.customPaths?.pipeline?.watchedFoldersDirs;
-        deltaSettings["system.customPaths.pipeline.finishedFoldersDir"] =
-          settings.customPaths?.pipeline?.finishedFoldersDir;
-        deltaSettings["system.customPaths.operations.weasyprint"] =
-          settings.customPaths?.operations?.weasyprint;
-        deltaSettings["system.customPaths.operations.unoconvert"] =
-          settings.customPaths?.operations?.unoconvert;
-      }
-
-      return {
-        sectionData: {},
-        deltaSettings,
-      };
-    },
+    saveTransformer: (settings: GeneralSettingsData) => ({
+      sectionData: {},
+      deltaSettings: buildGeneralSettingsSaveDelta(settings),
+    }),
   });
 
   const { isDirty, resetToSnapshot, markSaved } = useSettingsDirty(
@@ -259,77 +151,23 @@ export default function AdminGeneralSection() {
     [settings.customPaths?.pipeline?.watchedFoldersDirs],
   );
 
-  const watchedFoldersValidation = useMemo(() => {
-    const paths = settings.customPaths?.pipeline?.watchedFoldersDirs || [];
-    const finishedPath =
-      settings.customPaths?.pipeline?.finishedFoldersDir || "";
-    const warnings: string[] = [];
-
-    // Normalize paths for comparison (handle both Windows and Unix paths)
-    const normalizePath = (p: string) =>
-      p.replace(/\\/g, "/").replace(/\/+$/, "");
-
-    // Check for overlapping watched folders
-    if (paths.length >= 2) {
-      for (let i = 0; i < paths.length; i++) {
-        for (let j = i + 1; j < paths.length; j++) {
-          const path1 = normalizePath(paths[i]);
-          const path2 = normalizePath(paths[j]);
-
-          if (path1 === path2) {
-            warnings.push(`Duplicate path detected: '${paths[i]}'`);
-          } else if (path1.startsWith(path2 + "/")) {
-            warnings.push(
-              `'${paths[i]}' is nested inside '${paths[j]}' - may cause duplicate processing`,
-            );
-          } else if (path2.startsWith(path1 + "/")) {
-            warnings.push(
-              `'${paths[j]}' is nested inside '${paths[i]}' - may cause duplicate processing`,
-            );
-          }
-        }
-      }
-    }
-
-    // Check for conflicts with finished folder
-    if (finishedPath && paths.length > 0) {
-      const normalizedFinished = normalizePath(finishedPath);
-      for (const watchedPath of paths) {
-        const normalizedWatched = normalizePath(watchedPath);
-
-        if (normalizedWatched === normalizedFinished) {
-          warnings.push(
-            `CRITICAL: Watched folder '${watchedPath}' is the same as finished folder - will cause processing loops!`,
-          );
-        } else if (normalizedFinished.startsWith(normalizedWatched + "/")) {
-          warnings.push(
-            `Finished folder is nested inside watched folder '${watchedPath}' - may cause issues`,
-          );
-        } else if (normalizedWatched.startsWith(normalizedFinished + "/")) {
-          warnings.push(
-            `CRITICAL: Watched folder '${watchedPath}' is nested inside finished folder - will cause processing loops!`,
-          );
-        }
-      }
-    }
-
-    return warnings.length > 0 ? warnings : null;
-  }, [
-    settings.customPaths?.pipeline?.watchedFoldersDirs,
-    settings.customPaths?.pipeline?.finishedFoldersDir,
-  ]);
+  const watchedFoldersValidation = useMemo(
+    () =>
+      validateWatchedFolders(
+        settings.customPaths?.pipeline?.watchedFoldersDirs || [],
+        settings.customPaths?.pipeline?.finishedFoldersDir || "",
+      ),
+    [
+      settings.customPaths?.pipeline?.watchedFoldersDirs,
+      settings.customPaths?.pipeline?.finishedFoldersDir,
+    ],
+  );
 
   // Filter default locale options based on available languages setting
-  const defaultLocaleOptions = useMemo(() => {
-    // If no languages are selected (empty), show all languages
-    if (!selectedLanguages || selectedLanguages.length === 0) {
-      return languageOptions;
-    }
-    // Otherwise, only show languages that are in the selected list
-    return languageOptions.filter((option) =>
-      selectedLanguages.includes(option.value),
-    );
-  }, [selectedLanguages, languageOptions]);
+  const defaultLocaleOptions = useMemo(
+    () => filterDefaultLocaleOptions(languageOptions, selectedLanguages),
+    [selectedLanguages, languageOptions],
+  );
 
   useEffect(() => {
     // Only fetch real settings if login is enabled

@@ -11,8 +11,7 @@ import {
   Modal,
 } from "@mantine/core";
 import { Z_INDEX_AUTOMATE_MODAL } from "@app/styles/zIndex";
-import CheckIcon from "@mui/icons-material/Check";
-import DownloadIcon from "@mui/icons-material/Download";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { ToolRegistry } from "@app/data/toolsTaxonomy";
 import ToolConfigurationModal from "@app/components/tools/automate/ToolConfigurationModal";
 import ToolList from "@app/components/tools/automate/ToolList";
@@ -250,7 +249,9 @@ export default function AutomationCreation({
         {/* Action Buttons */}
         <Stack gap="sm">
           <Button
-            leftSection={<CheckIcon />}
+            leftSection={
+              <LocalIcon icon="check-rounded" width="1.5rem" height="1.5rem" />
+            }
             onClick={saveAutomation}
             disabled={!canSaveAutomation()}
             fullWidth
@@ -260,7 +261,13 @@ export default function AutomationCreation({
 
           <Group gap="sm" grow>
             <Button
-              leftSection={<DownloadIcon />}
+              leftSection={
+                <LocalIcon
+                  icon="download-rounded"
+                  width="1.5rem"
+                  height="1.5rem"
+                />
+              }
               onClick={() => {
                 downloadAutomationConfig(buildExportableAutomation());
               }}
@@ -270,7 +277,13 @@ export default function AutomationCreation({
               {t("automate.creation.export", "Export")}
             </Button>
             <Button
-              leftSection={<DownloadIcon />}
+              leftSection={
+                <LocalIcon
+                  icon="download-rounded"
+                  width="1.5rem"
+                  height="1.5rem"
+                />
+              }
               onClick={() => {
                 downloadFolderScanningConfig(
                   buildExportableAutomation(),

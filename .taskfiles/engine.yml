@@ -78,10 +78,27 @@ tasks:
       - uv run pyright . --warnings
 
   test:
-    desc: "Run tests"
+    desc: "Run tests with coverage gate (fail_under in pyproject.toml)"
     deps: [prepare]
     cmds:
-      - uv run pytest tests
+      # I1: coverage is measured + enforced on every test run. The floor lives in
+      # [tool.coverage.report] fail_under; --cov-report=xml emits coverage.xml for CI tooling.
+      - uv run pytest tests --cov=src --cov-branch --cov-report=term-missing --cov-report=xml
+
+  test:cov-html:
+    desc: "Run tests and open an HTML coverage report (engine/htmlcov/index.html)"
+    deps: [prepare]
+    cmds:
+      - uv run pytest tests --cov=src --cov-branch --cov-report=html --cov-report=term
+
+  sbom:
+    desc: "Generate a CycloneDX SBOM for the engine (E2) -> engine/sbom.json"
+    deps: [install]
+    cmds:
+      # cyclonedx-bom (cyclonedx-py) reads the installed .venv environment.
+      - uv run cyclonedx-py environment .venv --of JSON -o sbom.json
+    generates:
+      - sbom.json
 
   fix:
     desc: "Auto-fix lint + format"

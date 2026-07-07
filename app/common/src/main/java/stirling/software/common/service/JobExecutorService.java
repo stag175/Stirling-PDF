@@ -540,7 +540,9 @@ public class JobExecutorService {
      * @throws TimeoutException If the execution times out
      * @throws Exception If the supplier throws an exception
      */
-    private <T> T executeWithTimeout(Supplier<T> supplier, long timeoutMs)
+    // Package-private (not private) so JobExecutorServiceTest can drive the timeout path via a
+    // direct, compile-checked call instead of reflection.
+    <T> T executeWithTimeout(Supplier<T> supplier, long timeoutMs)
             throws TimeoutException, Exception {
         // Use the same executor as other async jobs for consistency
         // This ensures all operations run on the same thread pool

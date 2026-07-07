@@ -3,7 +3,7 @@ import { Modal, Button, Text, Alert, Loader, Stack } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { saasBillingService } from "@app/services/saasBillingService";
 import { Z_INDEX_OVER_CONFIG_MODAL } from "@app/styles/zIndex";
-import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 type CheckoutState = {
   status: "idle" | "loading" | "opened" | "refreshing" | "error";
@@ -123,7 +123,13 @@ export const SaaSStripeCheckout: React.FC<SaaSStripeCheckoutProps> = ({
           <Alert
             color="blue"
             title={t("payment.checkoutOpened", "Checkout Opened in Browser")}
-            icon={<OpenInBrowserIcon />}
+            icon={
+              <LocalIcon
+                icon="open-in-browser-rounded"
+                width="1.5rem"
+                height="1.5rem"
+              />
+            }
           >
             <Stack gap="md">
               <Text size="sm">

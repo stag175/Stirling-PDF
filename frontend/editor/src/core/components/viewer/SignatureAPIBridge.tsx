@@ -319,12 +319,12 @@ export const SignatureAPIBridge = forwardRef<
         const selectedAnnotation = annotationApi.getSelectedAnnotation?.();
 
         if (selectedAnnotation) {
-          const annotation = selectedAnnotation as any;
-          const pageIndex = annotation.object?.pageIndex || 0;
-          const id = annotation.object?.id;
+          const annotationObject = selectedAnnotation.object;
+          const pageIndex = annotationObject?.pageIndex || 0;
+          const id = annotationObject?.id;
 
-          // For STAMP annotations, ensure image data is preserved before deletion
-          if (annotation.object?.type === 13 && id) {
+          // For STAMP annotations (subtype 13), preserve image data before deletion
+          if (annotationObject?.type === PdfAnnotationSubtype.STAMP && id) {
             // Get current annotation data to ensure we have latest image data stored
             const pageAnnotationsTask = annotationApi.getPageAnnotations?.({
               pageIndex,
@@ -332,22 +332,28 @@ export const SignatureAPIBridge = forwardRef<
             if (pageAnnotationsTask) {
               pageAnnotationsTask
                 .toPromise()
-                .then((pageAnnotations: any) => {
+                .then((pageAnnotations) => {
                   const currentAnn = pageAnnotations?.find(
-                    (ann: any) => ann.id === id,
+                    (ann) => ann.id === id,
                   );
-                  if (currentAnn && currentAnn.imageSrc) {
+                  const imageSrc = (currentAnn as { imageSrc?: string } | undefined)
+                    ?.imageSrc;
+                  if (imageSrc) {
                     // Ensure the image data is stored in our persistent store
-                    storeImageData(id, currentAnn.imageSrc);
+                    storeImageData(id, imageSrc);
                   }
                 })
                 .catch(console.error);
             }
           }
 
-          // Use EmbedPDF's native deletion which should integrate with history
-          if ((annotationApi as any).deleteSelected) {
-            (annotationApi as any).deleteSelected();
+          // Use EmbedPDF's native deletion which should integrate with history.
+          // `deleteSelected` is version-dependent and not on the typed capability.
+          const deleteSelected = (
+            annotationApi as { deleteSelected?: () => void }
+          ).deleteSelected;
+          if (deleteSelected) {
+            deleteSelected();
           } else {
             // Fallback to direct deletion - less ideal for history
             if (id) {
@@ -469,17 +475,19 @@ export const SignatureAPIBridge = forwardRef<
         if (pageAnnotationsTask) {
           pageAnnotationsTask
             .toPromise()
-            .then((pageAnnotations: any) => {
+            .then((pageAnnotations) => {
               const annotation = pageAnnotations?.find(
-                (ann: any) => ann.id === annotationId,
+                (ann) => ann.id === annotationId,
               );
+              const imageSrc = (annotation as { imageSrc?: string } | undefined)
+                ?.imageSrc;
               if (
                 annotation &&
                 annotation.type === PdfAnnotationSubtype.STAMP &&
-                annotation.imageSrc
+                imageSrc
               ) {
                 // Store image data before deletion
-                storeImageData(annotationId, annotation.imageSrc);
+                storeImageData(annotationId, imageSrc);
               }
             })
             .catch(console.error);
@@ -526,11 +534,18 @@ export const SignatureAPIBridge = forwardRef<
         if (!annotationApi) return;
         // v2.7.0: move signature stamp to newRect without regenerating the AP stream,
         // preserving the original appearance (image data stays intact).
-        (annotationApi as any).moveAnnotation?.(
-          pageIndex,
-          annotationId,
-          newRect,
-        );
+        // The installed plugin's typed `moveAnnotation` expects a `Position`, but this
+        // codepath intentionally passes a full `AnnotationRect` to the v2.7.0 runtime
+        // behaviour, so we narrow through `unknown` to the rect-based call shape.
+        (
+          annotationApi as unknown as {
+            moveAnnotation?: (
+              pageIndex: number,
+              annotationId: string,
+              newRect: AnnotationRect,
+            ) => void;
+          }
+        ).moveAnnotation?.(pageIndex, annotationId, newRect);
       },
     }),
     [annotationApi, signatureConfig, placementPreviewSize, applyStampDefaults],
@@ -546,7 +561,19 @@ export const SignatureAPIBridge = forwardRef<
         return;
       }
 
-      const annotation: any = event.annotation;
+      // The annotation event payload probes many version/stamp-specific
+      // image-bearing fields that are not on the base annotation type.
+      const annotation = event.annotation as {
+        id?: string;
+        imageSrc?: unknown;
+        imageData?: unknown;
+        appearance?: unknown;
+        stampData?: unknown;
+        contents?: unknown;
+        data?: unknown;
+        customData?: unknown;
+        asset?: unknown;
+      };
       const annotationId: string | undefined = annotation?.id;
       if (!annotationId) {
         return;

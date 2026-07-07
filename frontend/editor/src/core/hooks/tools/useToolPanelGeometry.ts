@@ -13,7 +13,8 @@ interface UseToolPanelGeometryOptions {
   quickAccessRef: RefObject<HTMLDivElement | null>;
 }
 
-function computeGeometry(
+// Exported (was module-private) so the LTR/RTL geometry maths can be unit-tested directly.
+export function computeGeometry(
   panelEl: HTMLDivElement,
   quickAccessRef: RefObject<HTMLDivElement | null>,
 ): ToolPanelGeometry {

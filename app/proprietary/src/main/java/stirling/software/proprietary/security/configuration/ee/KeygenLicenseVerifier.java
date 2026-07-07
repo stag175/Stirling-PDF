@@ -56,10 +56,18 @@ public class KeygenLicenseVerifier {
                     .build();
 
     // License metadata context class to avoid shared mutable state
-    private static class LicenseContext {
-        private boolean isFloatingLicense = false;
-        private int maxMachines = 1; // Default to 1 if not specified
-        private boolean isEnterpriseLicense = false;
+    // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly instead
+    // of via reflection.
+    static class LicenseContext {
+        // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly
+        // instead of via reflection.
+        boolean isFloatingLicense = false;
+        // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly
+        // instead of via reflection.
+        int maxMachines = 1; // Default to 1 if not specified
+        // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly
+        // instead of via reflection.
+        boolean isEnterpriseLicense = false;
 
         public LicenseContext() {}
     }
@@ -101,15 +109,21 @@ public class KeygenLicenseVerifier {
 
     // Removed instance field for isEnterpriseLicense, now using LicenseContext
 
-    private boolean isCertificateLicense(String license) {
+    // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly instead
+    // of via reflection.
+    boolean isCertificateLicense(String license) {
         return license != null && license.trim().startsWith(CERT_PREFIX);
     }
 
-    private boolean isJWTLicense(String license) {
+    // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly instead
+    // of via reflection.
+    boolean isJWTLicense(String license) {
         return license != null && license.trim().startsWith(JWT_PREFIX);
     }
 
-    private boolean verifyCertificateLicense(String licenseFile, LicenseContext context) {
+    // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly instead
+    // of via reflection.
+    boolean verifyCertificateLicense(String licenseFile, LicenseContext context) {
         try {
             String encodedPayload = licenseFile;
             // Remove the header
@@ -177,7 +191,9 @@ public class KeygenLicenseVerifier {
         }
     }
 
-    private boolean verifyEd25519Signature(String encryptedData, String encodedSignature) {
+    // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly instead
+    // of via reflection.
+    boolean verifyEd25519Signature(String encryptedData, String encodedSignature) {
         try {
             log.info("Signature to verify: {}", encodedSignature);
 
@@ -211,7 +227,9 @@ public class KeygenLicenseVerifier {
         }
     }
 
-    private boolean processCertificateData(String certData, LicenseContext context) {
+    // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly instead
+    // of via reflection.
+    boolean processCertificateData(String certData, LicenseContext context) {
         try {
             JsonNode licenseData = objectMapper.readTree(certData);
             JsonNode metaObj = licenseData.path("meta");
@@ -303,7 +321,9 @@ public class KeygenLicenseVerifier {
         }
     }
 
-    private boolean verifyJWTLicense(String licenseKey, LicenseContext context) {
+    // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly instead
+    // of via reflection.
+    boolean verifyJWTLicense(String licenseKey, LicenseContext context) {
         try {
             log.info("Verifying ED25519_SIGN format license key");
 
@@ -373,7 +393,9 @@ public class KeygenLicenseVerifier {
         }
     }
 
-    private boolean processJWTLicensePayload(String payload, LicenseContext context) {
+    // Package-private (not private) so KeygenLicenseVerifierTest can exercise this directly instead
+    // of via reflection.
+    boolean processJWTLicensePayload(String payload, LicenseContext context) {
         try {
             log.info("Processing license payload: {}", payload);
 

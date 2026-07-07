@@ -7,8 +7,6 @@
 
 import React from "react";
 import { Modal, Stack, ActionIcon } from "@mantine/core";
-import DiamondOutlinedIcon from "@mui/icons-material/DiamondOutlined";
-import CloseIcon from "@mui/icons-material/Close";
 
 import type {
   SlideDefinition,
@@ -95,7 +93,12 @@ export default function OnboardingModalSlide({
           />
         )}
         {slideDefinition.hero.type === "diamond" && (
-          <DiamondOutlinedIcon sx={{ fontSize: 64, color: "#000000" }} />
+          <LocalIcon
+            icon="diamond-rounded"
+            width={64}
+            height={64}
+            style={{ color: "#000000" }}
+          />
         )}
         {slideDefinition.hero.type === "logo" && (
           <img
@@ -158,7 +161,11 @@ export default function OnboardingModalSlide({
                 },
               }}
             >
-              <CloseIcon fontSize="small" />
+              <LocalIcon
+                icon="close-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
             </ActionIcon>
           )}
           <div className={styles.heroLogo} key={`logo-${slideContent.key}`}>

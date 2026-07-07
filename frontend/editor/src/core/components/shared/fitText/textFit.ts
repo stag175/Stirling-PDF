@@ -1,17 +1,15 @@
 import { RefObject, useEffect } from "react";
 
-export type AdjustFontSizeOptions = {
-  /** Max font size to start from. Defaults to the element's computed font size. */
-  maxFontSizePx?: number;
-  /** Minimum scale relative to max size (like React Native's minimumFontScale). Default 0.7 */
-  minFontScale?: number;
-  /** Step as a fraction of max size used while shrinking. Default 0.05 (5%). */
-  stepScale?: number;
-  /** Limit the number of lines to fit. If omitted, only width is considered for multi-line. */
-  maxLines?: number;
-  /** If true, force single-line fitting (uses nowrap). Default false. */
-  singleLine?: boolean;
-};
+import {
+  computeMaxHeight,
+  contentFits,
+  type FitOptionsInput,
+  nextFontSize,
+  resolveFitParams,
+  shouldStopShrinking,
+} from "@app/components/shared/fitText/textFitUtils";
+
+export type AdjustFontSizeOptions = FitOptionsInput;
 
 /**
  * Imperative util: progressively reduces font-size until content fits within the element
@@ -24,12 +22,8 @@ export function adjustFontSizeToFit(
   if (!element) return () => {};
 
   const computed = window.getComputedStyle(element);
-  const baseFontPx =
-    options.maxFontSizePx ?? parseFloat(computed.fontSize || "16");
-  const minScale = Math.max(0.1, options.minFontScale ?? 0.7);
-  const stepScale = Math.max(0.005, options.stepScale ?? 0.05);
-  const singleLine = options.singleLine ?? false;
-  const maxLines = options.maxLines;
+  const { baseFontPx, minFontPx, stepPx, singleLine, maxLines } =
+    resolveFitParams(options, parseFloat(computed.fontSize || "16"));
 
   // Ensure measurement is consistent
   if (singleLine) {
@@ -42,9 +36,6 @@ export function adjustFontSizeToFit(
   element.style.setProperty("hyphens", "manual");
   element.style.overflow = "visible";
 
-  const minFontPx = baseFontPx * minScale;
-  const stepPx = Math.max(0.5, baseFontPx * stepScale);
-
   const fit = () => {
     // Reset to largest before measuring
     element.style.fontSize = `${baseFontPx}px`;
@@ -53,19 +44,21 @@ export function adjustFontSizeToFit(
     let maxHeight = Number.POSITIVE_INFINITY;
     if (typeof maxLines === "number" && maxLines > 0) {
       const cs = window.getComputedStyle(element);
-      const lineHeight = parseFloat(cs.lineHeight) || baseFontPx * 1.2;
-      maxHeight = lineHeight * maxLines + 0.1; // small epsilon
+      maxHeight = computeMaxHeight(maxLines, parseFloat(cs.lineHeight), baseFontPx);
     }
 
     let current = baseFontPx;
     // Guard against excessive loops
     let iterations = 0;
     while (iterations < 200) {
-      const fitsWidth = element.scrollWidth <= element.clientWidth + 1; // tolerance
-      const fitsHeight = element.scrollHeight <= maxHeight + 1;
-      const fits = fitsWidth && fitsHeight;
-      if (fits || current <= minFontPx) break;
-      current = Math.max(minFontPx, current - stepPx);
+      const fits = contentFits(
+        element.scrollWidth,
+        element.clientWidth,
+        element.scrollHeight,
+        maxHeight,
+      );
+      if (shouldStopShrinking(fits, current, minFontPx)) break;
+      current = nextFontSize(current, minFontPx, stepPx);
       element.style.fontSize = `${current}px`;
       iterations += 1;
     }

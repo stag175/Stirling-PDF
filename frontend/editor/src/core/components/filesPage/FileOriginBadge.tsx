@@ -1,10 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Tooltip } from "@mantine/core";
-import ComputerIcon from "@mui/icons-material/Computer";
-import CloudDoneIcon from "@mui/icons-material/CloudDone";
-import GroupIcon from "@mui/icons-material/Group";
 
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { FileOrigin } from "@app/components/filesPage/fileOrigin";
 
 interface FileOriginBadgeProps {
@@ -54,7 +52,13 @@ export function FileOriginBadge({
       case "cloud":
         return {
           label: t("filesPage.origin.cloud", "Cloud"),
-          icon: <CloudDoneIcon style={{ fontSize: "0.85rem" }} />,
+          icon: (
+            <LocalIcon
+              icon="cloud-done-rounded"
+              width="0.85rem"
+              height="0.85rem"
+            />
+          ),
           style: styles.cloud,
           tooltip: t(
             "filesPage.origin.cloudHint",
@@ -64,7 +68,9 @@ export function FileOriginBadge({
       case "shared-with-me":
         return {
           label: t("filesPage.origin.shared", "Shared"),
-          icon: <GroupIcon style={{ fontSize: "0.85rem" }} />,
+          icon: (
+            <LocalIcon icon="group-rounded" width="0.85rem" height="0.85rem" />
+          ),
           style: styles.shared,
           tooltip: t("filesPage.origin.sharedHint", "Shared with you via link"),
         };
@@ -72,7 +78,13 @@ export function FileOriginBadge({
       default:
         return {
           label: t("filesPage.origin.local", "Local"),
-          icon: <ComputerIcon style={{ fontSize: "0.85rem" }} />,
+          icon: (
+            <LocalIcon
+              icon="computer-rounded"
+              width="0.85rem"
+              height="0.85rem"
+            />
+          ),
           style: styles.local,
           tooltip: t(
             "filesPage.origin.localHint",

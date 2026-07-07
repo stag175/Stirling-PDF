@@ -7,8 +7,8 @@ import {
   UnstyledButton,
   useMantineTheme,
 } from "@mantine/core";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useTranslation } from "react-i18next";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useMultipleEndpointsEnabled } from "@app/hooks/useEndpointConfig";
 import { isImageFormat, isWebFormat } from "@app/utils/convertUtils";
 import { getConversionEndpoints } from "@app/data/toolsTaxonomy";
@@ -349,9 +349,11 @@ const ConvertSettings = ({
                   "Select a source format first",
                 )}
               </Text>
-              <KeyboardArrowDownIcon
+              <LocalIcon
+                icon="keyboard-arrow-down-rounded"
+                width="1rem"
+                height="1rem"
                 style={{
-                  fontSize: "1rem",
                   color: "var(--select-placeholder-text)",
                 }}
               />

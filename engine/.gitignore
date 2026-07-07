@@ -6,10 +6,21 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 build/
 dist/
 *.egg-info/
+
+# Coverage (I1 — engine coverage gate)
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# SBOM (E2 — generated CycloneDX SBOM artifact)
+sbom.json
 
 # Node
 node_modules/

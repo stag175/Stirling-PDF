@@ -1,6 +1,6 @@
 import { Modal, Stack, Button } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import DiamondOutlinedIcon from "@mui/icons-material/DiamondOutlined";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import AnimatedSlideBackground from "@app/components/onboarding/slides/AnimatedSlideBackground";
 import styles from "@app/components/onboarding/InitialOnboardingModal/InitialOnboardingModal.module.css";
 import { Z_INDEX_OVER_FULLSCREEN_SURFACE } from "@app/styles/zIndex";
@@ -95,7 +95,12 @@ export function TrialExpiredModal({
           />
           <div className={styles.heroLogo}>
             <div className={styles.heroLogoCircle}>
-              <DiamondOutlinedIcon sx={{ fontSize: 64, color: "#000000" }} />
+              <LocalIcon
+                icon="diamond-rounded"
+                width={64}
+                height={64}
+                style={{ color: "#000000" }}
+              />
             </div>
           </div>
         </div>

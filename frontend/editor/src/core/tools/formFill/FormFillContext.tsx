@@ -361,11 +361,15 @@ export function FormFillProvider({
         forFileIdRef.current = fileId ?? null;
         setForFileId(fileId ?? null);
         dispatch({ type: "FETCH_SUCCESS", fields });
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (fetchVersionRef.current !== version) return; // stale
+        const axiosErr = err as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
         const msg =
-          err?.response?.data?.message ||
-          err?.message ||
+          axiosErr?.response?.data?.message ||
+          axiosErr?.message ||
           "Failed to fetch form fields";
         dispatch({ type: "FETCH_ERROR", error: msg });
       }

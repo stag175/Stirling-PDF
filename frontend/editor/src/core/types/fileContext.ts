@@ -5,6 +5,7 @@
 import { PageOperation } from "@app/types/pageEditor";
 import { FileId, BaseFileMetadata } from "@app/types/file";
 import { generateId } from "@app/utils/generateId";
+import { collectRevocableBlobUrls } from "@app/contexts/file/fileLifecycleUtils";
 
 // Re-export FileId for convenience
 export type { FileId };
@@ -77,12 +78,13 @@ export interface StirlingFile extends File {
 
 // Type guard to check if a File object has an embedded fileId
 export function isStirlingFile(file: File | Blob): file is StirlingFile {
+  const candidate = file as Partial<StirlingFile>;
   return (
     file instanceof File &&
     "fileId" in file &&
-    typeof (file as any).fileId === "string" &&
+    typeof candidate.fileId === "string" &&
     "quickKey" in file &&
-    typeof (file as any).quickKey === "string"
+    typeof candidate.quickKey === "string"
   );
 }
 
@@ -105,7 +107,7 @@ export function getFormFillFileId(
   }
 
   // Fallback for Blobs or other objects
-  return `blob-${(file as any).size || 0}`;
+  return `blob-${file.size || 0}`;
 }
 
 // Create a StirlingFile from a regular File object
@@ -157,14 +159,15 @@ export function extractFiles(files: StirlingFile[]): File[] {
 }
 
 // Check if an object is a File or StirlingFile (replaces instanceof File checks)
-export function isFileObject(obj: any): obj is File | StirlingFile {
+export function isFileObject(obj: unknown): obj is File | StirlingFile {
+  if (typeof obj !== "object" || obj === null) return false;
+  const candidate = obj as Partial<File>;
   return (
-    obj &&
-    typeof obj.name === "string" &&
-    typeof obj.size === "number" &&
-    typeof obj.type === "string" &&
-    typeof obj.lastModified === "number" &&
-    typeof obj.arrayBuffer === "function"
+    typeof candidate.name === "string" &&
+    typeof candidate.size === "number" &&
+    typeof candidate.type === "string" &&
+    typeof candidate.lastModified === "number" &&
+    typeof candidate.arrayBuffer === "function"
   );
 }
 
@@ -192,32 +195,15 @@ export function createNewStirlingFileStub(
 }
 
 export function revokeFileResources(record: StirlingFileStub): void {
-  // Only revoke blob: URLs to prevent errors on other schemes
-  if (record.thumbnailUrl && record.thumbnailUrl.startsWith("blob:")) {
+  // The pure decision of which blob: URLs are eligible for revocation lives in
+  // collectRevocableBlobUrls (only blob: schemes, de-duplicated, in field
+  // order). The side-effecting revocation — and error swallowing — stays here.
+  for (const url of collectRevocableBlobUrls(record)) {
     try {
-      URL.revokeObjectURL(record.thumbnailUrl);
+      URL.revokeObjectURL(url);
     } catch (error) {
-      console.warn("Failed to revoke thumbnail URL:", error);
+      console.warn("Failed to revoke object URL:", error);
     }
-  }
-  if (record.blobUrl && record.blobUrl.startsWith("blob:")) {
-    try {
-      URL.revokeObjectURL(record.blobUrl);
-    } catch (error) {
-      console.warn("Failed to revoke blob URL:", error);
-    }
-  }
-  // Clean up processed file thumbnails
-  if (record.processedFile?.pages) {
-    record.processedFile.pages.forEach((page) => {
-      if (page.thumbnail && page.thumbnail.startsWith("blob:")) {
-        try {
-          URL.revokeObjectURL(page.thumbnail);
-        } catch (error) {
-          console.warn("Failed to revoke page thumbnail URL:", error);
-        }
-      }
-    });
   }
 }
 

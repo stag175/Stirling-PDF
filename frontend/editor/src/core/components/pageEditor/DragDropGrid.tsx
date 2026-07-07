@@ -253,7 +253,7 @@ const DraggableItemInner = <T extends DragDropItem>({
   zoomLevel,
 }: DraggableItemProps<T>) => {
   const isPlaceholder = Boolean(item.isPlaceholder);
-  const pageNumber = (item as any).pageNumber ?? index + 1;
+  const pageNumber = item.pageNumber ?? index + 1;
   const {
     attributes,
     listeners,

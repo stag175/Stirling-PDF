@@ -21,12 +21,7 @@ import {
   Textarea,
   UnstyledButton,
 } from "@mantine/core";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import CloseIcon from "@mui/icons-material/Close";
-import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import {
   useChat,
   AiWorkflowPhase,
@@ -142,9 +137,9 @@ function ToolsUsedBlock({
       >
         <Group gap={4} wrap="nowrap">
           {expanded ? (
-            <ExpandLessIcon sx={{ fontSize: 14 }} />
+            <LocalIcon icon="expand-less-rounded" width={14} height={14} />
           ) : (
-            <ExpandMoreIcon sx={{ fontSize: 14 }} />
+            <LocalIcon icon="expand-more-rounded" width={14} height={14} />
           )}
           <Text size="xs" c="dimmed">
             {label}
@@ -259,14 +254,19 @@ export function ChatPanel({ onBack, backLabel }: ChatPanelProps) {
               <span className="chat-panel__agent-pill-label">
                 {t("agents.stirling_name", "Stirling")}
               </span>
-              <KeyboardArrowDownIcon
-                sx={{ fontSize: 18, color: "var(--text-muted)" }}
+              <LocalIcon
+                icon="keyboard-arrow-down-rounded"
+                width={18}
+                height={18}
+                style={{ color: "var(--text-muted)" }}
               />
             </button>
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Item
-              leftSection={<DeleteSweepIcon sx={{ fontSize: 18 }} />}
+              leftSection={
+                <LocalIcon icon="delete-sweep-rounded" width={18} height={18} />
+              }
               onClick={clearChat}
               disabled={messages.length === 0 && !isLoading}
             >
@@ -282,7 +282,7 @@ export function ChatPanel({ onBack, backLabel }: ChatPanelProps) {
           onClick={onBack}
           aria-label={backLabel}
         >
-          <CloseIcon sx={{ fontSize: 18 }} />
+          <LocalIcon icon="close-rounded" width={18} height={18} />
         </ActionIcon>
       </div>
 
@@ -350,7 +350,7 @@ export function ChatPanel({ onBack, backLabel }: ChatPanelProps) {
             disabled={!input.trim() || isLoading}
             aria-label={t("chat.input.send", "Send message")}
           >
-            <ArrowUpwardIcon sx={{ fontSize: 16 }} />
+            <LocalIcon icon="arrow-upward-rounded" width={16} height={16} />
           </ActionIcon>
         </div>
       </div>

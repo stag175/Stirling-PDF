@@ -75,6 +75,11 @@ jobs:
   update-homebrew-and-scoop:
     needs: get-release-info
     runs-on: ubuntu-latest
+    # H4: release approval gate. Gates Homebrew/Scoop auto-publish behind the `package-publish`
+    # GitHub Environment — set required reviewers on it (repo Settings > Environments) to require
+    # manual approval before this job runs. No-op until protection rules are configured, so it is
+    # safe to add now and cannot block existing releases.
+    environment: package-publish
     permissions:
       contents: write
     steps:

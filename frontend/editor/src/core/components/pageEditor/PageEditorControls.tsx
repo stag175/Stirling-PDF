@@ -1,11 +1,5 @@
 import { Tooltip, ActionIcon } from "@mantine/core";
-import UndoIcon from "@mui/icons-material/Undo";
-import RedoIcon from "@mui/icons-material/Redo";
-import ContentCutIcon from "@mui/icons-material/ContentCut";
-import RotateLeftIcon from "@mui/icons-material/RotateLeft";
-import RotateRightIcon from "@mui/icons-material/RotateRight";
-import DeleteIcon from "@mui/icons-material/Delete";
-import InsertPageBreakIcon from "@mui/icons-material/InsertPageBreak";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface PageEditorControlsProps {
   // Close/Reset functions
@@ -142,7 +136,7 @@ const PageEditorControls = ({
             radius="md"
             size="lg"
           >
-            <UndoIcon />
+            <LocalIcon icon="undo-rounded" width="1.5rem" height="1.5rem" />
           </ActionIcon>
         </Tooltip>
         <Tooltip label="Redo">
@@ -156,7 +150,7 @@ const PageEditorControls = ({
             radius="md"
             size="lg"
           >
-            <RedoIcon />
+            <LocalIcon icon="redo-rounded" width="1.5rem" height="1.5rem" />
           </ActionIcon>
         </Tooltip>
 
@@ -184,7 +178,11 @@ const PageEditorControls = ({
             radius="md"
             size="lg"
           >
-            <RotateLeftIcon />
+            <LocalIcon
+              icon="rotate-left-rounded"
+              width="1.5rem"
+              height="1.5rem"
+            />
           </ActionIcon>
         </Tooltip>
         <Tooltip label="Rotate Selected Right">
@@ -201,7 +199,11 @@ const PageEditorControls = ({
             radius="md"
             size="lg"
           >
-            <RotateRightIcon />
+            <LocalIcon
+              icon="rotate-right-rounded"
+              width="1.5rem"
+              height="1.5rem"
+            />
           </ActionIcon>
         </Tooltip>
         <Tooltip label="Delete Selected">
@@ -218,7 +220,7 @@ const PageEditorControls = ({
             radius="md"
             size="lg"
           >
-            <DeleteIcon />
+            <LocalIcon icon="delete-rounded" width="1.5rem" height="1.5rem" />
           </ActionIcon>
         </Tooltip>
         <Tooltip label={getSplitTooltip()}>
@@ -235,7 +237,11 @@ const PageEditorControls = ({
             radius="md"
             size="lg"
           >
-            <ContentCutIcon />
+            <LocalIcon
+              icon="content-cut-rounded"
+              width="1.5rem"
+              height="1.5rem"
+            />
           </ActionIcon>
         </Tooltip>
         <Tooltip label={getPageBreakTooltip()}>
@@ -252,7 +258,11 @@ const PageEditorControls = ({
             radius="md"
             size="lg"
           >
-            <InsertPageBreakIcon />
+            <LocalIcon
+              icon="insert-page-break-rounded"
+              width="1.5rem"
+              height="1.5rem"
+            />
           </ActionIcon>
         </Tooltip>
       </div>

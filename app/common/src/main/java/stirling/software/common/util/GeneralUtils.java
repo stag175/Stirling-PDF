@@ -273,7 +273,14 @@ public class GeneralUtils {
             Urls.create(
                     urlStr, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
             return true;
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | SecurityException e) {
+            // D4: honour the documented boolean contract. Urls.create throws MalformedURLException
+            // for syntactically-broken input, but a *SecurityException* (a RuntimeException) for a
+            // well-formed URL whose scheme is not http(s) or whose host is a denied
+            // common-infrastructure target (loopback, cloud metadata, private ranges, ...). Both
+            // mean "not a valid+allowed URL" and must return false — letting the SecurityException
+            // propagate turned a rejected SSRF target into an unhandled 500 in callers such as
+            // ConvertWebsiteToPDF (which evaluates isValidURL eagerly).
             return false;
         }
     }

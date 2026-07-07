@@ -18,22 +18,8 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from "@mui/icons-material/Close";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import QrCode2Icon from "@mui/icons-material/QrCode2";
-import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
-import GridViewIcon from "@mui/icons-material/GridView";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DriveFileMoveIcon from "@mui/icons-material/DriveFileMove";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import RefreshIcon from "@mui/icons-material/Refresh";
 
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useSharingEnabled } from "@app/hooks/useSharingEnabled";
 import { useFolders } from "@app/contexts/FolderContext";
 import { useFileActions } from "@app/contexts/file/fileHooks";
@@ -894,7 +880,11 @@ export default function FileManagerView() {
                     onClick={handleRefresh}
                     aria-label={t("filesPage.refresh", "Refresh from server")}
                   >
-                    <RefreshIcon />
+                    <LocalIcon
+                      icon="refresh-rounded"
+                      width="1.5rem"
+                      height="1.5rem"
+                    />
                   </ActionIcon>
                 </Tooltip>
                 {newFolderDisabledReason ? (
@@ -908,7 +898,13 @@ export default function FileManagerView() {
                       <Button
                         variant="default"
                         size="sm"
-                        leftSection={<CreateNewFolderIcon fontSize="small" />}
+                        leftSection={
+                          <LocalIcon
+                            icon="create-new-folder-rounded"
+                            width="1.25rem"
+                            height="1.25rem"
+                          />
+                        }
                         disabled
                         styles={{ root: { pointerEvents: "auto" } }}
                       >
@@ -920,7 +916,13 @@ export default function FileManagerView() {
                   <Button
                     variant="default"
                     size="sm"
-                    leftSection={<CreateNewFolderIcon fontSize="small" />}
+                    leftSection={
+                      <LocalIcon
+                        icon="create-new-folder-rounded"
+                        width="1.25rem"
+                        height="1.25rem"
+                      />
+                    }
                     onClick={() => openNewFolderDialog()}
                   >
                     {t("filesPage.newFolder", "New folder")}
@@ -928,7 +930,13 @@ export default function FileManagerView() {
                 )}
                 <Button
                   size="sm"
-                  leftSection={<UploadFileIcon fontSize="small" />}
+                  leftSection={
+                    <LocalIcon
+                      icon="upload-file-rounded"
+                      width="1.25rem"
+                      height="1.25rem"
+                    />
+                  }
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {t("filesPage.upload", "Upload")}
@@ -951,7 +959,11 @@ export default function FileManagerView() {
                         "Upload from Mobile",
                       )}
                     >
-                      <QrCode2Icon fontSize="small" />
+                      <LocalIcon
+                        icon="qr-code-2-rounded"
+                        width="1.25rem"
+                        height="1.25rem"
+                      />
                     </ActionIcon>
                   </Tooltip>
                 )}
@@ -992,7 +1004,7 @@ export default function FileManagerView() {
             aria-label={t("filesPage.dismissError", "Dismiss")}
             onClick={() => folders.setError(null)}
           >
-            <CloseIcon fontSize="small" />
+            <LocalIcon icon="close-rounded" width="1.25rem" height="1.25rem" />
           </ActionIcon>
         </div>
       )}
@@ -1164,7 +1176,13 @@ export default function FileManagerView() {
                       <Tooltip label={addLabel} withinPortal>
                         <Button
                           size="sm"
-                          leftSection={<OpenInNewIcon fontSize="small" />}
+                          leftSection={
+                            <LocalIcon
+                              icon="open-in-new-rounded"
+                              width="1.25rem"
+                              height="1.25rem"
+                            />
+                          }
                           onClick={() => handleAddToWorkspace(selectedFiles)}
                           aria-label={addLabel}
                           data-testid="add-to-workspace"
@@ -1177,7 +1195,13 @@ export default function FileManagerView() {
                           <Button
                             size="sm"
                             variant="subtle"
-                            leftSection={<VisibilityIcon fontSize="small" />}
+                            leftSection={
+                              <LocalIcon
+                                icon="visibility-rounded"
+                                width="1.25rem"
+                                height="1.25rem"
+                              />
+                            }
                             onClick={() => handleQuickView(selectedFiles[0]!)}
                             aria-label={quickViewLabel}
                           >
@@ -1194,7 +1218,13 @@ export default function FileManagerView() {
                           <Button
                             size="sm"
                             variant="default"
-                            leftSection={<CloudUploadIcon fontSize="small" />}
+                            leftSection={
+                              <LocalIcon
+                                icon="upload-rounded"
+                                width="1.25rem"
+                                height="1.25rem"
+                              />
+                            }
                             onClick={() =>
                               setSaveToServerTarget(localOnlySelectedStubs)
                             }
@@ -1218,7 +1248,11 @@ export default function FileManagerView() {
                               size="sm"
                               variant="default"
                               leftSection={
-                                <InfoOutlinedIcon fontSize="small" />
+                                <LocalIcon
+                                  icon="info-rounded"
+                                  width="1.25rem"
+                                  height="1.25rem"
+                                />
                               }
                               onClick={() => setMobileDetailsOpen(true)}
                               aria-label={t(
@@ -1234,7 +1268,13 @@ export default function FileManagerView() {
                         <Button
                           size="sm"
                           variant="default"
-                          leftSection={<DriveFileMoveIcon fontSize="small" />}
+                          leftSection={
+                            <LocalIcon
+                              icon="drive-file-move-rounded"
+                              width="1.25rem"
+                              height="1.25rem"
+                            />
+                          }
                           onClick={() => promptMoveFiles(selectedFiles)}
                           aria-label={moveLabel}
                         >
@@ -1246,7 +1286,13 @@ export default function FileManagerView() {
                           size="sm"
                           color="red"
                           variant="light"
-                          leftSection={<DeleteIcon fontSize="small" />}
+                          leftSection={
+                            <LocalIcon
+                              icon="delete-rounded"
+                              width="1.25rem"
+                              height="1.25rem"
+                            />
+                          }
                           onClick={() => handleRemoveFiles(selectedFiles)}
                           aria-label={removeLabel}
                         >
@@ -1266,7 +1312,11 @@ export default function FileManagerView() {
                             "Clear selection",
                           )}
                         >
-                          <CloseIcon fontSize="small" />
+                          <LocalIcon
+                            icon="close-rounded"
+                            width="1.25rem"
+                            height="1.25rem"
+                          />
                         </ActionIcon>
                       </Tooltip>
                     </Group>
@@ -1383,7 +1433,11 @@ export default function FileManagerView() {
                         className="files-page-view-toggle-icon"
                         title={t("filesPage.viewMode.grid", "Grid view")}
                       >
-                        <GridViewIcon fontSize="small" />
+                        <LocalIcon
+                          icon="grid-view-rounded"
+                          width="1.25rem"
+                          height="1.25rem"
+                        />
                         <span className="files-page-sr-only">
                           {t("filesPage.viewMode.grid", "Grid view")}
                         </span>
@@ -1397,7 +1451,11 @@ export default function FileManagerView() {
                         className="files-page-view-toggle-icon"
                         title={t("filesPage.viewMode.list", "List view")}
                       >
-                        <ViewListIcon fontSize="small" />
+                        <LocalIcon
+                          icon="view-list-rounded"
+                          width="1.25rem"
+                          height="1.25rem"
+                        />
                         <span className="files-page-sr-only">
                           {t("filesPage.viewMode.list", "List view")}
                         </span>
@@ -1461,7 +1519,11 @@ export default function FileManagerView() {
             {isDraggingExternal && (
               <div className="files-page-drop-overlay" aria-live="polite">
                 <span className="files-page-drop-overlay-icon">
-                  <UploadFileIcon />
+                  <LocalIcon
+                    icon="upload-file-rounded"
+                    width="1.5rem"
+                    height="1.5rem"
+                  />
                 </span>
                 <span>
                   {t("filesPage.dropOverlay", "Drop files to upload")}
@@ -1621,7 +1683,12 @@ const SearchField = React.forwardRef<
   const { t } = useTranslation();
   return (
     <div className="files-page-search">
-      <SearchIcon fontSize="small" style={{ color: "var(--text-muted)" }} />
+      <LocalIcon
+        icon="search-rounded"
+        width="1.25rem"
+        height="1.25rem"
+        style={{ color: "var(--text-muted)" }}
+      />
       <input
         ref={ref}
         type="text"
@@ -1640,7 +1707,7 @@ const SearchField = React.forwardRef<
           onClick={() => onChange("")}
           aria-label={t("filesPage.clearSearch", "Clear search")}
         >
-          <CloseIcon fontSize="small" />
+          <LocalIcon icon="close-rounded" width="1.25rem" height="1.25rem" />
         </ActionIcon>
       )}
     </div>
@@ -1723,9 +1790,11 @@ function Breadcrumbs() {
               {entry.name}
             </button>
             {!isLast && (
-              <KeyboardArrowRightIcon
+              <LocalIcon
+                icon="chevron-right-rounded"
                 className="files-page-breadcrumb-sep"
-                fontSize="small"
+                width="1.25rem"
+                height="1.25rem"
                 aria-hidden="true"
               />
             )}

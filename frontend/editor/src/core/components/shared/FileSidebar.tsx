@@ -24,16 +24,9 @@ import {
 } from "@app/contexts/IndexedDBContext";
 import { accountService } from "@app/services/accountService";
 import { GoogleDriveIcon } from "@app/components/shared/CloudStorageIcons";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { Wordmark } from "@app/components/shared/Wordmark";
 import type { StirlingFileStub } from "@app/types/fileContext";
-import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
-import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import CloseIcon from "@mui/icons-material/Close";
-import AddIcon from "@mui/icons-material/Add";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import SettingsIcon from "@mui/icons-material/Settings";
 import type { FileId } from "@app/types/file";
 import { FileItem } from "@app/components/shared/FileSidebarFileItem";
 import "@app/components/shared/FileSidebar.css";
@@ -397,7 +390,13 @@ const FileSidebar = forwardRef<HTMLDivElement, FileSidebarProps>(
                 className="file-sidebar-menu-icon"
                 data-toggle-flip-rtl={toggleIcon ? "true" : undefined}
               >
-                {toggleIcon ?? <MenuIcon />}
+                {toggleIcon ?? (
+                  <LocalIcon
+                    icon="menu-rounded"
+                    width="1.5rem"
+                    height="1.5rem"
+                  />
+                )}
               </span>
               {!collapsed && (
                 <Wordmark
@@ -427,15 +426,26 @@ const FileSidebar = forwardRef<HTMLDivElement, FileSidebarProps>(
               }
             >
               {searchActive && !collapsed ? (
-                <CloseIcon
+                <span
                   className="file-sidebar-search-icon"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleSearchClose();
                   }}
-                />
+                >
+                  <LocalIcon
+                    icon="close-rounded"
+                    width="1.5rem"
+                    height="1.5rem"
+                  />
+                </span>
               ) : (
-                <SearchIcon className="file-sidebar-search-icon" />
+                <LocalIcon
+                  icon="search-rounded"
+                  width="1.5rem"
+                  height="1.5rem"
+                  className="file-sidebar-search-icon"
+                />
               )}
               {!collapsed &&
                 (searchActive ? (
@@ -513,7 +523,12 @@ const FileSidebar = forwardRef<HTMLDivElement, FileSidebarProps>(
                   }
                 }}
               >
-                <UploadFileIcon className="file-sidebar-action-icon" />
+                <LocalIcon
+                  icon="upload-file-rounded"
+                  width="1.5rem"
+                  height="1.5rem"
+                  className="file-sidebar-action-icon"
+                />
                 {!collapsed && (
                   <span className="file-sidebar-action-label sidebar-content-fade">
                     {t("fileSidebar.openFromComputer", "Open from computer")}
@@ -596,7 +611,12 @@ const FileSidebar = forwardRef<HTMLDivElement, FileSidebarProps>(
                   }
                 }}
               >
-                <FolderOpenIcon className="file-sidebar-action-icon" />
+                <LocalIcon
+                  icon="folder-open-rounded"
+                  width="1.5rem"
+                  height="1.5rem"
+                  className="file-sidebar-action-icon"
+                />
                 {!collapsed && (
                   <span className="file-sidebar-action-label sidebar-content-fade">
                     {t("fileSidebar.myFiles", "My Files")}
@@ -672,7 +692,11 @@ const FileSidebar = forwardRef<HTMLDivElement, FileSidebarProps>(
                     type="button"
                     data-testid="open-files-page"
                   >
-                    <OpenInNewIcon sx={{ fontSize: "1rem" }} />
+                    <LocalIcon
+                      icon="open-in-new-rounded"
+                      width="1rem"
+                      height="1rem"
+                    />
                   </button>
                   <button
                     className="file-sidebar-section-btn file-sidebar-section-btn-add"
@@ -680,7 +704,7 @@ const FileSidebar = forwardRef<HTMLDivElement, FileSidebarProps>(
                     title={t("fileSidebar.addFiles", "Add files")}
                     type="button"
                   >
-                    <AddIcon sx={{ fontSize: "1rem" }} />
+                    <LocalIcon icon="add-rounded" width="1rem" height="1rem" />
                   </button>
                 </div>
 
@@ -788,7 +812,11 @@ const FileSidebar = forwardRef<HTMLDivElement, FileSidebarProps>(
             )}
             {onOpenSettings && !collapsed && (
               <div className="file-sidebar-bottom-settings">
-                <SettingsIcon sx={{ fontSize: "1.1rem" }} />
+                <LocalIcon
+                  icon="settings-rounded"
+                  width="1.1rem"
+                  height="1.1rem"
+                />
               </div>
             )}
           </div>

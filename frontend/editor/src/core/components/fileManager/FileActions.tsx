@@ -6,11 +6,8 @@ import {
   Tooltip,
   SegmentedControl,
 } from "@mantine/core";
-import SelectAllIcon from "@mui/icons-material/SelectAll";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import LinkIcon from "@mui/icons-material/Link";
 import { useTranslation } from "react-i18next";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useFileManagerContext } from "@app/contexts/FileManagerContext";
 import { useFileActionTerminology } from "@app/hooks/useFileActionTerminology";
 import { useFileActionIcons } from "@app/hooks/useFileActionIcons";
@@ -22,7 +19,7 @@ const FileActions: React.FC = () => {
   const { t } = useTranslation();
   const terminology = useFileActionTerminology();
   const icons = useFileActionIcons();
-  const DownloadIcon = icons.download;
+  const downloadIcon = icons.download;
   const { config } = useAppConfig();
   const [showBulkUploadModal, setShowBulkUploadModal] = React.useState(false);
   const [showBulkShareModal, setShowBulkShareModal] = React.useState(false);
@@ -138,7 +135,7 @@ const FileActions: React.FC = () => {
             disabled={filteredFiles.length === 0}
             radius="sm"
           >
-            <SelectAllIcon style={{ fontSize: "1rem" }} />
+            <LocalIcon icon="select-all-rounded" width="1rem" height="1rem" />
           </ActionIcon>
         </Tooltip>
         {showStorageFilter && (
@@ -184,7 +181,7 @@ const FileActions: React.FC = () => {
               disabled={!canBulkUpload}
               radius="sm"
             >
-              <CloudUploadIcon style={{ fontSize: "1rem" }} />
+              <LocalIcon icon="upload-rounded" width="1rem" height="1rem" />
             </ActionIcon>
           </Tooltip>
         )}
@@ -198,7 +195,7 @@ const FileActions: React.FC = () => {
               disabled={!canBulkShare}
               radius="sm"
             >
-              <LinkIcon style={{ fontSize: "1rem" }} />
+              <LocalIcon icon="link-rounded" width="1rem" height="1rem" />
             </ActionIcon>
           </Tooltip>
         )}
@@ -211,7 +208,7 @@ const FileActions: React.FC = () => {
             disabled={!hasSelection}
             radius="sm"
           >
-            <DeleteIcon style={{ fontSize: "1rem" }} />
+            <LocalIcon icon="delete-rounded" width="1rem" height="1rem" />
           </ActionIcon>
         </Tooltip>
 
@@ -224,7 +221,7 @@ const FileActions: React.FC = () => {
             disabled={!hasSelection || !hasDownloadAccess}
             radius="sm"
           >
-            <DownloadIcon style={{ fontSize: "1rem" }} />
+            <LocalIcon icon={downloadIcon} width="1rem" height="1rem" />
           </ActionIcon>
         </Tooltip>
       </Group>

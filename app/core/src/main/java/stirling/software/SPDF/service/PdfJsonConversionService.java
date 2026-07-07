@@ -13,8 +13,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
@@ -31,9 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -119,6 +115,10 @@ import stirling.software.SPDF.service.pdfjson.type3.Type3ConversionRequest;
 import stirling.software.SPDF.service.pdfjson.type3.Type3FontConversionService;
 import stirling.software.SPDF.service.pdfjson.type3.Type3GlyphExtractor;
 import stirling.software.SPDF.service.pdfjson.type3.model.Type3GlyphOutline;
+import stirling.software.SPDF.service.pdfjson.util.PdfJsonByteUtils;
+import stirling.software.SPDF.service.pdfjson.util.PdfJsonDateUtils;
+import stirling.software.SPDF.service.pdfjson.util.PdfJsonFontUtils;
+import stirling.software.SPDF.service.pdfjson.util.PdfJsonGraphicsUtils;
 import stirling.software.common.service.CustomPDFDocumentFactory;
 import stirling.software.common.service.TaskManager;
 import stirling.software.common.util.ExceptionUtils;
@@ -674,8 +674,8 @@ public class PdfJsonConversionService {
                 log.debug("Reconstructing page {}", pageNumberValue);
                 PDRectangle pageSize =
                         new PDRectangle(
-                                safeFloat(pageModel.getWidth(), 612f),
-                                safeFloat(pageModel.getHeight(), 792f));
+                                PdfJsonGraphicsUtils.safeFloat(pageModel.getWidth(), 612f),
+                                PdfJsonGraphicsUtils.safeFloat(pageModel.getHeight(), 792f));
                 PDPage page = new PDPage(pageSize);
                 if (pageModel.getRotation() != null) {
                     page.setRotation(pageModel.getRotation());
@@ -1652,7 +1652,7 @@ public class PdfJsonConversionService {
         prioritized.sort(
                 Comparator.comparingInt(
                         c ->
-                                conversionStatusPriority(
+                                PdfJsonFontUtils.conversionStatusPriority(
                                         c.getStatus() != null
                                                 ? c.getStatus()
                                                 : PdfJsonFontConversionStatus.FAILURE)));
@@ -1680,16 +1680,10 @@ public class PdfJsonConversionService {
         }
         sources.sort(
                 Comparator.comparingInt(
-                        source -> fontFormatPreference(source.format(), source.originLabel())));
+                        source ->
+                                PdfJsonFontUtils.fontFormatPreference(
+                                        source.format(), source.originLabel())));
         return sources;
-    }
-
-    private int conversionStatusPriority(PdfJsonFontConversionStatus status) {
-        return switch (status) {
-            case SUCCESS -> 0;
-            case WARNING -> 1;
-            default -> 2;
-        };
     }
 
     private void addCandidatePayload(
@@ -1763,39 +1757,6 @@ public class PdfJsonConversionService {
         }
         if (!coverage.isEmpty()) {
             type3GlyphCoverageCache.put(fontUid, Collections.unmodifiableSet(coverage));
-        }
-    }
-
-    private boolean isGlyphCoveredByType3Font(Set<Integer> coverage, int codePoint) {
-        if (coverage == null || coverage.isEmpty()) {
-            return true;
-        }
-        if (coverage.contains(codePoint)) {
-            return true;
-        }
-        if (codePoint >= 0 && codePoint <= 0xFF) {
-            return coverage.contains(0xF000 | (codePoint & 0xFF));
-        }
-        return false;
-    }
-
-    private int fontFormatPreference(String format, String origin) {
-        if (format == null) {
-            return 5;
-        }
-        switch (format) {
-            case "ttf":
-                return 0;
-            case "truetype":
-                return 1;
-            case "otf":
-            case "cff":
-            case "type1c":
-            case "cidfonttype0c":
-                return 2;
-            default:
-                log.debug("[FONT-DEBUG] Unknown font format '{}' from {}", format, origin);
-                return 4;
         }
     }
 
@@ -2103,8 +2064,8 @@ public class PdfJsonConversionService {
             java.util.regex.Matcher matcher = bfcharPattern.matcher(toUnicodeStr);
             while (matcher.find()) {
                 try {
-                    int charCode = parseToUnicodeCodepoint(matcher.group(1));
-                    int unicode = parseToUnicodeCodepoint(matcher.group(2));
+                    int charCode = PdfJsonFontUtils.parseToUnicodeCodepoint(matcher.group(1));
+                    int unicode = PdfJsonFontUtils.parseToUnicodeCodepoint(matcher.group(2));
                     charCodeToUnicode.put(charCode, unicode);
                 } catch (NumberFormatException entryEx) {
                     // Tolerate a single malformed entry: log and skip rather than aborting the
@@ -2167,42 +2128,6 @@ public class PdfJsonConversionService {
                     e.getMessage());
             return toUnicodeBase64; // Fall back to raw ToUnicode
         }
-    }
-
-    /**
-     * Parse a hex string from a PDF ToUnicode CMap into a single Unicode codepoint. Handles three
-     * cases: a single BMP code unit (4 hex chars), a UTF-16 surrogate pair encoding a supplementary
-     * codepoint above U+FFFF (8 hex chars, e.g. {@code D837DF0E} for U+1F40E), and multi-codepoint
-     * mappings (longer; returns the first codepoint as a best-effort representative).
-     *
-     * <p>Without this, {@code Integer.parseInt("D837DF0E", 16)} overflows because the value is ~3.6
-     * billion, throwing {@link NumberFormatException} and forcing the conversion to fall back to a
-     * raw ToUnicode payload that the JSON&rarr;PDF rebuild then fails to use efficiently.
-     */
-    static int parseToUnicodeCodepoint(String hex) {
-        if (hex == null || hex.isEmpty()) {
-            throw new NumberFormatException("Empty ToUnicode hex value");
-        }
-        if (hex.length() <= 4) {
-            return Integer.parseInt(hex, 16);
-        }
-        // Treat the hex string as UTF-16BE: pairs of hex digits form bytes, four hex digits form
-        // one UTF-16 code unit. The PDF ToUnicode CMap convention requires an even number of bytes
-        // (i.e. a multiple of four hex characters) for multi-unit values.
-        if (hex.length() % 4 != 0) {
-            throw new NumberFormatException(
-                    "ToUnicode hex value not a multiple of 4 chars: " + hex);
-        }
-        int unitCount = hex.length() / 4;
-        char[] units = new char[unitCount];
-        for (int i = 0; i < unitCount; i++) {
-            units[i] = (char) Integer.parseInt(hex.substring(i * 4, i * 4 + 4), 16);
-        }
-        // codePointAt assembles a surrogate pair into a supplementary codepoint when the
-        // high/low surrogates appear in sequence; for any other multi-unit sequence it returns
-        // the first BMP codepoint, which is the right best-effort fallback for ligature
-        // decompositions (one charCode -> several Unicode chars).
-        return new String(units).codePointAt(0);
     }
 
     private PdfJsonFontCidSystemInfo extractCidSystemInfo(COSDictionary fontDictionary) {
@@ -2282,7 +2207,7 @@ public class PdfJsonConversionService {
             String webFormat = null;
             String pdfBase64 = null;
             String pdfFormat = null;
-            if (format != null && isCffFormat(format)) {
+            if (format != null && PdfJsonFontUtils.isCffFormat(format)) {
                 log.debug(
                         "[FONT-DEBUG] Font is CFF format, attempting conversion. CFF conversion enabled: {}, method: {}",
                         fontService.isCffConversionEnabled(),
@@ -2603,7 +2528,7 @@ public class PdfJsonConversionService {
                         try {
                             Calendar creationDate =
                                     DateConverter.toCalendar(creationDateStr.getString());
-                            ann.setCreationDate(formatCalendar(creationDate));
+                            ann.setCreationDate(PdfJsonDateUtils.formatCalendar(creationDate));
                         } catch (Exception e) {
                             log.debug(
                                     "Failed to parse annotation creation date: {}", e.getMessage());
@@ -2614,7 +2539,7 @@ public class PdfJsonConversionService {
                     if (modDateStr != null) {
                         try {
                             Calendar modDate = DateConverter.toCalendar(modDateStr.getString());
-                            ann.setModificationDate(formatCalendar(modDate));
+                            ann.setModificationDate(PdfJsonDateUtils.formatCalendar(modDate));
                         } catch (Exception e) {
                             log.debug(
                                     "Failed to parse annotation modification date: {}",
@@ -2788,8 +2713,9 @@ public class PdfJsonConversionService {
             metadata.setKeywords(info.getKeywords());
             metadata.setCreator(info.getCreator());
             metadata.setProducer(info.getProducer());
-            metadata.setCreationDate(formatCalendar(info.getCreationDate()));
-            metadata.setModificationDate(formatCalendar(info.getModificationDate()));
+            metadata.setCreationDate(PdfJsonDateUtils.formatCalendar(info.getCreationDate()));
+            metadata.setModificationDate(
+                    PdfJsonDateUtils.formatCalendar(info.getModificationDate()));
             metadata.setTrapped(info.getTrapped());
         }
         metadata.setNumberOfPages(document.getNumberOfPages());
@@ -2830,12 +2756,15 @@ public class PdfJsonConversionService {
         info.setCreator(metadata.getCreator());
         info.setProducer(metadata.getProducer());
         if (metadata.getCreationDate() != null) {
-            parseInstant(metadata.getCreationDate())
-                    .ifPresent(instant -> info.setCreationDate(toCalendar(instant)));
+            PdfJsonDateUtils.parseInstant(metadata.getCreationDate())
+                    .ifPresent(
+                            instant -> info.setCreationDate(PdfJsonDateUtils.toCalendar(instant)));
         }
         if (metadata.getModificationDate() != null) {
-            parseInstant(metadata.getModificationDate())
-                    .ifPresent(instant -> info.setModificationDate(toCalendar(instant)));
+            PdfJsonDateUtils.parseInstant(metadata.getModificationDate())
+                    .ifPresent(
+                            instant ->
+                                    info.setModificationDate(PdfJsonDateUtils.toCalendar(instant)));
         }
         info.setTrapped(metadata.getTrapped());
     }
@@ -3443,7 +3372,7 @@ public class PdfJsonConversionService {
             } else if (baseIsType3) {
                 // For actual Type3 fonts without normalized replacement
                 boolean type3SupportsGlyph =
-                        isGlyphCoveredByType3Font(baseType3Coverage, codePoint);
+                        PdfJsonFontUtils.isGlyphCoveredByType3Font(baseType3Coverage, codePoint);
                 if (!type3SupportsGlyph) {
                     targetFont = null;
                     targetFontId = null;
@@ -4297,7 +4226,7 @@ public class PdfJsonConversionService {
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream(encoded.length);
         for (byte b : encoded) {
-            if (isStrippedControlByte(b)) {
+            if (PdfJsonByteUtils.isStrippedControlByte(b)) {
                 continue;
             }
             baos.write(b);
@@ -4309,24 +4238,13 @@ public class PdfJsonConversionService {
         return sanitized;
     }
 
-    private boolean isStrippedControlByte(byte value) {
-        if (value == 0) {
-            return true;
-        }
-        int unsigned = Byte.toUnsignedInt(value);
-        if (unsigned <= 0x1F) {
-            return !(unsigned == 0x09 || unsigned == 0x0A || unsigned == 0x0D);
-        }
-        return false;
-    }
-
     private int countGlyphs(COSString value, PDFont font) {
         if (value == null) {
             return 0;
         }
         if (font != null) {
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(value.getBytes())) {
-                int count = countCodesProtected(inputStream, font::readCode);
+                int count = PdfJsonByteUtils.countCodesProtected(inputStream, font::readCode);
                 if (count > 0) {
                     return count;
                 }
@@ -4336,49 +4254,6 @@ public class PdfJsonConversionService {
         }
         byte[] bytes = value.getBytes();
         return Math.max(1, bytes.length);
-    }
-
-    /**
-     * Functional accessor for {@link PDFont#readCode(InputStream)} so the bounded counting loop can
-     * be exercised in isolation without instantiating a {@link PDFont}.
-     */
-    @FunctionalInterface
-    interface CodeReader {
-        int readCode(InputStream stream) throws IOException;
-    }
-
-    /**
-     * Count how many codes the supplied {@code reader} can extract from {@code inputStream}, with
-     * two safety nets that PDFBox's raw {@link PDFont#readCode(InputStream)} loop lacks:
-     *
-     * <ol>
-     *   <li>Stop when the stream is empty (a corrupt CMap can otherwise loop forever returning
-     *       successfully-matched zero-bytes from an exhausted {@link ByteArrayInputStream}).
-     *   <li>Stop when a {@code readCode} call did not consume any bytes, even if it returned a
-     *       non-{@code -1} value.
-     * </ol>
-     *
-     * <p>Both conditions were observed in the wild on round-tripped fallback fonts where the
-     * embedded ToUnicode CMap matched 0x00 sequences, hanging the JSON&rarr;PDF rebuild.
-     */
-    static int countCodesProtected(ByteArrayInputStream inputStream, CodeReader reader)
-            throws IOException {
-        int count = 0;
-        int previousAvailable = inputStream.available();
-        while (previousAvailable > 0) {
-            int code = reader.readCode(inputStream);
-            if (code == -1) {
-                break;
-            }
-            int currentAvailable = inputStream.available();
-            if (currentAvailable >= previousAvailable) {
-                // No progress made; break to avoid infinite loop on corrupt CMaps.
-                break;
-            }
-            count++;
-            previousAvailable = currentAvailable;
-        }
-        return count;
     }
 
     private MergedText mergeText(List<PdfJsonTextElement> elements) {
@@ -4578,7 +4453,7 @@ public class PdfJsonConversionService {
                     // PDFBox expects TrueType/OpenType data during reconstruction.
                     boolean preferWeb =
                             originalFormat == null
-                                    || isCffFormat(originalFormat)
+                                    || PdfJsonFontUtils.isCffFormat(originalFormat)
                                     || "cidfonttype0c".equals(originalFormat);
                     FontByteSource source = new FontByteSource(bytes, webFormat, "webProgram");
                     if (preferWeb) {
@@ -4840,7 +4715,7 @@ public class PdfJsonConversionService {
                         format,
                         fontBytes.length);
             }
-            if (isType1Format(format)) {
+            if (PdfJsonFontUtils.isType1Format(format)) {
                 try (InputStream stream = new ByteArrayInputStream(fontBytes)) {
                     PDFont font = new PDType1Font(document, stream);
                     if (!skipMetadata) {
@@ -4976,23 +4851,6 @@ public class PdfJsonConversionService {
         }
     }
 
-    private boolean isType1Format(String format) {
-        if (format == null) {
-            return false;
-        }
-        return "type1".equals(format) || format.endsWith("pfb");
-    }
-
-    private boolean isCffFormat(String format) {
-        if (format == null) {
-            return false;
-        }
-        String normalized = format.toLowerCase(Locale.ROOT);
-        return normalized.contains("type1c")
-                || normalized.contains("cidfonttype0c")
-                || "cff".equals(normalized);
-    }
-
     private void applyAdditionalFontMetadata(
             PDDocument document, PDFont font, PdfJsonFont fontModel) throws IOException {
         if (fontModel.getToUnicode() != null && !fontModel.getToUnicode().isBlank()) {
@@ -5042,8 +4900,8 @@ public class PdfJsonConversionService {
             contentStream.setTextMatrix(new Matrix(a, b, c, d, e, f));
             return;
         }
-        float x = safeFloat(element.getX(), 0f);
-        float y = safeFloat(element.getY(), 0f);
+        float x = PdfJsonGraphicsUtils.safeFloat(element.getX(), 0f);
+        float y = PdfJsonGraphicsUtils.safeFloat(element.getY(), 0f);
         contentStream.setTextMatrix(new Matrix(1, 0, 0, 1, x, y));
     }
 
@@ -5067,7 +4925,7 @@ public class PdfJsonConversionService {
                 return horizontalScale;
             }
         }
-        return safeFloat(element.getFontSize(), 12f);
+        return PdfJsonGraphicsUtils.safeFloat(element.getFontSize(), 12f);
     }
 
     private void applyRenderingMode(PDPageContentStream contentStream, Integer renderingMode)
@@ -5075,7 +4933,7 @@ public class PdfJsonConversionService {
         if (renderingMode == null) {
             return;
         }
-        RenderingMode mode = toRenderingMode(renderingMode);
+        RenderingMode mode = PdfJsonGraphicsUtils.toRenderingMode(renderingMode);
         if (mode == null) {
             log.debug("Ignoring unsupported rendering mode {}", renderingMode);
             return;
@@ -5085,35 +4943,6 @@ public class PdfJsonConversionService {
         } catch (IllegalArgumentException ex) {
             log.debug("Failed to apply rendering mode {}: {}", renderingMode, ex.getMessage());
         }
-    }
-
-    private float safeFloat(Float value, float defaultValue) {
-        if (value == null || Float.isNaN(value) || Float.isInfinite(value)) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    private String formatCalendar(Calendar calendar) {
-        if (calendar == null) {
-            return null;
-        }
-        return calendar.toInstant().toString();
-    }
-
-    private Optional<Instant> parseInstant(String value) {
-        try {
-            return Optional.of(Instant.parse(value));
-        } catch (DateTimeParseException ex) {
-            log.warn("Failed to parse instant '{}': {}", value, ex.getMessage());
-            return Optional.empty();
-        }
-    }
-
-    private Calendar toCalendar(Instant instant) {
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.setTimeInMillis(instant.toEpochMilli());
-        return calendar;
     }
 
     private class ImageCollectingEngine extends PDFGraphicsStreamEngine {
@@ -5150,7 +4979,7 @@ public class PdfJsonConversionService {
             }
             Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
             Bounds bounds = computeBounds(ctm);
-            float[] matrixValues = toMatrixValues(ctm);
+            float[] matrixValues = PdfJsonGraphicsUtils.toMatrixValues(ctm);
 
             PdfJsonImageElement element =
                     PdfJsonImageElement.builder()
@@ -5324,17 +5153,6 @@ public class PdfJsonConversionService {
 
     private record EncodedImage(String base64, String format) {}
 
-    private float[] toMatrixValues(Matrix matrix) {
-        return new float[] {
-            matrix.getValue(0, 0),
-            matrix.getValue(0, 1),
-            matrix.getValue(1, 0),
-            matrix.getValue(1, 1),
-            matrix.getValue(2, 0),
-            matrix.getValue(2, 1)
-        };
-    }
-
     private EncodedImage encodeImage(PDImage image) {
         try {
             BufferedImage bufferedImage = image.getImage();
@@ -5447,18 +5265,18 @@ public class PdfJsonConversionService {
         if (transform != null && transform.length == 6) {
             Matrix matrix =
                     new Matrix(
-                            safeFloat(transform[0], 1f),
-                            safeFloat(transform[1], 0f),
-                            safeFloat(transform[2], 0f),
-                            safeFloat(transform[3], 1f),
-                            safeFloat(transform[4], 0f),
-                            safeFloat(transform[5], 0f));
+                            PdfJsonGraphicsUtils.safeFloat(transform[0], 1f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[1], 0f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[2], 0f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[3], 1f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[4], 0f),
+                            PdfJsonGraphicsUtils.safeFloat(transform[5], 0f));
             contentStream.drawImage(image, matrix);
             return;
         }
 
-        float width = safeFloat(element.getWidth(), fallbackWidth(element));
-        float height = safeFloat(element.getHeight(), fallbackHeight(element));
+        float width = PdfJsonGraphicsUtils.safeFloat(element.getWidth(), fallbackWidth(element));
+        float height = PdfJsonGraphicsUtils.safeFloat(element.getHeight(), fallbackHeight(element));
         if (width <= 0f) {
             width = Math.max(1f, fallbackWidth(element));
         }
@@ -5978,32 +5796,6 @@ public class PdfJsonConversionService {
         }
     }
 
-    private RenderingMode toRenderingMode(Integer renderingMode) {
-        if (renderingMode == null) {
-            return null;
-        }
-        switch (renderingMode) {
-            case 0:
-                return RenderingMode.FILL;
-            case 1:
-                return RenderingMode.STROKE;
-            case 2:
-                return RenderingMode.FILL_STROKE;
-            case 3:
-                return RenderingMode.NEITHER;
-            case 4:
-                return RenderingMode.FILL_CLIP;
-            case 5:
-                return RenderingMode.STROKE_CLIP;
-            case 6:
-                return RenderingMode.FILL_STROKE_CLIP;
-            case 7:
-                return RenderingMode.NEITHER_CLIP;
-            default:
-                return null;
-        }
-    }
-
     /**
      * Get the job ID from the current request context
      *
@@ -6383,7 +6175,7 @@ public class PdfJsonConversionService {
                         try {
                             Calendar creationDate =
                                     DateConverter.toCalendar(creationDateStr.getString());
-                            ann.setCreationDate(formatCalendar(creationDate));
+                            ann.setCreationDate(PdfJsonDateUtils.formatCalendar(creationDate));
                         } catch (Exception e) {
                             log.debug(
                                     "Failed to parse annotation creation date: {}", e.getMessage());
@@ -6394,7 +6186,7 @@ public class PdfJsonConversionService {
                     if (modDateStr != null) {
                         try {
                             Calendar modDate = DateConverter.toCalendar(modDateStr.getString());
-                            ann.setModificationDate(formatCalendar(modDate));
+                            ann.setModificationDate(PdfJsonDateUtils.formatCalendar(modDate));
                         } catch (Exception e) {
                             log.debug(
                                     "Failed to parse annotation modification date: {}",
@@ -6695,8 +6487,8 @@ public class PdfJsonConversionService {
         float fallbackWidth = currentBox != null ? currentBox.getWidth() : 612f;
         float fallbackHeight = currentBox != null ? currentBox.getHeight() : 792f;
 
-        float width = safeFloat(pageModel.getWidth(), fallbackWidth);
-        float height = safeFloat(pageModel.getHeight(), fallbackHeight);
+        float width = PdfJsonGraphicsUtils.safeFloat(pageModel.getWidth(), fallbackWidth);
+        float height = PdfJsonGraphicsUtils.safeFloat(pageModel.getHeight(), fallbackHeight);
         PDRectangle newBox = new PDRectangle(width, height);
         page.setMediaBox(newBox);
         page.setCropBox(newBox);

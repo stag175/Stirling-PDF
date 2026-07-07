@@ -122,6 +122,12 @@ tasks:
     cmds:
       - npx vite build editor
 
+  analyze:
+    desc: "Build with bundle visualizer report (frontend/editor/dist/stats.html)"
+    deps: [prepare]
+    cmds:
+      - npm run analyze
+
   build:core:
     desc: "Build for core mode"
     deps: [prepare]
@@ -298,3 +304,15 @@ tasks:
     deps: [install]
     cmds:
       - node editor/scripts/generate-licenses.js
+
+  licenses:check:
+    desc: "Gate frontend production dependency licenses against the allow-list"
+    deps: [install]
+    cmds:
+      - npm run license:check
+
+  sbom:
+    desc: "Generate a CycloneDX SBOM for the frontend (E2) -> frontend/sbom.json"
+    deps: [install]
+    cmds:
+      - npm run sbom

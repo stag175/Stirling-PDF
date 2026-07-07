@@ -210,7 +210,9 @@ public class S3FileStore implements FileStore, AutoCloseable {
         }
     }
 
-    private static String normalizePrefix(String prefix) {
+    // Package-private (not private) so S3FileStoreNormalizePrefixTest can pin the
+    // blank/leading-slash/trailing-slash normalisation.
+    static String normalizePrefix(String prefix) {
         if (prefix == null || prefix.isBlank()) {
             return "";
         }

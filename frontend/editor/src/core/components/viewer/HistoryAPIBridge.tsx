@@ -26,6 +26,9 @@ export const HistoryAPIBridge = forwardRef<HistoryAPI>(
     useEffect(() => {
       if (!annotationApi || !documentReady) return;
 
+      // The annotation/history event payload is probed for many version- and
+      // stamp-specific fields and its values flow into strict EmbedPDF APIs that
+      // the runtime (but not the published types) guarantees; kept `any`.
       const handleAnnotationEvent = (event: any) => {
         const annotation = event.annotation;
 

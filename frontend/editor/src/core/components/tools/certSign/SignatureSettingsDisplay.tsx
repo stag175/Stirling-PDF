@@ -1,9 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Stack, Paper, Text, Group, Badge } from "@mantine/core";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface SignatureSettingsDisplayProps {
   showSignature: boolean;
@@ -33,9 +30,11 @@ const SignatureSettingsDisplay = ({
             <Group gap="xs">
               {showSignature ? (
                 <>
-                  <VisibilityIcon
+                  <LocalIcon
+                    icon="visibility-rounded"
+                    width="16px"
+                    height="16px"
                     style={{
-                      fontSize: "16px",
                       color: "var(--mantine-color-green-6)",
                     }}
                   />
@@ -45,9 +44,11 @@ const SignatureSettingsDisplay = ({
                 </>
               ) : (
                 <>
-                  <VisibilityOffIcon
+                  <LocalIcon
+                    icon="visibility-off-rounded"
+                    width="16px"
+                    height="16px"
                     style={{
-                      fontSize: "16px",
                       color: "var(--mantine-color-gray-6)",
                     }}
                   />
@@ -101,9 +102,11 @@ const SignatureSettingsDisplay = ({
                 <Group gap="xs">
                   {showLogo ? (
                     <>
-                      <CheckIcon
+                      <LocalIcon
+                        icon="check-rounded"
+                        width="16px"
+                        height="16px"
                         style={{
-                          fontSize: "16px",
                           color: "var(--mantine-color-green-6)",
                         }}
                       />
@@ -113,9 +116,11 @@ const SignatureSettingsDisplay = ({
                     </>
                   ) : (
                     <>
-                      <CloseIcon
+                      <LocalIcon
+                        icon="close-rounded"
+                        width="16px"
+                        height="16px"
                         style={{
-                          fontSize: "16px",
                           color: "var(--mantine-color-gray-6)",
                         }}
                       />

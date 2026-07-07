@@ -168,7 +168,9 @@ final class FormPayloadParser {
         return record;
     }
 
-    private static String normalizeFieldValue(JsonNode valueNode) {
+    // Package-private (not private) so FormPayloadParserValueTest can pin the array/object/scalar
+    // normalisation directly.
+    static String normalizeFieldValue(JsonNode valueNode) {
         if (valueNode == null || valueNode.isNull()) {
             return null;
         }
@@ -193,7 +195,8 @@ final class FormPayloadParser {
         return coerceScalarToString(valueNode);
     }
 
-    private static String coerceScalarToString(JsonNode node) {
+    // Package-private (not private) so FormPayloadParserValueTest can pin the scalar coercion.
+    static String coerceScalarToString(JsonNode node) {
         if (node == null || node.isNull()) {
             return null;
         }
@@ -222,7 +225,9 @@ final class FormPayloadParser {
         }
     }
 
-    private static String extractName(JsonNode node) {
+    // Package-private (not private) so FormPayloadParserExtractNameTest can pin the name-key
+    // precedence and nested-field fallback directly.
+    static String extractName(JsonNode node) {
         if (node == null || node.isNull()) {
             return null;
         }
@@ -249,7 +254,9 @@ final class FormPayloadParser {
         return null;
     }
 
-    private static String textProperty(JsonNode node, String... keys) {
+    // Package-private (not private) so FormPayloadParserExtractNameTest can pin the
+    // first-non-blank-key-wins lookup directly.
+    static String textProperty(JsonNode node, String... keys) {
         for (String key : keys) {
             final JsonNode valueNode = node.get(key);
             final String value = coerceScalarToString(valueNode);

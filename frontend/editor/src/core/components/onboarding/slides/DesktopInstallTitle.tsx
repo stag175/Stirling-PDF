@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Menu, ActionIcon } from "@mantine/core";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 export interface OSOption {
   label: string;
@@ -76,7 +76,11 @@ export const DesktopInstallTitle: React.FC<DesktopInstallTitleProps> = ({
               padding: 0,
             }}
           >
-            <ExpandMoreIcon fontSize="small" />
+            <LocalIcon
+              icon="expand-more-rounded"
+              width="1.25rem"
+              height="1.25rem"
+            />
           </ActionIcon>
         </Menu.Target>
         <Menu.Dropdown>

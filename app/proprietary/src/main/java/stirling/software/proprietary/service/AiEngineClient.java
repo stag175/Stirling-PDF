@@ -69,20 +69,33 @@ public class AiEngineClient {
         String url = config.getUrl().stripTrailing() + path;
         log.debug("Proxying AI engine request to {} (timeout {}s)", url, timeout.toSeconds());
 
-        HttpRequest request =
+        HttpRequest.Builder builder =
                 HttpRequest.newBuilder()
                         .uri(URI.create(url))
                         .header("Content-Type", "application/json")
                         .header("Accept", "application/json")
                         .timeout(timeout)
-                        .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                        .build();
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
+        HttpRequest request = applyServiceToken(builder, config).build();
 
         HttpResponse<String> response = sendRequest(request);
 
         log.debug("AI engine responded with status {}", response.statusCode());
         checkResponseStatus(response);
         return response.body();
+    }
+
+    /**
+     * D3: attach the shared service token as {@code X-API-Key} when configured. No-op when blank,
+     * so loopback deployments (engine with no {@code STIRLING_ENGINE_API_KEY}) are unaffected.
+     */
+    private static HttpRequest.Builder applyServiceToken(
+            HttpRequest.Builder builder, ApplicationProperties.AiEngine config) {
+        String apiKey = config.getApiKey();
+        if (apiKey != null && !apiKey.isBlank()) {
+            builder.header("X-API-Key", apiKey);
+        }
+        return builder;
     }
 
     /**
@@ -110,12 +123,14 @@ public class AiEngineClient {
                 timeout.toSeconds());
 
         HttpRequest request =
-                HttpRequest.newBuilder()
-                        .uri(URI.create(url))
-                        .header("Content-Type", "application/json")
-                        .header("Accept", "application/x-ndjson")
-                        .timeout(timeout)
-                        .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                applyServiceToken(
+                                HttpRequest.newBuilder()
+                                        .uri(URI.create(url))
+                                        .header("Content-Type", "application/json")
+                                        .header("Accept", "application/x-ndjson")
+                                        .timeout(timeout)
+                                        .POST(HttpRequest.BodyPublishers.ofString(jsonBody)),
+                                config)
                         .build();
 
         HttpResponse<Stream<String>> response;
@@ -160,11 +175,13 @@ public class AiEngineClient {
         log.debug("Proxying AI engine GET request to {}", url);
 
         HttpRequest request =
-                HttpRequest.newBuilder()
-                        .uri(URI.create(url))
-                        .header("Accept", "application/json")
-                        .timeout(Duration.ofSeconds(config.getTimeoutSeconds()))
-                        .GET()
+                applyServiceToken(
+                                HttpRequest.newBuilder()
+                                        .uri(URI.create(url))
+                                        .header("Accept", "application/json")
+                                        .timeout(Duration.ofSeconds(config.getTimeoutSeconds()))
+                                        .GET(),
+                                config)
                         .build();
 
         HttpResponse<String> response = sendRequest(request);

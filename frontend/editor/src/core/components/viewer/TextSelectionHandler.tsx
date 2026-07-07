@@ -154,7 +154,7 @@ export function TextSelectionHandler({
     if (!selPlugin || !selCapability || !imCapability) return;
 
     const handlers = {
-      onDoubleClick: (pos: Position, _evt: any, modeId: string) => {
+      onDoubleClick: (pos: Position, _evt: unknown, modeId: string) => {
         if (
           Date.now() - tripleClickTimeRef.current <
           TRIPLE_CLICK_TIME_THRESHOLD
@@ -220,7 +220,7 @@ export function TextSelectionHandler({
         }
       },
 
-      onClick: (pos: Position, _evt: any, modeId: string) => {
+      onClick: (pos: Position, _evt: unknown, modeId: string) => {
         const dbl = lastDblClickRef.current;
         if (!dbl) return;
 

@@ -7,6 +7,7 @@ import {
   decodeImageDataUrl,
 } from "@app/utils/pdfiumBitmapUtils";
 import { generateThumbnailWithMetadata } from "@app/utils/thumbnailUtils";
+import { resolveSignaturePdfRect } from "@app/utils/signatureFlatteningUtils";
 import {
   createChildStub,
   createProcessedFile,
@@ -64,6 +65,9 @@ export async function flattenSignatures(
 
   try {
     // Step 1: Extract all annotations from EmbedPDF before export
+    // Annotation objects come from the viewer's `getPageAnnotations` (typed
+    // `Promise<any[]>`) and are probed for many version/stamp-specific fields
+    // (rect/bounds/imageSrc/appearance/...) not on a single published type.
     const allAnnotations: Array<{ pageIndex: number; annotations: any[] }> = [];
 
     if (signatureApiRef?.current) {
@@ -194,16 +198,9 @@ export async function flattenSignatures(
                       annotation.position;
 
                     if (rect) {
-                      const originalX =
-                        rect.origin?.x || rect.x || rect.left || 0;
-                      const originalY =
-                        rect.origin?.y || rect.y || rect.top || 0;
-                      const width = rect.size?.width || rect.width || 100;
-                      const height = rect.size?.height || rect.height || 50;
-
-                      // Convert from CSS top-left to PDF bottom-left
-                      const pdfX = originalX;
-                      const pdfY = pageHeight - originalY - height;
+                      // Resolve position/size fallbacks and flip CSS top-left -> PDF bottom-left.
+                      const { pdfX, pdfY, width, height } =
+                        resolveSignaturePdfRect(rect, pageHeight);
 
                       let imageDataUrl =
                         annotation.imageData ||

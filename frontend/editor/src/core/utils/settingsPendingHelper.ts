@@ -130,11 +130,14 @@ export function getCurrentValue<T extends SettingsWithPending>(
 /**
  * Deep merge two objects. Second object takes priority.
  */
-function deepMerge(target: any, source: any): any {
+function deepMerge(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>,
+): Record<string, unknown> {
   if (!source) return target;
   if (!target) return source;
 
-  const result = { ...target };
+  const result: Record<string, unknown> = { ...target };
 
   for (const key in source) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
@@ -155,17 +158,17 @@ function deepMerge(target: any, source: any): any {
 /**
  * Get nested value using dot notation.
  */
-function getNestedValue(obj: any, path: string): any {
+function getNestedValue(obj: unknown, path: string): unknown {
   if (!obj || !path) return undefined;
 
   const parts = path.split(".");
-  let current = obj;
+  let current: unknown = obj;
 
   for (const part of parts) {
     if (current === null || current === undefined) {
       return undefined;
     }
-    current = current[part];
+    current = (current as Record<string, unknown>)[part];
   }
 
   return current;
@@ -174,8 +177,10 @@ function getNestedValue(obj: any, path: string): any {
 /**
  * Check if value is a plain object (not array, not null, not Date, etc.)
  */
-function isPlainObject(value: any): boolean {
+function isPlainObject(value: unknown): value is Record<string, unknown> {
   return (
-    value !== null && typeof value === "object" && value.constructor === Object
+    value !== null &&
+    typeof value === "object" &&
+    (value as { constructor?: unknown }).constructor === Object
   );
 }

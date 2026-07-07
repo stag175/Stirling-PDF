@@ -13,10 +13,7 @@ import {
   useSavedSignatures,
   SavedSignature,
 } from "@app/hooks/tools/sign/useSavedSignatures";
-import DrawIcon from "@mui/icons-material/Draw";
-import TextFieldsIcon from "@mui/icons-material/TextFields";
-import ImageIcon from "@mui/icons-material/Image";
-import CloseIcon from "@mui/icons-material/Close";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface SelectSignatureModalProps {
   opened: boolean;
@@ -156,7 +153,11 @@ export const SelectSignatureModal: React.FC<SelectSignatureModalProps> = ({
                     )}
                     style={{ margin: "0 6px" }}
                   >
-                    <CloseIcon sx={{ fontSize: "1rem" }} />
+                    <LocalIcon
+                      icon="close-rounded"
+                      width="1rem"
+                      height="1rem"
+                    />
                   </ActionIcon>
                 </Group>
               ))}
@@ -178,7 +179,9 @@ export const SelectSignatureModal: React.FC<SelectSignatureModalProps> = ({
         <Group grow>
           <Button
             variant="outline"
-            leftSection={<DrawIcon />}
+            leftSection={
+              <LocalIcon icon="draw-rounded" width="1.5rem" height="1.5rem" />
+            }
             onClick={() => {
               onCreateNew("canvas");
               onClose();
@@ -188,7 +191,13 @@ export const SelectSignatureModal: React.FC<SelectSignatureModalProps> = ({
           </Button>
           <Button
             variant="outline"
-            leftSection={<TextFieldsIcon />}
+            leftSection={
+              <LocalIcon
+                icon="text-fields-rounded"
+                width="1.5rem"
+                height="1.5rem"
+              />
+            }
             onClick={() => {
               onCreateNew("text");
               onClose();
@@ -198,7 +207,9 @@ export const SelectSignatureModal: React.FC<SelectSignatureModalProps> = ({
           </Button>
           <Button
             variant="outline"
-            leftSection={<ImageIcon />}
+            leftSection={
+              <LocalIcon icon="image-rounded" width="1.5rem" height="1.5rem" />
+            }
             onClick={() => {
               onCreateNew("image");
               onClose();

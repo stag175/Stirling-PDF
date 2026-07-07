@@ -30,8 +30,10 @@ import stirling.software.common.model.api.misc.ReplaceAndInvert;
 @Slf4j
 public class CustomColorReplaceStrategy extends ReplaceAndInvertColorStrategy {
 
-    private String textColor;
-    private String backgroundColor;
+    // Package-private (not private) so CustomColorReplaceStrategyTest can assert the resolved
+    // high-contrast colours via direct field reads instead of reflection.
+    String textColor;
+    String backgroundColor;
     private HighContrastColorCombination highContrastColorCombination;
 
     public CustomColorReplaceStrategy(
@@ -161,7 +163,8 @@ public class CustomColorReplaceStrategy extends ReplaceAndInvertColorStrategy {
         }
     }
 
-    private PDFont checkSupportedFontForCharacter(String unicodeText) {
+    // Package-private (not private) so CustomColorReplaceStrategyTest can call this directly.
+    PDFont checkSupportedFontForCharacter(String unicodeText) {
 
         Set<String> fonts = Standard14Fonts.getNames();
         for (String font : fonts) {

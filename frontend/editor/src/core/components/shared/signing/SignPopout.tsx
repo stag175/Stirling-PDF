@@ -300,6 +300,7 @@ const SignPopout = ({
 
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [isOpen, activeTab, showCreatePanel, fetchData]);
 
   // Combine and filter sessions
@@ -536,8 +537,11 @@ const SignPopout = ({
             pdfFile = new File([pdfResponse.data], session.documentName, {
               type: "application/pdf",
             });
-          } catch (pdfError: any) {
-            if (pdfError?.response?.status === 404) {
+          } catch (pdfError: unknown) {
+            if (
+              (pdfError as { response?: { status?: number } })?.response
+                ?.status === 404
+            ) {
               // Finalized but signed PDF not available - backend issue
               alert({
                 alertType: "warning",

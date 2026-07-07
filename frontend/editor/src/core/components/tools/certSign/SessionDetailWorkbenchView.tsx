@@ -13,11 +13,7 @@ import {
 } from "@mantine/core";
 import { useIsPhone } from "@app/hooks/useIsMobile";
 import { alert } from "@app/components/toast";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { Z_INDEX_FULLSCREEN_SURFACE } from "@app/styles/zIndex";
 import { SessionDetail } from "@app/types/signingSession";
 import {
@@ -87,6 +83,7 @@ const SessionDetailWorkbenchView = ({
       }, 30000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [session.finalized, onRefresh]);
 
   const handleAddParticipants = async (
@@ -244,7 +241,13 @@ const SessionDetailWorkbenchView = ({
         <Group justify="space-between">
           <Group gap="md">
             <Button
-              leftSection={<ArrowBackIcon />}
+              leftSection={
+                <LocalIcon
+                  icon="arrow-back-rounded"
+                  width="1.5rem"
+                  height="1.5rem"
+                />
+              }
               variant="subtle"
               onClick={onBack}
               size="sm"
@@ -296,7 +299,11 @@ const SessionDetailWorkbenchView = ({
                   onClick={() => annotationApiRef.current?.zoomOut()}
                   title={t("viewer.zoomOut", "Zoom out")}
                 >
-                  <ZoomOutIcon fontSize="small" />
+                  <LocalIcon
+                    icon="zoom-out-rounded"
+                    width="1.25rem"
+                    height="1.25rem"
+                  />
                 </Button>
                 <Button
                   variant="default"
@@ -304,7 +311,11 @@ const SessionDetailWorkbenchView = ({
                   onClick={() => annotationApiRef.current?.resetZoom()}
                   title={t("viewer.resetZoom", "Reset zoom")}
                 >
-                  <ZoomOutMapIcon fontSize="small" />
+                  <LocalIcon
+                    icon="zoom-out-map-rounded"
+                    width="1.25rem"
+                    height="1.25rem"
+                  />
                 </Button>
                 <Button
                   variant="default"
@@ -312,7 +323,11 @@ const SessionDetailWorkbenchView = ({
                   onClick={() => annotationApiRef.current?.zoomIn()}
                   title={t("viewer.zoomIn", "Zoom in")}
                 >
-                  <ZoomInIcon fontSize="small" />
+                  <LocalIcon
+                    icon="zoom-in-rounded"
+                    width="1.25rem"
+                    height="1.25rem"
+                  />
                 </Button>
               </Button.Group>
             )}
@@ -320,7 +335,13 @@ const SessionDetailWorkbenchView = ({
             {/* Delete Session Button */}
             {!session.finalized && (
               <Button
-                leftSection={<DeleteIcon />}
+                leftSection={
+                  <LocalIcon
+                    icon="delete-rounded"
+                    width="1.5rem"
+                    height="1.5rem"
+                  />
+                }
                 color="red"
                 variant="outline"
                 onClick={() => setDeleteModalOpen(true)}

@@ -7,6 +7,11 @@ import {
   renderPdfiumPageDataUrl,
   readPdfiumPageMetadata,
 } from "@app/utils/pdfiumPageRender";
+import { calculateScaleFromFileSize } from "@app/utils/thumbnailScaleUtils";
+
+// Re-exported for backwards compatibility; the implementation now lives in a pure,
+// WASM-free module so it can be unit-tested without pulling in the PDFium service.
+export { calculateScaleFromFileSize };
 
 export interface ThumbnailWithMetadata {
   thumbnail: string; // Always returns a thumbnail (placeholder if needed)
@@ -14,18 +19,6 @@ export interface ThumbnailWithMetadata {
   pageRotations?: number[]; // Rotation for each page (0, 90, 180, 270)
   pageDimensions?: Array<{ width: number; height: number }>;
   isEncrypted?: boolean;
-}
-
-/**
- * Calculate thumbnail scale based on file size (modern 2024 scaling)
- */
-export function calculateScaleFromFileSize(fileSize: number): number {
-  const MB = 1024 * 1024;
-  if (fileSize < 10 * MB) return 1.0; // Full quality for small files
-  if (fileSize < 50 * MB) return 0.8; // High quality for common file sizes
-  if (fileSize < 200 * MB) return 0.6; // Good quality for typical large files
-  if (fileSize < 500 * MB) return 0.4; // Readable quality for large but manageable files
-  return 0.3; // Still usable quality, not tiny
 }
 
 /** PDFium error code 4 = password required (encrypted PDF). */

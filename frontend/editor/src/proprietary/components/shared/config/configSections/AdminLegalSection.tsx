@@ -9,8 +9,8 @@ import {
   Group,
   Alert,
 } from "@mantine/core";
-import WarningIcon from "@mui/icons-material/Warning";
 import { alert } from "@app/components/toast";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import RestartConfirmationModal from "@app/components/shared/config/RestartConfirmationModal";
 import { useRestartServer } from "@app/components/shared/config/useRestartServer";
 import { useAdminSettings } from "@app/hooks/useAdminSettings";
@@ -110,7 +110,7 @@ export default function AdminLegalSection() {
 
         {/* Legal Disclaimer */}
         <Alert
-          icon={<WarningIcon style={{ fontSize: 18 }} />}
+          icon={<LocalIcon icon="warning-rounded" width={18} height={18} />}
           title={t(
             "admin.settings.legal.disclaimer.title",
             "Legal Responsibility Warning",

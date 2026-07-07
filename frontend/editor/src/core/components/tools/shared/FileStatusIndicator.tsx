@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Text, Anchor } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import FolderIcon from "@mui/icons-material/Folder";
-import UploadIcon from "@mui/icons-material/Upload";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useFilesModalContext } from "@app/contexts/FilesModalContext";
 import { useAllFiles } from "@app/contexts/FileContext";
 import { useFileManager } from "@app/hooks/useFileManager";
@@ -85,7 +84,11 @@ const FileStatusIndicator = ({
               gap: "0.25rem",
             }}
           >
-            <UploadIcon style={{ fontSize: "0.875rem" }} />
+            <LocalIcon
+              icon="upload-rounded"
+              width="0.875rem"
+              height="0.875rem"
+            />
             {t("files.upload", "Upload")}
           </Anchor>
         </Text>
@@ -104,7 +107,11 @@ const FileStatusIndicator = ({
               gap: "0.25rem",
             }}
           >
-            <FolderIcon style={{ fontSize: "0.875rem" }} />
+            <LocalIcon
+              icon="folder-rounded"
+              width="0.875rem"
+              height="0.875rem"
+            />
             {t("files.addFiles", "Add files")}
           </Anchor>
         </Text>
@@ -129,7 +136,11 @@ const FileStatusIndicator = ({
               gap: "0.25rem",
             }}
           >
-            <UploadIcon style={{ fontSize: "0.875rem" }} />
+            <LocalIcon
+              icon="upload-rounded"
+              width="0.875rem"
+              height="0.875rem"
+            />
             {t("files.uploadFiles", "Upload Files")}
           </Anchor>
         </Text>
@@ -149,7 +160,11 @@ const FileStatusIndicator = ({
               gap: "0.25rem",
             }}
           >
-            <FolderIcon style={{ fontSize: "0.875rem" }} />
+            <LocalIcon
+              icon="folder-rounded"
+              width="0.875rem"
+              height="0.875rem"
+            />
             {t("files.addFiles", "Add files")}
           </Anchor>
         </Text>

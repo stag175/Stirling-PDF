@@ -79,7 +79,7 @@ export function useSavedAutomations() {
         const savedAutomation = {
           name: suggestedAutomation.name,
           description: suggestedAutomation.description,
-          icon: getIconKey(suggestedAutomation.icon),
+          icon: getIconKey(suggestedAutomation),
           operations: suggestedAutomation.operations,
         };
 

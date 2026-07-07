@@ -53,7 +53,7 @@ const detectSignaturesInFile = async (
 
       // Count signature annotations (Type: /Sig)
       const signatureAnnotations = annotations.filter(
-        (annotation: any) =>
+        (annotation: { subtype?: string; fieldType?: string }) =>
           annotation.subtype === "Widget" && annotation.fieldType === "Sig",
       );
 

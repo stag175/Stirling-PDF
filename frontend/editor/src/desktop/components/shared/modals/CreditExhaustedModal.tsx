@@ -9,7 +9,7 @@ import {
   Alert,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { useSaaSBilling } from "@app/contexts/SaasBillingContext";
 import { useSaaSTeam } from "@app/contexts/SaaSTeamContext";
 import {
@@ -157,8 +157,11 @@ export function CreditExhaustedModal({
           >
             <Stack gap="md">
               <Group gap="xs" align="center">
-                <TrendingUpIcon
-                  sx={{ fontSize: 24, color: "var(--color-primary-600)" }}
+                <LocalIcon
+                  icon="trending-up-rounded"
+                  width={24}
+                  height={24}
+                  style={{ color: "var(--color-primary-600)" }}
                 />
                 <Text size="lg" fw={600}>
                   {t(
@@ -239,7 +242,9 @@ export function CreditExhaustedModal({
               size="lg"
               loading={enablingMetering}
               disabled={!isTeamLeader}
-              leftSection={<TrendingUpIcon sx={{ fontSize: 18 }} />}
+              leftSection={
+                <LocalIcon icon="trending-up-rounded" width={18} height={18} />
+              }
               style={{
                 fontWeight: 600,
               }}

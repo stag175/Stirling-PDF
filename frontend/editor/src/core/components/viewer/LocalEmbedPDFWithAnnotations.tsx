@@ -51,7 +51,7 @@ import {
 import { CustomSearchLayer } from "@app/components/viewer/CustomSearchLayer";
 import ToolLoadingFallback from "@app/components/tools/ToolLoadingFallback";
 import { ActionIcon, Center, Stack, Text, Tooltip } from "@mantine/core";
-import CloseIcon from "@mui/icons-material/Close";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { ScrollAPIBridge } from "@app/components/viewer/ScrollAPIBridge";
 import { SelectionAPIBridge } from "@app/components/viewer/SelectionAPIBridge";
 import { PanAPIBridge } from "@app/components/viewer/PanAPIBridge";
@@ -241,6 +241,7 @@ export const LocalEmbedPDFWithAnnotations = forwardRef<
       } else if (url) {
         setPdfUrl(url);
       }
+      return undefined;
     }, [file, url]);
 
     // Notify parent when signature previews change
@@ -655,8 +656,10 @@ export const LocalEmbedPDFWithAnnotations = forwardRef<
                                           }}
                                           aria-label="Delete signature"
                                         >
-                                          <CloseIcon
-                                            style={{ fontSize: "0.8rem" }}
+                                          <LocalIcon
+                                            icon="close-rounded"
+                                            width="0.8rem"
+                                            height="0.8rem"
                                           />
                                         </ActionIcon>
                                       )}

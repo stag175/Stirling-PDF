@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import CompareRoundedIcon from "@mui/icons-material/CompareRounded";
-import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
   Group,
@@ -11,7 +9,7 @@ import {
   Modal,
   ActionIcon,
 } from "@mantine/core";
-import SwapVertRoundedIcon from "@mui/icons-material/SwapVertRounded";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { createToolFlow } from "@app/components/tools/shared/createToolFlow";
 import { useBaseTool } from "@app/hooks/tools/shared/useBaseTool";
 import { BaseToolProps, ToolComponent } from "@app/types/tool";
@@ -66,7 +64,7 @@ const Compare = (props: BaseToolProps) => {
   const params = base.params.parameters;
 
   const compareIcon = useMemo(
-    () => <CompareRoundedIcon fontSize="small" />,
+    () => <LocalIcon icon="compare-rounded" width="1.25rem" height="1.25rem" />,
     [],
   );
   const [swapConfirmOpen, setSwapConfirmOpen] = useState(false);
@@ -379,7 +377,11 @@ const Compare = (props: BaseToolProps) => {
               onClick={() => clearSlot(role)}
               aria-label={t("compare.clearSlot", "Remove file")}
             >
-              <CloseIcon fontSize="small" />
+              <LocalIcon
+                icon="close-rounded"
+                width="1.25rem"
+                height="1.25rem"
+              />
             </ActionIcon>
             <Group align="flex-start" wrap="nowrap" gap="md">
               <Box style={{ alignSelf: "center" }}>
@@ -516,9 +518,11 @@ const Compare = (props: BaseToolProps) => {
                   disabled={base.operation.isLoading}
                   aria-label={t("compare.swap.label", "Swap")}
                 >
-                  <SwapVertRoundedIcon
+                  <LocalIcon
+                    icon="swap-vert-rounded"
                     className="compare-step-selection__swap-icon"
-                    fontSize="inherit"
+                    width="1em"
+                    height="1em"
                   />
                   <span className="compare-step-selection__swap-label">
                     {t("compare.swap.label", "Swap")}

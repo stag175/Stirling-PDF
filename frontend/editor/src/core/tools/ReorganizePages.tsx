@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { createToolFlow } from "@app/components/tools/shared/createToolFlow";
-import { BaseToolProps, ToolComponent } from "@app/types/tool";
+import {
+  AutomationCapableTool,
+  BaseToolProps,
+  ToolComponent,
+} from "@app/types/tool";
 import { useEndpointEnabled } from "@app/hooks/useEndpointConfig";
 import { useViewScopedFiles } from "@app/hooks/tools/shared/useViewScopedFiles";
 import { useAccordionSteps } from "@app/hooks/tools/shared/useAccordionSteps";
@@ -34,9 +38,9 @@ const ReorganizePages = ({
       if (operation.files && onComplete) {
         onComplete(operation.files);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       onError?.(
-        error?.message ||
+        (error as { message?: string })?.message ||
           t("reorganizePages.error.failed", "Failed to reorganize pages"),
       );
     }
@@ -107,6 +111,7 @@ const ReorganizePages = ({
   });
 };
 
-(ReorganizePages as any).tool = () => useReorganizePagesOperation;
+(ReorganizePages as unknown as AutomationCapableTool).tool = () =>
+  useReorganizePagesOperation;
 
 export default ReorganizePages as ToolComponent;

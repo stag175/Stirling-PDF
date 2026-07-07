@@ -182,7 +182,7 @@ export const FilesModalProvider: React.FC<{ children: React.ReactNode }> = ({
         responseType: "blob",
         suppressErrorToast: true,
         skipAuthRedirect: true,
-      } as any,
+      },
     );
     const contentType =
       (response.headers &&
@@ -208,7 +208,7 @@ export const FilesModalProvider: React.FC<{ children: React.ReactNode }> = ({
         responseType: "blob",
         suppressErrorToast: true,
         skipAuthRedirect: true,
-      } as any,
+      },
     );
     const contentType =
       (response.headers &&

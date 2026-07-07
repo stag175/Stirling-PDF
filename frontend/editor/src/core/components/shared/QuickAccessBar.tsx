@@ -157,6 +157,7 @@ const QuickAccessBar = forwardRef<HTMLDivElement>((_, ref) => {
       }, 500);
       return () => clearTimeout(timeout);
     }
+    return undefined;
   }, [signMenuOpen, groupSigningEnabled]);
 
   const configButtonIcon = useConfigButtonIcon();

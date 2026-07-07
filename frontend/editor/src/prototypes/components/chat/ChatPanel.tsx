@@ -21,12 +21,7 @@ import {
   UnstyledButton,
   List,
 } from "@mantine/core";
-import SendIcon from "@mui/icons-material/Send";
-import StopIcon from "@mui/icons-material/Stop";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutlined";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import {
   useChat,
   AiWorkflowPhase,
@@ -150,9 +145,9 @@ function ToolsUsedBlock({
       >
         <Group gap={4} wrap="nowrap">
           {expanded ? (
-            <ExpandLessIcon sx={{ fontSize: 14 }} />
+            <LocalIcon icon="expand-less-rounded" width={14} height={14} />
           ) : (
-            <ExpandMoreIcon sx={{ fontSize: 14 }} />
+            <LocalIcon icon="expand-more-rounded" width={14} height={14} />
           )}
           <Text size="xs" c="dimmed">
             {label}
@@ -270,7 +265,7 @@ export function ChatPanel(_props: ChatPanelProps = {}) {
           onClick={toggleOpen}
           aria-label="Open chat"
         >
-          <ChatBubbleOutlineIcon sx={{ fontSize: 24 }} />
+          <LocalIcon icon="chat-bubble-rounded" width={24} height={24} />
         </ActionIcon>
       )}
 
@@ -289,7 +284,7 @@ export function ChatPanel(_props: ChatPanelProps = {}) {
                 onClick={toggleOpen}
                 aria-label="Close chat"
               >
-                <CloseIcon sx={{ fontSize: 16 }} />
+                <LocalIcon icon="close-rounded" width={16} height={16} />
               </ActionIcon>
             </div>
 
@@ -351,7 +346,7 @@ export function ChatPanel(_props: ChatPanelProps = {}) {
                       onClick={cancelMessage}
                       aria-label="Stop generating"
                     >
-                      <StopIcon sx={{ fontSize: 14 }} />
+                      <LocalIcon icon="stop-rounded" width={14} height={14} />
                     </ActionIcon>
                   ) : (
                     <ActionIcon
@@ -362,7 +357,7 @@ export function ChatPanel(_props: ChatPanelProps = {}) {
                       disabled={!input.trim()}
                       aria-label="Send message"
                     >
-                      <SendIcon sx={{ fontSize: 14 }} />
+                      <LocalIcon icon="send-rounded" width={14} height={14} />
                     </ActionIcon>
                   )
                 }

@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig, loadEnv, type PluginOption } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -78,12 +79,19 @@ export default defineConfig(async ({ mode }) => {
       tsconfigPaths({
         projects: [tsconfigProject],
       }),
-      // Set ANALYZE=true to emit dist/stats.html (treemap) alongside the
-      // build; rollup-plugin-visualizer is ESM-only so we import dynamically.
-      ...(process.env.ANALYZE === "true"
+      // Build with `--mode analyze` (cross-platform, no env-var prefix needed)
+      // to emit dist/stats.html (treemap) alongside the build. ANALYZE=true is
+      // also honoured for backwards compatibility. rollup-plugin-visualizer is
+      // ESM-only so we import it dynamically. Gated so normal builds are
+      // unaffected.
+      ...(mode === "analyze" || process.env.ANALYZE === "true"
         ? [
             (await import("rollup-plugin-visualizer")).visualizer({
-              filename: "dist/stats.html",
+              // Anchor to this config's dir (frontend/editor/) so the report
+              // always lands at editor/dist/stats.html regardless of the cwd
+              // the build was invoked from. A bare relative path resolves
+              // against process.cwd() (frontend/) and would miss editor/.
+              filename: path.resolve(import.meta.dirname, "dist/stats.html"),
               template: "treemap",
               gzipSize: true,
               brotliSize: true,

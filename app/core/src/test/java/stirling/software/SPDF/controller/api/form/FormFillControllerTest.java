@@ -333,55 +333,50 @@ class FormFillControllerTest {
     // ── buildBaseName ──────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("buildBaseName (via reflection)")
+    @DisplayName("buildBaseName (direct, compile-checked)")
     class BuildBaseName {
 
         @Test
         @DisplayName("strips .pdf extension and appends suffix")
-        void stripsExtension() throws Exception {
-            var method =
-                    FormFillController.class.getDeclaredMethod(
-                            "buildBaseName",
-                            org.springframework.web.multipart.MultipartFile.class,
-                            String.class);
-            method.setAccessible(true);
-
+        void stripsExtension() {
             MockMultipartFile file =
                     new MockMultipartFile("file", "report.pdf", "application/pdf", new byte[] {1});
-            String result = (String) method.invoke(null, file, "filled");
-            assertThat(result).isEqualTo("report_filled");
+            assertThat(FormFillController.buildBaseName(file, "filled")).isEqualTo("report_filled");
         }
 
         @Test
         @DisplayName("handles file without .pdf extension")
-        void noPdfExtension() throws Exception {
-            var method =
-                    FormFillController.class.getDeclaredMethod(
-                            "buildBaseName",
-                            org.springframework.web.multipart.MultipartFile.class,
-                            String.class);
-            method.setAccessible(true);
-
+        void noPdfExtension() {
             MockMultipartFile file =
                     new MockMultipartFile("file", "report.docx", "application/pdf", new byte[] {1});
-            String result = (String) method.invoke(null, file, "filled");
-            assertThat(result).isEqualTo("report.docx_filled");
+            assertThat(FormFillController.buildBaseName(file, "filled"))
+                    .isEqualTo("report.docx_filled");
         }
 
         @Test
         @DisplayName("uses 'document' for null original filename")
-        void nullFilename() throws Exception {
-            var method =
-                    FormFillController.class.getDeclaredMethod(
-                            "buildBaseName",
-                            org.springframework.web.multipart.MultipartFile.class,
-                            String.class);
-            method.setAccessible(true);
-
+        void nullFilename() {
             MockMultipartFile file =
                     new MockMultipartFile("file", null, "application/pdf", new byte[] {1});
-            String result = (String) method.invoke(null, file, "filled");
-            assertThat(result).isEqualTo("document_filled");
+            assertThat(FormFillController.buildBaseName(file, "filled"))
+                    .isEqualTo("document_filled");
+        }
+
+        @Test
+        @DisplayName("uses 'document' for blank original filename")
+        void blankFilename() {
+            MockMultipartFile file =
+                    new MockMultipartFile("file", "   ", "application/pdf", new byte[] {1});
+            assertThat(FormFillController.buildBaseName(file, "filled"))
+                    .isEqualTo("document_filled");
+        }
+
+        @Test
+        @DisplayName(".pdf match is case-insensitive")
+        void uppercasePdfExtension() {
+            MockMultipartFile file =
+                    new MockMultipartFile("file", "REPORT.PDF", "application/pdf", new byte[] {1});
+            assertThat(FormFillController.buildBaseName(file, "filled")).isEqualTo("REPORT_filled");
         }
     }
 }

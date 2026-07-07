@@ -2,8 +2,7 @@ import React from "react";
 import { ActionIcon } from "@mantine/core";
 import type { MantineSize } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import StarRoundedIcon from "@mui/icons-material/StarRounded";
-import StarBorderRoundedIcon from "@mui/icons-material/StarBorderRounded";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface FavoriteStarProps {
   isFavorite: boolean;
@@ -44,15 +43,14 @@ const FavoriteStar: React.FC<FavoriteStarProps> = ({
       }
     >
       {isFavorite ? (
-        <StarRoundedIcon
-          fontSize="inherit"
-          style={{ color: "var(--special-color-favorites)", fontSize: "1rem" }}
+        <LocalIcon
+          icon="star-rounded"
+          width="1rem"
+          height="1rem"
+          style={{ color: "var(--special-color-favorites)" }}
         />
       ) : (
-        <StarBorderRoundedIcon
-          fontSize="inherit"
-          style={{ fontSize: "1rem" }}
-        />
+        <LocalIcon icon="star-outline-rounded" width="1rem" height="1rem" />
       )}
     </ActionIcon>
   );

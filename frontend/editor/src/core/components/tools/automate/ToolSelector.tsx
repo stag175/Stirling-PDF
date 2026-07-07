@@ -153,6 +153,7 @@ export default function ToolSelector({
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
+    return undefined;
   }, [opened]);
 
   const handleSearchChange = (value: string) => {

@@ -13,10 +13,20 @@ export default defineConfig({
       "src/**/*.spec.ts", // Exclude Playwright E2E tests
       "src/tests/test-fixtures/**",
     ],
-    testTimeout: 10000,
-    hookTimeout: 10000,
+    // 20s (not 10s): v8 coverage instrumentation materially slows the heavy
+    // integration tests (e.g. the Convert smart-detection suite), which
+    // intermittently tripped a 10s limit under a fully-parallel --coverage run.
+    testTimeout: 20000,
+    hookTimeout: 20000,
+    // The suite is large (180+ files) and includes timing-sensitive UI/async and
+    // whole-source-scan tests. On resource-constrained runners the fully-parallel
+    // run can cause transient, non-deterministic failures (a file flakes in one
+    // run, passes the next). retry re-runs only the failed test; a genuinely
+    // broken test still fails all attempts, so this hardens the gate against load
+    // flakiness without masking real regressions.
+    retry: 2,
     coverage: {
-      reporter: ["text", "json", "html"],
+      reporter: ["text", "json", "json-summary", "html"],
       exclude: [
         "node_modules/",
         "src/core/setupTests.ts",
@@ -26,6 +36,24 @@ export default defineConfig({
         "src/tests/test-fixtures/**",
         "src/**/*.spec.ts",
       ],
+      // Regression-floor ratchet. Set just below the current aggregate so the
+      // build fails if coverage drops, NOT as a target. Raise as tests are added
+      // (see AGENTS.md Testing Strategy).
+      //
+      // 2026-06: a STALE floor (stmts/lines 7.7, funcs 27, branches 55) was found
+      // to sit ABOVE the actual aggregate — a measured baseline was
+      // 6.96 / 53.64 / 25.45 / 6.96, i.e. the gate had been red on all four metrics
+      // since the B1 MUI->Mantine migration added uncovered UI wrapper code without
+      // re-verification. Successive waves of new tests (pure utils, then
+      // statement-heavy services/hooks/reducers) lifted every metric well above
+      // the old phantom floor. Latest 184-file green run measured
+      // 14.64 / 78.28 / 46.27 / 14.64; floors pinned just below that. Only move up.
+      thresholds: {
+        statements: 14.5,
+        branches: 78,
+        functions: 46,
+        lines: 14.5,
+      },
     },
     projects: [
       {

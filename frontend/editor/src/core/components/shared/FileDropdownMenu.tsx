@@ -1,8 +1,6 @@
 import React from "react";
 import { Menu, Loader, Group, Text, ActionIcon, Tooltip } from "@mantine/core";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import CloseIcon from "@mui/icons-material/Close";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import FitText from "@app/components/shared/FitText";
 import { PrivateContent } from "@app/components/shared/PrivateContent";
 import { FileId } from "@app/types/file";
@@ -37,7 +35,12 @@ export const FileDropdownMenu: React.FC<FileDropdownMenuProps> = ({
           {switchingTo === "viewer" ? (
             <Loader size="xs" />
           ) : (
-            <InsertDriveFileIcon fontSize="small" style={{ flexShrink: 0 }} />
+            <LocalIcon
+              icon="description-rounded"
+              width="1.25rem"
+              height="1.25rem"
+              style={{ flexShrink: 0 }}
+            />
           )}
           <PrivateContent>
             <FitText
@@ -46,7 +49,12 @@ export const FileDropdownMenu: React.FC<FileDropdownMenuProps> = ({
               style={{ maxWidth: "12rem", display: "inline-block" }}
             />
           </PrivateContent>
-          <KeyboardArrowDownIcon fontSize="small" style={{ flexShrink: 0 }} />
+          <LocalIcon
+            icon="keyboard-arrow-down-rounded"
+            width="1.25rem"
+            height="1.25rem"
+            style={{ flexShrink: 0 }}
+          />
         </div>
       </Menu.Target>
       <Menu.Dropdown
@@ -107,7 +115,11 @@ export const FileDropdownMenu: React.FC<FileDropdownMenuProps> = ({
                         }}
                         style={{ flexShrink: 0 }}
                       >
-                        <CloseIcon style={{ fontSize: 14 }} />
+                        <LocalIcon
+                          icon="close-rounded"
+                          width={14}
+                          height={14}
+                        />
                       </ActionIcon>
                     </Tooltip>
                   )}

@@ -1,9 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Text, Stack, Group, ActionIcon } from "@mantine/core";
-import SettingsIcon from "@mui/icons-material/Settings";
-import CloseIcon from "@mui/icons-material/Close";
-import AddCircleOutline from "@mui/icons-material/AddCircleOutlined";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { AutomationTool } from "@app/types/automation";
 import { ToolRegistry } from "@app/data/toolsTaxonomy";
 import { ToolId } from "@app/types/toolId";
@@ -90,7 +88,7 @@ export default function ToolList({
                     color: "var(--mantine-color-gray-6)",
                   }}
                 >
-                  <CloseIcon style={{ fontSize: 16 }} />
+                  <LocalIcon icon="close-rounded" width={16} height={16} />
                 </ActionIcon>
               )}
 
@@ -122,7 +120,11 @@ export default function ToolList({
                       )}
                       style={{ color: "var(--mantine-color-gray-6)" }}
                     >
-                      <SettingsIcon style={{ fontSize: 16 }} />
+                      <LocalIcon
+                        icon="settings-rounded"
+                        width={16}
+                        height={16}
+                      />
                     </ActionIcon>
                   )}
                 </Group>
@@ -178,7 +180,7 @@ export default function ToolList({
         >
           <AutomationEntry
             title={t("automate.creation.tools.addTool", "Add Tool")}
-            badgeIcon={AddCircleOutline}
+            badgeIcon="add-circle-rounded"
             operations={[]}
             onClick={onToolAdd}
             keepIconColor={true}

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Button, Stack } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import UndoIcon from "@mui/icons-material/Undo";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import ErrorNotification from "@app/components/tools/shared/ErrorNotification";
 import ResultsPreview from "@app/components/tools/shared/ResultsPreview";
 import { SuggestedToolsSection } from "@app/components/tools/shared/SuggestedToolsSection";
@@ -36,7 +36,7 @@ function ReviewStepContent<TParams = unknown>({
   const { t } = useTranslation();
   const terminology = useFileActionTerminology();
   const icons = useFileActionIcons();
-  const DownloadIcon = icons.download;
+  const downloadIcon = icons.download;
   const stepRef = useRef<HTMLDivElement>(null);
   const { actions: fileActions } = useFileActions();
   const { selectors } = useFileState();
@@ -127,7 +127,9 @@ function ReviewStepContent<TParams = unknown>({
           )}
         >
           <Button
-            leftSection={<UndoIcon />}
+            leftSection={
+              <LocalIcon icon="undo-rounded" width="1.5rem" height="1.5rem" />
+            }
             variant="outline"
             color="var(--mantine-color-gray-6)"
             onClick={handleUndo}
@@ -140,7 +142,9 @@ function ReviewStepContent<TParams = unknown>({
       {operation.downloadUrl && (
         <Button
           data-testid="download-result-button"
-          leftSection={<DownloadIcon />}
+          leftSection={
+            <LocalIcon icon={downloadIcon} width="1.5rem" height="1.5rem" />
+          }
           color="blue"
           fullWidth
           mb="md"

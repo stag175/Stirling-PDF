@@ -203,7 +203,8 @@ public class EditTableOfContentsController {
         }
     }
 
-    private PDOutlineItem createOutlineItem(PDDocument document, BookmarkItem bookmark) {
+    // Package-private (not private) so tests call it directly instead of via reflection.
+    PDOutlineItem createOutlineItem(PDDocument document, BookmarkItem bookmark) {
         PDOutlineItem item = new PDOutlineItem();
         item.setTitle(bookmark.getTitle());
 

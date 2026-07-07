@@ -394,9 +394,20 @@ The frontend is organized with a clear separation of concerns:
 - **Security Mode**: Adds authentication, user management, and enterprise features
 
 ### Testing Strategy
+This is **not** a lightly-tested codebase — every tier has a substantial suite that is enforced by a
+coverage gate. Do not assume tests are absent or minimal.
+- **Backend unit tests**: JUnit 5 across `app/*/src/test` (438+ test files). Run via `task backend:test`.
+- **Frontend unit tests**: Vitest across `frontend/editor/src` (184+ test files; multi-project: core/proprietary/saas/desktop/prototypes). Run via `task frontend:test` (or `npx vitest run --root editor`).
 - **Integration Tests**: Cucumber tests in `testing/cucumber/`
+- **E2E Tests**: Playwright (`*.spec.ts`); see `task e2e:*`
+- **Engine tests**: pytest in `engine/` (293 tests). Run via `task engine:test`.
 - **Docker Testing**: `test.sh` validates all Docker variants
-- **Manual Testing**: No unit tests currently - relies on UI and API testing
+- **Coverage gates** (all enforced in CI; ratchet upward, never lower):
+  - **Backend**: per-module JaCoCo floors via `perModuleCoverageFloors` in `build.gradle`
+    (`:common` ~40% / `:stirling-pdf` ~38% / `:proprietary` ~45% line; `:saas` falls back to the default
+    so its un-buildable state never breaks CI).
+  - **Frontend**: Vitest `coverage.thresholds` in `frontend/editor/vitest.config.ts`.
+  - **Engine**: `pytest-cov` with `fail_under` in `engine/pyproject.toml` (`[tool.coverage.report]`).
 
 ## Development Workflow
 

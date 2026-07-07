@@ -11,7 +11,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Callable;
@@ -70,26 +69,6 @@ public class ScannerEffectController {
     private static final ThreadLocal<BufferCache> BUFFER_CACHE =
             ThreadLocal.withInitial(BufferCache::new);
 
-    private static int calculateSafeResolution(
-            float pageWidthPts, float pageHeightPts, int resolution) {
-        int projectedWidth = (int) Math.ceil(pageWidthPts * resolution / 72.0);
-        int projectedHeight = (int) Math.ceil(pageHeightPts * resolution / 72.0);
-        long projectedPixels = (long) projectedWidth * projectedHeight;
-
-        if (projectedWidth <= MAX_IMAGE_WIDTH
-                && projectedHeight <= MAX_IMAGE_HEIGHT
-                && projectedPixels <= MAX_IMAGE_PIXELS) {
-            return resolution;
-        }
-
-        double widthScale = (double) MAX_IMAGE_WIDTH / projectedWidth;
-        double heightScale = (double) MAX_IMAGE_HEIGHT / projectedHeight;
-        double pixelScale = Math.sqrt((double) MAX_IMAGE_PIXELS / projectedPixels);
-        double minScale = Math.min(Math.min(widthScale, heightScale), pixelScale);
-
-        return (int) Math.max(72, resolution * minScale);
-    }
-
     private static int determineRenderResolution(ScannerEffectRequest request) {
         return request.getResolution();
     }
@@ -109,22 +88,10 @@ public class ScannerEffectController {
         g.dispose();
 
         if (colorspace == ScannerEffectRequest.Colorspace.grayscale) {
-            convertToGrayscale(result);
+            ScannerEffectGrayscaleUtils.convertToGrayscale(result);
         }
 
         return result;
-    }
-
-    private static void convertToGrayscale(BufferedImage image) {
-        int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-        for (int i = 0; i < pixels.length; i++) {
-            int rgb = pixels[i];
-            int r = (rgb >> 16) & 0xFF;
-            int g = (rgb >> 8) & 0xFF;
-            int b = rgb & 0xFF;
-            int gray = (r + g + b) / 3;
-            pixels[i] = (gray << 16) | (gray << 8) | gray;
-        }
     }
 
     private static GradientConfig createRandomGradient() {
@@ -151,11 +118,14 @@ public class ScannerEffectController {
         int width = image.getWidth() + 2 * borderPx;
         int height = image.getHeight() + 2 * borderPx;
 
-        int[] gradientLUT = createGradientLUT(width, height, gradient);
+        int[] gradientLUT =
+                ScannerEffectGradientUtils.createGradientLUT(
+                        width, height, gradient.vertical, gradient.startColor, gradient.endColor);
         BufferedImage result = new BufferedImage(width, height, image.getType());
         int[] pixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
 
-        fillWithGradient(pixels, width, height, gradientLUT, gradient.vertical);
+        ScannerEffectGradientUtils.fillWithGradient(
+                pixels, width, height, gradientLUT, gradient.vertical);
 
         Graphics2D g = result.createGraphics();
         g.drawImage(image, borderPx, borderPx, null);
@@ -164,42 +134,9 @@ public class ScannerEffectController {
         return result;
     }
 
-    private static int[] createGradientLUT(int width, int height, GradientConfig gradient) {
-        int size = gradient.vertical ? height : width;
-        int[] lut = new int[size];
-
-        int rStart = gradient.startColor.getRed();
-        int gStart = gradient.startColor.getGreen();
-        int bStart = gradient.startColor.getBlue();
-        int rDiff = gradient.endColor.getRed() - rStart;
-        int gDiff = gradient.endColor.getGreen() - gStart;
-        int bDiff = gradient.endColor.getBlue() - bStart;
-
-        for (int i = 0; i < size; i++) {
-            float frac = (float) i / Math.max(1, size - 1);
-            int r = Math.round(rStart + rDiff * frac);
-            int g = Math.round(gStart + gDiff * frac);
-            int b = Math.round(bStart + bDiff * frac);
-            lut[i] = (r << 16) | (g << 8) | b;
-        }
-
-        return lut;
-    }
-
-    private static void fillWithGradient(
-            int[] pixels, int width, int height, int[] gradientLUT, boolean vertical) {
-        if (vertical) {
-            for (int y = 0; y < height; y++) {
-                Arrays.fill(pixels, y * width, (y + 1) * width, gradientLUT[y]);
-            }
-        } else {
-            for (int y = 0; y < height; y++) {
-                System.arraycopy(gradientLUT, 0, pixels, y * width, width);
-            }
-        }
-    }
-
-    private static double calculateRotation(int baseRotation, int rotateVariance) {
+    // Package-private (not private) so ScannerEffectRotationTest can pin the zero-shortcut and the
+    // [base-variance, base+variance) envelope of the random rotation.
+    static double calculateRotation(int baseRotation, int rotateVariance) {
         if (baseRotation == 0 && rotateVariance == 0) {
             return 0;
         }
@@ -244,8 +181,11 @@ public class ScannerEffectController {
             int width, int height, int imageType, GradientConfig gradient) {
         BufferedImage background = new BufferedImage(width, height, imageType);
         int[] pixels = ((DataBufferInt) background.getRaster().getDataBuffer()).getData();
-        int[] gradientLUT = createGradientLUT(width, height, gradient);
-        fillWithGradient(pixels, width, height, gradientLUT, gradient.vertical);
+        int[] gradientLUT =
+                ScannerEffectGradientUtils.createGradientLUT(
+                        width, height, gradient.vertical, gradient.startColor, gradient.endColor);
+        ScannerEffectGradientUtils.fillWithGradient(
+                pixels, width, height, gradientLUT, gradient.vertical);
         return background;
     }
 
@@ -336,8 +276,8 @@ public class ScannerEffectController {
         int[] dstPixels = ((DataBufferInt) output.getRaster().getDataBuffer()).getData();
 
         int[] gradientLUT =
-                createGradientLUT(
-                        width, height, new GradientConfig(vertical, startColor, endColor));
+                ScannerEffectGradientUtils.createGradientLUT(
+                        width, height, vertical, startColor, endColor);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int dx = Math.min(x, width - 1 - x);
@@ -354,7 +294,8 @@ public class ScannerEffectController {
         return output;
     }
 
-    private static int blendColors(int fg, int bg, float alpha) {
+    // Package-private (not private) so ScannerEffectBlendColorsTest can pin the per-channel blend.
+    static int blendColors(int fg, int bg, float alpha) {
         int r = Math.round(((fg >> 16) & 0xFF) * alpha + ((bg >> 16) & 0xFF) * (1 - alpha));
         int g = Math.round(((fg >> 8) & 0xFF) * alpha + ((bg >> 8) & 0xFF) * (1 - alpha));
         int b = Math.round((fg & 0xFF) * alpha + (bg & 0xFF) * (1 - alpha));
@@ -503,7 +444,13 @@ public class ScannerEffectController {
             float pageHeightPts = pageSize.getHeight();
 
             int safeResolution =
-                    calculateSafeResolution(pageWidthPts, pageHeightPts, renderResolution);
+                    ScannerEffectResolutionUtils.calculateSafeResolution(
+                            pageWidthPts,
+                            pageHeightPts,
+                            renderResolution,
+                            MAX_IMAGE_WIDTH,
+                            MAX_IMAGE_HEIGHT,
+                            MAX_IMAGE_PIXELS);
 
             BufferedImage image = renderingResources.renderPage(pageIndex, safeResolution);
             BufferedImage processed = convertColorspace(image, colorspace);

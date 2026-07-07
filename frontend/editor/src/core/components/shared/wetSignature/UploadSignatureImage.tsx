@@ -1,8 +1,7 @@
 import { useState, useRef } from "react";
 import { Stack, Button, Text, Image } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import DeleteIcon from "@mui/icons-material/Delete";
+import LocalIcon from "@app/components/shared/LocalIcon";
 
 interface UploadSignatureImageProps {
   signature: string | null;
@@ -102,7 +101,9 @@ export const UploadSignatureImage: React.FC<UploadSignatureImageProps> = ({
           <Button
             variant="light"
             color="red"
-            leftSection={<DeleteIcon sx={{ fontSize: 16 }} />}
+            leftSection={
+              <LocalIcon icon="delete-rounded" width={16} height={16} />
+            }
             onClick={handleClear}
             disabled={disabled}
             fullWidth
@@ -113,7 +114,9 @@ export const UploadSignatureImage: React.FC<UploadSignatureImageProps> = ({
       ) : (
         <Button
           variant="outline"
-          leftSection={<UploadFileIcon sx={{ fontSize: 16 }} />}
+          leftSection={
+            <LocalIcon icon="upload-file-rounded" width={16} height={16} />
+          }
           onClick={handleUploadClick}
           disabled={disabled}
           fullWidth

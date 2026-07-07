@@ -12,7 +12,6 @@ import {
 import LocalIcon from "@app/components/shared/LocalIcon";
 import { useViewer } from "@app/contexts/ViewerContext";
 import { PdfBookmarkObject, PdfActionType } from "@embedpdf/models";
-import BookmarksIcon from "@mui/icons-material/BookmarksRounded";
 import "@app/components/viewer/SidebarBase.css";
 import "@app/components/viewer/BookmarkSidebar.css";
 
@@ -193,11 +192,10 @@ export const BookmarkSidebar = ({
         try {
           const result = await bookmarkActions.fetchBookmarks();
           return Array.isArray(result) ? result : [];
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const errMessage = (error as { message?: unknown })?.message;
           const message =
-            typeof error?.message === "string"
-              ? error.message.toLowerCase()
-              : "";
+            typeof errMessage === "string" ? errMessage.toLowerCase() : "";
           const notReady =
             message.includes("document") &&
             message.includes("not") &&
@@ -323,7 +321,7 @@ export const BookmarkSidebar = ({
 
   const handleBookmarkClick = (
     bookmark: PdfBookmarkObject,
-    event: React.MouseEvent,
+    event: React.MouseEvent | React.KeyboardEvent,
   ) => {
     const target = bookmark.target;
     if (target?.type === "action") {
@@ -407,7 +405,7 @@ export const BookmarkSidebar = ({
                 ? (event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
-                      handleBookmarkClick(node, event as any);
+                      handleBookmarkClick(node, event);
                     }
                   }
                 : undefined
@@ -493,7 +491,11 @@ export const BookmarkSidebar = ({
       <div className="sidebar-base__header bookmark-sidebar__header">
         <div className="sidebar-base__header-title bookmark-sidebar__header-title">
           <span className="sidebar-base__header-icon bookmark-sidebar__header-icon">
-            <BookmarksIcon />
+            <LocalIcon
+              icon="bookmarks-rounded"
+              width="1.5rem"
+              height="1.5rem"
+            />
           </span>
           <Text fw={600} size="sm" tt="uppercase" lts={0.5}>
             Bookmarks

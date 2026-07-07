@@ -65,5 +65,5 @@ export interface SuggestedAutomation {
   operations: AutomationOperation[];
   createdAt: string;
   updatedAt: string;
-  icon: any; // MUI Icon component
+  icon: string; // material-symbols name
 }

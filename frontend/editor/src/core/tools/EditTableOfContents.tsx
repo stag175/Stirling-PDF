@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { downloadFile } from "@app/services/downloadService";
-import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
+import LocalIcon from "@app/components/shared/LocalIcon";
 import { alert } from "@app/components/toast";
 import { createToolFlow } from "@app/components/tools/shared/createToolFlow";
 import EditTableOfContentsWorkbenchView, {
@@ -10,7 +10,12 @@ import EditTableOfContentsWorkbenchView, {
 import EditTableOfContentsSettings from "@app/components/tools/editTableOfContents/EditTableOfContentsSettings";
 import { useEditTableOfContentsParameters } from "@app/hooks/tools/editTableOfContents/useEditTableOfContentsParameters";
 import { useEditTableOfContentsOperation } from "@app/hooks/tools/editTableOfContents/useEditTableOfContentsOperation";
-import { BaseToolProps, ToolComponent } from "@app/types/tool";
+import {
+  AutomationCapableTool,
+  BaseToolProps,
+  ToolComponent,
+} from "@app/types/tool";
+import type { StirlingFile } from "@app/types/fileContext";
 import { useBaseTool } from "@app/hooks/tools/shared/useBaseTool";
 import apiClient from "@app/services/apiClient";
 import {
@@ -76,7 +81,12 @@ const EditTableOfContents = (props: BaseToolProps) => {
 
   const WORKBENCH_VIEW_ID = "editTableOfContentsWorkbench";
   const WORKBENCH_ID = "custom:editTableOfContents" as const;
-  const viewIcon = useMemo(() => <MenuBookRoundedIcon fontSize="small" />, []);
+  const viewIcon = useMemo(
+    () => (
+      <LocalIcon icon="menu-book-rounded" width="1.25rem" height="1.25rem" />
+    ),
+    [],
+  );
 
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoadingBookmarks, setIsLoadingBookmarks] = useState(false);
@@ -112,7 +122,7 @@ const EditTableOfContents = (props: BaseToolProps) => {
         const payload = await extractBookmarks(file);
         const bookmarks = hydrateBookmarkPayload(payload);
         setBookmarks(bookmarks);
-        setLastLoadedFileId((file as any)?.fileId ?? file.name);
+        setLastLoadedFileId((file as Partial<StirlingFile>)?.fileId ?? file.name);
 
         if (showToast) {
           alert({
@@ -164,7 +174,7 @@ const EditTableOfContents = (props: BaseToolProps) => {
       return;
     }
 
-    const fileId = (selectedFile as any)?.fileId ?? selectedFile.name;
+    const fileId = selectedFile?.fileId ?? selectedFile.name;
     if (fileId === lastLoadedFileId) {
       return;
     }
@@ -466,6 +476,7 @@ const EditTableOfContents = (props: BaseToolProps) => {
   });
 };
 
-(EditTableOfContents as any).tool = () => useEditTableOfContentsOperation;
+(EditTableOfContents as unknown as AutomationCapableTool).tool = () =>
+  useEditTableOfContentsOperation;
 
 export default EditTableOfContents as ToolComponent;

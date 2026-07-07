@@ -1,8 +1,6 @@
 package stirling.software.SPDF.controller.api;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.pdfbox.multipdf.LayerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -57,30 +55,7 @@ public class ScalePagesController {
             return sourceSize;
         }
 
-        Map<String, PDRectangle> sizeMap = getSizeMap();
-        PDRectangle base = sizeMap.get(targetPDRectangle);
-        if (base == null) {
-            throw ExceptionUtils.createInvalidPageSizeException(targetPDRectangle);
-        }
-
-        if ("LANDSCAPE".equalsIgnoreCase(orientation)) {
-            return new PDRectangle(base.getHeight(), base.getWidth());
-        }
-        return base;
-    }
-
-    private static Map<String, PDRectangle> getSizeMap() {
-        Map<String, PDRectangle> sizeMap = new HashMap<>();
-        sizeMap.put("A0", PDRectangle.A0);
-        sizeMap.put("A1", PDRectangle.A1);
-        sizeMap.put("A2", PDRectangle.A2);
-        sizeMap.put("A3", PDRectangle.A3);
-        sizeMap.put("A4", PDRectangle.A4);
-        sizeMap.put("A5", PDRectangle.A5);
-        sizeMap.put("A6", PDRectangle.A6);
-        sizeMap.put("LETTER", PDRectangle.LETTER);
-        sizeMap.put("LEGAL", PDRectangle.LEGAL);
-        return sizeMap;
+        return ScalePagesSizeUtils.resolveNamedSize(targetPDRectangle, orientation);
     }
 
     @AutoJobPostMapping(
